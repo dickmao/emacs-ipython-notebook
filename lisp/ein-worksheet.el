@@ -475,7 +475,7 @@ after PIVOT and return the new cell."
      (t (error
          "PIVOT is `nil' but ncells != 0.  There is something wrong...")))
                                         ;(ein:worksheet-empty-undo-maybe)
-    (push `(apply ein:worksheet-delete-cell ,ws ,cell) buffer-undo-list)
+;    (push `(apply ein:worksheet-delete-cell ,ws ,cell) buffer-undo-list)
     (oset ws :dirty t)
     (when focus (ein:cell-goto cell))
     cell))
@@ -499,7 +499,7 @@ See also: `ein:worksheet-insert-cell-below'."
           (ein:cell-enter-first cell))))
      (t (error
          "PIVOT is `nil' but ncells > 0.  There is something wrong...")))
-    (push `(apply ein:worksheet-delete-cell ,ws ,cell) buffer-undo-list)
+;    (push `(apply ein:worksheet-delete-cell ,ws ,cell) buffer-undo-list)
     (oset ws :dirty t)
     (when focus (ein:cell-goto cell))
     cell))
@@ -800,7 +800,7 @@ Do not clear input prompts when the prefix argument is given."
                      (ein:worksheet-get-current-cell
                       :cell-p #'ein:codecell-p)))
   (ein:kernel-if-ready (slot-value ws 'kernel)
-    (push `(apply ein:undo-execute-cell ,ws ,cell ,(ein:cell-copy cell)) buffer-undo-list)
+;    (push `(apply ein:undo-execute-cell ,ws ,cell ,(ein:cell-copy cell)) buffer-undo-list)
     (ein:log 'debug "buffer-undo-list: %s" (length buffer-undo-list))
     (ein:with-undo-disabled
      (ein:cell-execute cell)
