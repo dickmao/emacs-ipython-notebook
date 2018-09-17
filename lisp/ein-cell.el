@@ -1209,7 +1209,8 @@ prettified text thus be used instead of HTML type."
   (let ((events (slot-value cell 'events)))
     (ein:events-trigger events 'set_next_input.Worksheet
                         (list :cell cell :text text))
-    (ein:events-trigger events 'maybe_reset_undo.Worksheet cell)))
+    ; (ein:events-trigger events 'maybe_reset_undo.Worksheet cell)
+    ))
 
 
 
@@ -1240,7 +1241,8 @@ prettified text thus be used instead of HTML type."
        (plist-put json :traceback (plist-get content :traceback))))
     (ein:cell-append-output cell json t)
     ;; (setf (slot-value cell 'dirty) t)
-    (ein:events-trigger (slot-value cell 'events) 'maybe_reset_undo.Worksheet cell)))
+    ; (ein:events-trigger (slot-value cell 'events) 'maybe_reset_undo.Worksheet cell)
+    ))
 
 
 (defun ein:output-area-convert-mime-types (json data)
@@ -1264,9 +1266,9 @@ prettified text thus be used instead of HTML type."
   (ein:cell-clear-output cell
                          t ;;(plist-get content :stdout)
                          t ;;(plist-get content :stderr)
-                         t ;;(plist-get content :other)
-                         )
-  (ein:events-trigger (slot-value cell 'events) 'maybe_reset_undo.Worksheet cell))
+                         t ;;(plist-get content :other))
+  ; (ein:events-trigger (slot-value cell 'events) 'maybe_reset_undo.Worksheet cell)
+  ))
 
 
 ;;; Misc.

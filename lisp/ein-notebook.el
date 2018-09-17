@@ -1622,6 +1622,7 @@ This hook is run regardless the actual major mode used."
   (run-hooks 'ein:notebook-mode-hook))
 
 (add-hook 'ein:notebook-mode-hook 'ein:worksheet-imenu-setup)
+(add-hook 'ein:notebook-mode-hook 'ein:worksheet-reinstall-which-cell-hook)
 
 (define-minor-mode ein:notebook-minor-mode
   "Minor mode to install `ein:notebook-mode-map' for `ein:notebook-mode'."
