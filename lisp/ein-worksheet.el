@@ -73,16 +73,15 @@ this value."
 
 (defun ein:worksheet--which-cell-hook (change-beg change-end prev-len)
   (when (and (not (null buffer-undo-list)) (listp buffer-undo-list))
-    (message "which-cell %s %s" (length buffer-undo-list) (length ein:%which-cell%))
-    (let ((fill (1+ (- (length buffer-undo-list) (length ein:%which-cell%)))))
+    (let ((fill (- (length buffer-undo-list) (length ein:%which-cell%))))
       (if (< fill 0)
           (setq ein:%which-cell% (nthcdr (- fill) ein:%which-cell%))
-        (if (> fill 0)
+        (when (> fill 0)
+          (let ((cell-id (ein:aif (ein:worksheet-get-current-cell :noerror t)
+                             (ein:worksheet--unique-enough-cell-id it) nil)))
+            (message "which-cell %s %s %s %s" change-beg change-end cell-id (car buffer-undo-list))
             (setq ein:%which-cell% 
-                  (nconc (make-list fill 
-                                    (ein:aif (ein:worksheet-get-current-cell :noerror t)
-                                        (ein:worksheet--unique-enough-cell-id it) nil))
-                         ein:%which-cell%)))))))
+                  (nconc (make-list fill cell-id) ein:%which-cell%))))))))
 
 (defun ein:worksheet--next-cell-start (cell)
   (let ((cell1 (ein:cell-next cell)))
@@ -200,7 +199,7 @@ this value."
 (defun ein:worksheet-unshift-undo-list (cell)
   "Adjust `buffer-undo-list' for adding CELL.  Unshift generally means prepending to list."
   ; this callback is getting called several times but which-cell is stateful
-  (when (and ein:worksheet-enable-undo)
+  (when ein:worksheet-enable-undo
     (ein:with-live-buffer (ein:cell-buffer cell)
       (let* ((opl (ein:worksheet--prompt-length cell t))
              (ool (ein:worksheet--output-length cell t))
@@ -217,14 +216,27 @@ this value."
              (func-after-cell (hof-add (lambda (pos) (not (null pos))) (if (zerop otl) ntl (+ pdist odist))))
              lst)
         (message "hunt %s %s %s %s %s" (ein:worksheet--unique-enough-cell-id cell) otl ntl pdist odist)
+        (if (/= (length buffer-undo-list) (length ein:%which-cell%))
+            (message "%s %s %s %s" (length buffer-undo-list) (length ein:%which-cell%) buffer-undo-list ein:%which-cell%))
+        (cl-assert (>= (length buffer-undo-list) (length ein:%which-cell%)))
+
+        (setq ein:%which-cell%
+              (nconc (make-list (- (length buffer-undo-list) (length ein:%which-cell%))
+                                (car ein:%which-cell%))
+                     ein:%which-cell%))
+        (cl-assert (= (length buffer-undo-list) (length ein:%which-cell%)))
+
         (dolist (uc (mapcar* 'cons buffer-undo-list ein:%which-cell%))
           (let ((u (car uc))
                 (cell-id (or (cdr uc) "")))
             (if (string= (ein:worksheet--unique-enough-cell-id cell) cell-id)
                 (setq lst (nconc lst (list (funcall func-same-cell u))))
               (if (plist-member after-ids cell-id)
-                  (setq lst (nconc lst (list (funcall func-after-cell u))))
+                  (progn
+                    (message "danger %s %s %s" u cell-id (ein:worksheet--unique-enough-cell-id cell))
+                    (setq lst (nconc lst (list (funcall func-after-cell u)))))
                 (setq lst (nconc lst (list u)))))))
+        (cl-assert (= (length buffer-undo-list) (length lst)))
         (setq buffer-undo-list lst)))
     (ein:worksheet--update-undo-data cell)))
 
@@ -359,20 +371,21 @@ this value."
     (setq ein:%worksheet% ws)
     (let ((inhibit-read-only t))
       (erase-buffer)
-      (let ((ewoc (ein:ewoc-create 'ein:worksheet-pp
-                                   (ein:propertize-read-only "\n")
-                                   nil t))
+      (let ((ewoc (let ((buffer-undo-list t))
+                    (ein:ewoc-create 'ein:worksheet-pp
+                                     (ein:propertize-read-only "\n")
+                                     nil t)))
             (cells (ein:worksheet--saved-cells ws)))
         (setf (ein:worksheet--ewoc ws) ewoc)
         (ein:worksheet-reinstall-which-cell-hook)
         (if cells
-            (mapc (lambda (c)
-                    (setf (slot-value c 'ewoc) ewoc)
-                    (ein:cell-enter-last c))
-                  cells)
+            (let ((buffer-undo-list t))
+              (mapc (lambda (c)
+                      (setf (slot-value c 'ewoc) ewoc)
+                      (ein:cell-enter-last c))
+                    cells))
           (ein:worksheet-insert-cell-below ws 'code nil t)))
     (set-buffer-modified-p nil)
-    (ein:worksheet-restart-undo-list) ; clear undo history
     (unless ein:worksheet-enable-undo
       (setq buffer-undo-list t))
     (ein:worksheet-bind-events ws)
