@@ -73,9 +73,12 @@ this value."
 
 (defun ein:worksheet--which-cell-hook (change-beg change-end prev-len)
   (when (and (not (null buffer-undo-list)) (listp buffer-undo-list))
+    (setq buffer-undo-list (delete-if-not (lambda (u) (not (and (consp u) (markerp (car u))))) buffer-undo-list))
     (let ((fill (- (length buffer-undo-list) (length ein:%which-cell%))))
       (if (< fill 0)
-          (setq ein:%which-cell% (nthcdr (- fill) ein:%which-cell%))
+          (progn
+            (message "Truncating %s to %s" (length ein:%which-cell%) (length buffer-undo-list))
+            (setq ein:%which-cell% (nthcdr (- fill)  ein:%which-cell%)))
         (when (> fill 0)
           (let ((cell-id (ein:aif (ein:worksheet-get-current-cell :noerror t)
                              (ein:worksheet--unique-enough-cell-id it) nil)))
@@ -219,13 +222,12 @@ this value."
         (if (/= (length buffer-undo-list) (length ein:%which-cell%))
             (message "%s %s %s %s" (length buffer-undo-list) (length ein:%which-cell%) buffer-undo-list ein:%which-cell%))
         (cl-assert (>= (length buffer-undo-list) (length ein:%which-cell%)))
-
         (setq ein:%which-cell%
               (nconc (make-list (- (length buffer-undo-list) (length ein:%which-cell%))
                                 (car ein:%which-cell%))
                      ein:%which-cell%))
         (cl-assert (= (length buffer-undo-list) (length ein:%which-cell%)))
-
+        
         (dolist (uc (mapcar* 'cons buffer-undo-list ein:%which-cell%))
           (let ((u (car uc))
                 (cell-id (or (cdr uc) "")))
