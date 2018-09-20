@@ -140,24 +140,6 @@ this value."
     (setq buffer-undo-list nil)
     ))
 
-(defmacro hof-satisfy (comp)
-"Return function that returns true those undo elements whose begs satisfy COMP.  'hof' refers to higher-order function,"
-  `(lambda (u)
-     (cond ((numberp u) (funcall ,comp u))
-           ((and (consp u) (numberp (car u)) (numberp (cdr u)))
-            (funcall ,comp (car u)))
-           ((and (consp u) (stringp (car u)) (numberp (cdr u)))
-            (funcall ,comp (cdr u)))
-           ((and (consp u) (markerp (car u)))
-            (funcall ,comp (marker-position (car u))))
-           ((and (consp u) (null (car u)) 
-                 (numberp (car (last u))) (numberp (cdr (last u))))
-            (funcall ,comp (car (last u))))
-           ((and (consp u) (eq (car u) 'apply) 
-                 (numberp (nth 2 u)) (numberp (nth 3 u)))
-            (funcall ,comp (nth 2 u)))
-           (t t))))
-
 ;; can use apply-partially instead here
 (defmacro hof-add (comp distance)
 "Return function that adds signed DISTANCE those undo elements whose begs compare via COMP.  'hof' refers to higher-order function,"
@@ -200,8 +182,7 @@ this value."
     result))
 
 (defun ein:worksheet-unshift-undo-list (cell)
-  "Adjust `buffer-undo-list' for adding CELL.  Unshift generally means prepending to list."
-  ; this callback is getting called several times but which-cell is stateful
+  "Adjust `buffer-undo-list' for adding CELL.  Unshift in list parlance means prepending to list."
   (when ein:worksheet-enable-undo
     (ein:with-live-buffer (ein:cell-buffer cell)
       (let* ((opl (ein:worksheet--prompt-length cell t))
@@ -221,13 +202,16 @@ this value."
         (message "hunt %s %s %s %s %s" (ein:worksheet--unique-enough-cell-id cell) otl ntl pdist odist)
         (if (/= (length buffer-undo-list) (length ein:%which-cell%))
             (message "%s %s %s %s" (length buffer-undo-list) (length ein:%which-cell%) buffer-undo-list ein:%which-cell%))
-        (cl-assert (>= (length buffer-undo-list) (length ein:%which-cell%)))
-        (setq ein:%which-cell%
-              (nconc (make-list (- (length buffer-undo-list) (length ein:%which-cell%))
-                                (car ein:%which-cell%))
-                     ein:%which-cell%))
+        (let ((fill (- (length buffer-undo-list) (length ein:%which-cell%))))
+          (if (> (abs fill) 1)
+              (error "Show stopper")
+            (if (< fill 0)
+                (setq ein:%which-cell% (nthcdr (- fill)  ein:%which-cell%))
+              (if (> fill 0)
+                  (setq ein:%which-cell%
+                        (nconc (make-list fill (car ein:%which-cell%))
+                               ein:%which-cell%))))))
         (cl-assert (= (length buffer-undo-list) (length ein:%which-cell%)))
-        
         (dolist (uc (mapcar* 'cons buffer-undo-list ein:%which-cell%))
           (let ((u (car uc))
                 (cell-id (or (cdr uc) "")))
@@ -243,12 +227,12 @@ this value."
     (ein:worksheet--update-undo-data cell)))
 
 (defun ein:worksheet-shift-undo-list (cell)
-  "Adjust `buffer-undo-list' for deleting CELL if `ein:worksheet-enable-undo' is true.  Shift generally means removing head of list."
+  "Adjust `buffer-undo-list' for deleting CELL if `ein:worksheet-enable-undo' is true.  Shift in list parlance means removing the front."
   (when ein:worksheet-enable-undo
     (ein:with-live-buffer (ein:cell-buffer cell)
       (let* ((ps (ein:worksheet--element-start cell :prompt))
              (ntl (ein:worksheet--total-length cell))
-             (func-sat (hof-satisfy (lambda (pos) (or (< pos ps) (> pos (+ ps ntl))))))
+             
              (func-add (hof-add (lambda (pos) (>= pos ps)) (- ntl))))
         (delete-if-not func-sat buffer-undo-list)
         (setq buffer-undo-list 
