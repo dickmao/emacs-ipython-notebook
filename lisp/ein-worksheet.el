@@ -77,12 +77,12 @@ this value."
     (let ((fill (- (length buffer-undo-list) (length ein:%which-cell%))))
       (if (< fill 0)
           (progn
-            (message "Truncating %s to %s" (length ein:%which-cell%) (length buffer-undo-list))
+            (ein:log 'debug "truncating %s to %s: %S -> %S" (length ein:%which-cell%) (length buffer-undo-list) ein:%which-cell% (nthcdr (- fill)  ein:%which-cell%))
             (setq ein:%which-cell% (nthcdr (- fill)  ein:%which-cell%)))
         (when (> fill 0)
           (let ((cell-id (ein:aif (ein:worksheet-get-current-cell :noerror t)
                              (ein:worksheet--unique-enough-cell-id it) nil)))
-            (message "which-cell %s %s %s %s" change-beg change-end cell-id (car buffer-undo-list))
+            (ein:log 'debug "which-cell (%s . %s) %s %s fill=%s" change-beg change-end cell-id (car buffer-undo-list) fill)
             (setq ein:%which-cell% 
                   (nconc (make-list fill cell-id) ein:%which-cell%))))))))
 
@@ -127,13 +127,6 @@ this value."
                                             (ein:worksheet--total-length cell)
                                             (plist-put (plist-put '() :prompt (ein:worksheet--element-start cell :prompt)) :output (ein:worksheet--element-start cell :output))))))
 
-(defun ein:worksheet--update-undo-data (cell)
-  (ein:with-live-buffer (ein:cell-buffer cell)
-    (if (ein:worksheet--element-start cell :prompt)
-        (ein:worksheet--update-cell-lengths cell)
-      (remprop (oref cell :cell-id) ein:%cell-lengths%))
-))
-
 (defun ein:worksheet-restart-undo-list ()
   "Some worksheet operations are too onerous for undo offset accounting.  Suboptimally clear the undo list in those cases, likely to the user's chagrin."
   (when ein:worksheet-enable-undo
@@ -141,37 +134,33 @@ this value."
     ))
 
 ;; can use apply-partially instead here
-(defmacro hof-add (comp distance)
-"Return function that adds signed DISTANCE those undo elements whose begs compare via COMP.  'hof' refers to higher-order function,"
+(defmacro hof-add (distance)
+"Return function that adds signed DISTANCE those undo elements.  'hof' refers to higher-order function,"
   `(lambda (u)
      (cond ((numberp u) 
-            (+ u (if (funcall ,comp u) ,distance 0)))
+            (+ u ,distance))
            ((and (consp u) (numberp (car u)) (numberp (cdr u)))
-            (if (funcall ,comp (car u))
-                (cons (+ ,distance (car u))
-                      (+ ,distance (cdr u))) u))
+            (cons (+ ,distance (car u))
+                  (+ ,distance (cdr u))))
            ((and (consp u) (stringp (car u)) (numberp (cdr u)))
-            (if (funcall ,comp (cdr u)) 
-                (cons (car u)
-                      (* (if (< (cdr u) 0) -1 1) (+ ,distance (abs (cdr u))))) u))
+            (cons (car u)
+                  (* (if (< (cdr u) 0) -1 1) (+ ,distance (abs (cdr u))))))
            ((and (consp u) (markerp (car u)))
             (let ((mp (marker-position (car u))))
-              (if (funcall ,comp mp)
+              (if (not (null mp))
                   (let* ((m (set-marker (make-marker) (+ ,distance mp) (marker-buffer (car u)))))
                     (cons m (cdr u))) u)))
            ((and (consp u) (null (car u)) 
                  (numberp (car (last u))) (numberp (cdr (last u))))
-            (if (funcall ,comp (car (last u)))
-                (append (subseq u 0 3) 
-                        (cons (+ ,distance (car (last u)))
-                              (+ ,distance (cdr (last u))))) u))
+            (append (subseq u 0 3)
+                    (cons (+ ,distance (car (last u)))
+                          (+ ,distance (cdr (last u))))))
            ((and (consp u) (eq (car u) 'apply) 
                  (numberp (nth 2 u)) (numberp (nth 3 u)))
-            (if (funcall ,comp (nth 2 u))
-                (append (subseq u 0 2) 
-                        (list (+ ,distance (nth 2 u)))
-                        (list (+ ,distance (nth 3 u))) 
-                        (nthcdr 4 u)) u))
+            (append (subseq u 0 2) 
+                    (list (+ ,distance (nth 2 u)))
+                    (list (+ ,distance (nth 3 u))) 
+                    (nthcdr 4 u)))
            (t u))))
     
 (defun ein:worksheet--get-ids-after (cell)
@@ -180,6 +169,20 @@ this value."
       (setq result (plist-put result (ein:worksheet--unique-enough-cell-id (ein:cell-next cell0)) t))
       (setq cell0 (ein:cell-next cell0)))
     result))
+
+(defun ein:worksheet--jigger-undo-list ()
+  (if (/= (length buffer-undo-list) (length ein:%which-cell%))
+      (ein:log 'debug "Jiggering %s to %s: %S %S" (length ein:%which-cell%) (length buffer-undo-list) buffer-undo-list ein:%which-cell%))
+  (let ((fill (- (length buffer-undo-list) (length ein:%which-cell%))))
+    (if (> (abs fill) 1)
+        (error "Show stopper")
+      (if (< fill 0)
+          (setq ein:%which-cell% (nthcdr (- fill)  ein:%which-cell%))
+        (if (> fill 0)
+            (setq ein:%which-cell%
+                  (nconc (make-list fill (car ein:%which-cell%))
+                         ein:%which-cell%))))))
+  (cl-assert (= (length buffer-undo-list) (length ein:%which-cell%))))
 
 (defun ein:worksheet-unshift-undo-list (cell)
   "Adjust `buffer-undo-list' for adding CELL.  Unshift in list parlance means prepending to list."
@@ -191,27 +194,14 @@ this value."
              (npl (ein:worksheet--prompt-length cell))
              (nol (ein:worksheet--output-length cell))
              (ntl (ein:worksheet--total-length cell))
-             (ps (ein:worksheet--element-start cell :prompt))
-             (ops (or (ein:worksheet--element-start cell :prompt t) ps))
              (pdist (- npl opl))
              (odist (- nol ool))
              (after-ids (ein:worksheet--get-ids-after cell))
-             (func-same-cell (hof-add (lambda (pos) (not (null pos))) pdist))
-             (func-after-cell (hof-add (lambda (pos) (not (null pos))) (if (zerop otl) ntl (+ pdist odist))))
+             (func-same-cell (hof-add pdist))
+             (func-after-cell (hof-add (if (zerop otl) ntl (+ pdist odist))))
              lst)
-        (message "hunt %s %s %s %s %s" (ein:worksheet--unique-enough-cell-id cell) otl ntl pdist odist)
-        (if (/= (length buffer-undo-list) (length ein:%which-cell%))
-            (message "%s %s %s %s" (length buffer-undo-list) (length ein:%which-cell%) buffer-undo-list ein:%which-cell%))
-        (let ((fill (- (length buffer-undo-list) (length ein:%which-cell%))))
-          (if (> (abs fill) 1)
-              (error "Show stopper")
-            (if (< fill 0)
-                (setq ein:%which-cell% (nthcdr (- fill)  ein:%which-cell%))
-              (if (> fill 0)
-                  (setq ein:%which-cell%
-                        (nconc (make-list fill (car ein:%which-cell%))
-                               ein:%which-cell%))))))
-        (cl-assert (= (length buffer-undo-list) (length ein:%which-cell%)))
+        (ein:log 'debug "unsh trig=%s pdist=%s odist=%s" (ein:worksheet--unique-enough-cell-id cell) pdist odist)
+        (ein:worksheet--jigger-undo-list)
         (dolist (uc (mapcar* 'cons buffer-undo-list ein:%which-cell%))
           (let ((u (car uc))
                 (cell-id (or (cdr uc) "")))
@@ -219,32 +209,50 @@ this value."
                 (setq lst (nconc lst (list (funcall func-same-cell u))))
               (if (plist-member after-ids cell-id)
                   (progn
-                    (message "danger %s %s %s" u cell-id (ein:worksheet--unique-enough-cell-id cell))
+                    (ein:log 'debug "unsh adj %s %s" u cell-id)
                     (setq lst (nconc lst (list (funcall func-after-cell u)))))
                 (setq lst (nconc lst (list u)))))))
         (cl-assert (= (length buffer-undo-list) (length lst)))
-        (setq buffer-undo-list lst)))
-    (ein:worksheet--update-undo-data cell)))
+        (setq buffer-undo-list lst)
+        (ein:worksheet--update-cell-lengths cell)))))
+
+(defun ein:worksheet--calc-offset (u)
+  "Return length of inserted (or uninserted) text corresponding to undo entry U."
+  (cond ((and (consp u) (numberp (car u)) (numberp (cdr u)))
+         (- (cdr u) (car u)))
+        ((and (consp u) (stringp (car u)) (numberp (cdr u)))
+         (- (length (car u))))
+        (t 0)))
 
 (defun ein:worksheet-shift-undo-list (cell)
   "Adjust `buffer-undo-list' for deleting CELL if `ein:worksheet-enable-undo' is true.  Shift in list parlance means removing the front."
   (when ein:worksheet-enable-undo
     (ein:with-live-buffer (ein:cell-buffer cell)
-      (let* ((ps (ein:worksheet--element-start cell :prompt))
-             (ntl (ein:worksheet--total-length cell))
-             
-             (func-add (hof-add (lambda (pos) (>= pos ps)) (- ntl))))
-        (delete-if-not func-sat buffer-undo-list)
-        (setq buffer-undo-list 
-              (cl-loop for x in buffer-undo-list
-                       with prev = t
-                       and keep = nil
-                       if (not (and (null x) (null prev)))
-                       collect x into keep
-                       do (setf prev x)
-                       finally return keep))
-        (setq buffer-undo-list (mapcar func-add buffer-undo-list))))
-    (ein:worksheet--update-undo-data cell)))
+      (let* ((pdist (ein:worksheet--prompt-length cell))
+             (odist (ein:worksheet--output-length cell))
+             (after-ids (ein:worksheet--get-ids-after cell))
+             (offset 0)
+             lst wc)
+        (ein:log 'debug "shft trig=%s pdist=%s odist=%s" (ein:worksheet--unique-enough-cell-id cell) pdist odist)
+        (ein:worksheet--jigger-undo-list)
+        (dolist (uc (nreverse (mapcar* 'cons buffer-undo-list ein:%which-cell%)))
+          (let ((u (car uc))
+                (cell-id (or (cdr uc) "")))
+            (if (string= (ein:worksheet--unique-enough-cell-id cell) cell-id)
+                (progn
+                  (setq offset (+ offset (ein:worksheet--calc-offset u)))
+                  (ein:log 'debug "shft del %s (%s) %s" u (ein:worksheet--calc-offset u) cell-id))
+              (setq wc (nconc wc (list (cdr uc))))
+              (if (plist-member after-ids cell-id)
+                  (progn
+                    (ein:log 'debug "shft adj %s %s" u cell-id)
+                    ;; 1 for when cell un-executed, there is still a newline
+                    (setq lst (nconc lst (list (funcall (hof-add (- (+ 1 offset pdist odist))) u)))))
+                (setq lst (nconc lst (list u)))))))
+        (setq buffer-undo-list (nreverse lst))
+        (setq ein:%which-cell% (nreverse wc))
+        (ein:worksheet--jigger-undo-list)
+        (remprop 'ein:%cell-lengths% (oref cell :cell-id))))))
 
 
 ;;; Class and variable
@@ -550,14 +558,13 @@ If you really want use this command, you can do something like this
   (interactive (list (ein:worksheet--get-ws-or-error)
                      (ein:worksheet-get-current-cell)
                      t))
+  (ein:worksheet-shift-undo-list cell)
   (let ((inhibit-read-only t)
         (buffer-undo-list t))        ; disable undo recording
     (apply #'ewoc-delete
            (slot-value ws 'ewoc)
            (ein:cell-all-element cell)))
   (oset ws :dirty t)
-  (ein:worksheet-shift-undo-list cell)
-
   (when focus (ein:worksheet-focus-cell)))
 
 (defun ein:worksheet-kill-cell (ws cells &optional focus)
