@@ -8,7 +8,7 @@ set -x
 
 # adjust these versions as needed
 export NETTLE_VERSION=3.4
-export GNUTLS_VERSION=3.6.3
+export GNUTLS_VERSION=3.5.16
 
 export WORKDIR=${HOME}/local/
 export LD_LIBRARY_PATH=${WORKDIR}/lib/

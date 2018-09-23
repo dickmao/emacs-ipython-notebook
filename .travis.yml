@@ -18,6 +18,9 @@ addons:
   apt:
     packages:
     - autogen
+    - ca-certificates
+    - libgmp-dev
+    - xz-utils
 
 cache:
   directories:
