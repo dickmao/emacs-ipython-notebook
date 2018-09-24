@@ -159,7 +159,9 @@ See the definition of `create-image' for how it works."
         ;; This cell has only one input but turning on --debug in the notebook
         ;; gets you multiple responses
         ;; (should (= (length (oref cell :outputs)) 4))
-
+        (dolist (i (oref cell :outputs))
+          (ein:log 'debug "%s" i))
+        
         ;; This output is a SVG image
         (let ((out (nth 0 (oref cell :outputs))))
           (should (equal (plist-get out :output_type) "pyout"))

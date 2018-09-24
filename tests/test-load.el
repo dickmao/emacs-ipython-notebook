@@ -10,6 +10,8 @@
 (ein:setq-if-not ein:testing-dump-file-log "test-batch-log.log")
 (ein:setq-if-not ein:testing-dump-file-messages "test-batch-messages.log")
 (setq message-log-max t)
+(ein:log-set-level 'debug)
+(ein:log-set-message-level 'debug)
 
 (ein:load-files "^test-ein-.*\\.el$"
                 (file-name-directory load-file-name)
