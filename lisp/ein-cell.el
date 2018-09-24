@@ -401,7 +401,7 @@ a number will limit the number of lines in a cell output."
            (plist-get element :input)))
         (t (call-next-method))))))
 
-(defmethod ein:cell-element-get ((cell ein:textcell) prop)
+(defmethod ein:cell-element-get ((cell ein:textcell) prop &rest args)
   (let ((element (slot-value cell 'element)))
     (case prop
       (:after-input (plist-get element :footer))
