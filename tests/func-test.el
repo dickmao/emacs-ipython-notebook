@@ -155,12 +155,10 @@ See the definition of `create-image' for how it works."
         ;; It seems in this case, watching `:running' does not work
         ;; well sometimes.  Probably "output reply" (iopub) comes
         ;; before "execute reply" in this case.
-        (ein:testing-wait-until (lambda () (oref cell :outputs)))
+        (ein:testing-wait-until (lambda () (oref cell :outputs)) nil 180)
         ;; This cell has only one input but turning on --debug in the notebook
         ;; gets you multiple responses
-        ;; (should (= (length (oref cell :outputs)) 4))
-        (dolist (i (oref cell :outputs))
-          (ein:log 'debug "%s" i))
+        ;; (should (= (length (oref cell :outputs)) 1))
         
         ;; This output is a SVG image
         (let ((out (nth 0 (oref cell :outputs))))
