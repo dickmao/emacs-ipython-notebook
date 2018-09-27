@@ -12,6 +12,8 @@
  (depends-on "dash")
  (depends-on "cl-generic")
  (depends-on "ert-runner")
+ (depends-on "ecukes")
+ (depends-on "espuds")
  (depends-on "mocker")
  (depends-on "skewer-mode")
  (depends-on "deferred")

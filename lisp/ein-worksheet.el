@@ -904,17 +904,14 @@ It is set in `ein:notebook-multilang-mode'."
   (ein:aif (if up (ein:cell-prev cell) (ein:cell-next cell))
       (let ((inhibit-read-only t)
             (pivot-cell it))
-        (ein:with-undo-disabled
-         (ein:cell-save-text cell)
-         (ein:worksheet-delete-cell ws cell)
-         (funcall (if up
-                      #'ein:worksheet-insert-cell-above
-                    #'ein:worksheet-insert-cell-below)
-                  ws cell pivot-cell)
-         (ein:cell-goto cell)
-         (oset ws :dirty t))
-        (when ein:worksheet-enable-undo
-          (push `(apply ein:worksheet-move-cell ,ws ,cell ,(not up)) buffer-undo-list)))
+        (ein:cell-save-text cell)
+        (ein:worksheet-delete-cell ws cell)
+        (funcall (if up
+                     #'ein:worksheet-insert-cell-above
+                   #'ein:worksheet-insert-cell-below)
+                 ws cell pivot-cell)
+        (ein:cell-goto cell)
+        (oset ws :dirty t))
     (error "No %s cell" (if up "previous" "next"))))
 
 (defun ein:worksheet-move-cell-up (ws cell)
