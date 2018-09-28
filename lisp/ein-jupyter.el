@@ -229,7 +229,8 @@ there is no running server then no action will be taken.
 
     ; G-d have mercy if you're not POSIX...
     (with-current-buffer ein:jupyter-server-buffer-name
-      (signal-process (process-id (get-buffer-process (buffer-name))) 15))
+      (if (processp (get-buffer-process (buffer-name)))
+          (signal-process (process-id (get-buffer-process (buffer-name))) 15)))
     (sit-for 1) ; this seems necessary (try it without in the integration test)
     (when log
       (with-current-buffer ein:jupyter-server-buffer-name
