@@ -17,11 +17,11 @@ env-ipy.%:
 test: test-unit test-int
 
 .PHONY: test-int
-test-int:
+test-int: env-ipy.$(IPY_VERSION)
 	cask exec ert-runner -L ./lisp -L ./test -l test/testfunc.el test/test-func.el
 
 .PHONY: test-unit
-test-unit:
+test-unit: env-ipy.$(IPY_VERSION)
 	cask exec ert-runner -L ./lisp -L ./test -l test/testein.el test/test-ein*.el
 
 travis-ci-zeroein:

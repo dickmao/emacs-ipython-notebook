@@ -827,7 +827,8 @@ If END is non-`nil', return the location of next element."
     ;; Footer may have extra (possibly colored) newline due to the
     ;; last output type.  So invalidate it here.
     ;; See `ein:cell-insert-footer' (for codecell).
-    (ewoc-invalidate ewoc (ein:cell-element-get cell :footer))))
+    (let ((buffer-undo-list t))   ; disable undo recording
+      (ewoc-invalidate ewoc (ein:cell-element-get cell :footer)))))
 
 (defun ein:cell-output-json-to-class (json)
   (ein:case-equal (plist-get json :output_type)
@@ -877,8 +878,7 @@ If END is non-`nil', return the location of next element."
          (element (slot-value cell 'element)))
     (plist-put element :output
                (append (plist-get element :output) (list ewoc-node)))
-    (ewoc-invalidate ewoc (ein:cell-element-get cell :footer))
-    ))
+    (ewoc-invalidate ewoc (ein:cell-element-get cell :footer))))
 
 (defmethod ein:cell-append-pyout ((cell ein:codecell) json)
   "Insert pyout type output in the buffer.

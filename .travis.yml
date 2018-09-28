@@ -1,18 +1,14 @@
 sudo: false
-language: python
+language: emacs-lisp
 
 addons:
   apt:
     packages:
     - gnutls-bin
     - python-tornado
-    - python3-tornado
     - python-zmq
-    - python3-zmq
     - python-jinja2
-    - python3-jinja2
     - python-jsonschema
-    - python3-jsonschema
 
 addons:
   apt:
@@ -22,11 +18,6 @@ addons:
 cache:
   directories:
   - $HOME/local
-
-python:
-  - "2.7"
-  - "3.5"
-  - "3.6"
 
 env:
   global:
