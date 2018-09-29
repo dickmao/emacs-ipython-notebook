@@ -369,7 +369,6 @@ This function is called via `ein:notebook-after-rename-hook'."
                                                    (ein:notebooklist-list-get url-or-port)))))
         (version (ein:$notebooklist-api-version (or ein:%notebooklist%
                                                     (ein:notebooklist-list-get url-or-port)))))
-    (ein:log 'info "Creating a new notebook at %s..." path)
     (unless url-or-port
       (setq url-or-port (ein:$notebooklist-url-or-port ein:%notebooklist%)))
     (assert url-or-port nil
@@ -401,7 +400,6 @@ This function is called via `ein:notebook-after-rename-hook'."
                                                 &allow-other-keys
                                                 &aux
                                                 (no-popup t))
-  (ein:log 'info "Creating a new notebook (%s)... Done." path)
   (if data
       (let ((name (plist-get data :name))
             (path (plist-get data :path)))

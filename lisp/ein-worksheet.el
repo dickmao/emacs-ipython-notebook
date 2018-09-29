@@ -49,13 +49,11 @@
   :type 'boolean
   :group 'ein)
 
-(defcustom ein:worksheet-enable-undo t
-  "When non-`nil', allow undo of text manipulation within cells provided
-subject cell is still visible (wasn't killed or collapsed).  You can't undo
-cell operations such as kill, execution, add, remove.
-
-You need to reopen the notebook buffer to reflect the change of
-this value."
+(defcustom ein:worksheet-enable-undo nil
+  "When non-`nil', allow undo of cell inputs only (as opposed to
+  whole-cell operations such as killing, moving, executing cells).
+ 
+  You cannot enable this feature midstream, and must restart emacs."
   :type 'boolean
   :group 'ein)
 
@@ -71,9 +69,12 @@ this value."
   "Gets the first five characters of an md5sum.  How far I can get without r collisions follow a negative binomial with p=1e-6 (should go pretty far)."
   (intern (substring (oref cell :cell-id) 0 5)))
 
+(defsubst delete-if (clause lst)
+  (delete-if-not (lambda (u) (not (funcall clause u))) lst))
+
 (defun ein:worksheet--which-cell-hook (change-beg change-end prev-len)
   (when (and (not (null buffer-undo-list)) (listp buffer-undo-list))
-    (setq buffer-undo-list (delete-if-not (lambda (u) (not (and (consp u) (markerp (car u))))) buffer-undo-list))
+    (setq buffer-undo-list (delete-if (lambda (u) (or (numberp u) (and (consp u) (markerp (car u))))) buffer-undo-list))
     (let ((fill (- (length buffer-undo-list) (length ein:%which-cell%))))
       (if (< fill 0)
           (progn
@@ -83,7 +84,7 @@ this value."
           (let ((cell-id (ein:aif (ein:worksheet-get-current-cell :noerror t)
                              (ein:worksheet--unique-enough-cell-id it) nil)))
             (let ((ein:log-print-level 5))
-              (ein:log 'debug "which-cell (%s . %s) %s %s fill=%s" change-beg change-end cell-id (subseq buffer-undo-list 0 fill) fill))
+              (ein:log 'debug "which-cell (%s . %s) %s %S fill=%s" change-beg change-end cell-id (subseq buffer-undo-list 0 fill) fill))
             (setq ein:%which-cell% 
                   (nconc (make-list fill cell-id) ein:%which-cell%))))))))
 
@@ -130,7 +131,6 @@ this value."
                                             (plist-put (plist-put '() :prompt (ein:worksheet--element-start cell :prompt)) :output (ein:worksheet--element-start cell (if (string= (oref cell :cell-type) "code") :output :footer)))))))
 
 (defun ein:worksheet-restart-undo-list ()
-  "Some worksheet operations are too onerous for undo offset accounting.  Suboptimally clear the undo list in those cases, likely to the user's chagrin."
   (interactive)
   (when ein:worksheet-enable-undo
     (setq buffer-undo-list nil)
@@ -187,7 +187,7 @@ this value."
                          ein:%which-cell%))))))
   (cl-assert (= (length buffer-undo-list) (length ein:%which-cell%))))
 
-(defun ein:worksheet--unshift-undo-list (cell)
+(defun ein:worksheet--unshift-undo-cell (cell)
   "Adjust `buffer-undo-list' for adding CELL.  Unshift in list parlance means prepending to list."
   (when ein:worksheet-enable-undo
     (ein:with-live-buffer (ein:cell-buffer cell)
@@ -219,6 +219,25 @@ this value."
         (setq buffer-undo-list lst)
         (ein:worksheet--update-cell-lengths cell)))))
 
+(defun ein:worksheet--undo-within-first (u split)
+  "Return t if undo entry U is before SPLIT."
+  (cond ((numberp u) (<= u split))
+        ((and (consp u) (numberp (car u)) (numberp (cdr u)))
+         (<= (car u) split))
+        ((and (consp u) (stringp (car u)) (numberp (cdr u)))
+         (<= (cdr u) split))
+        ((and (consp u) (markerp (car u)))
+         (<= (marker-position (car u)) split))
+        ((and (consp u) (null (car u)) 
+              (numberp (car (last u))) (numberp (cdr (last u))))
+         (<= (car (last u)) split))
+        ((and (consp u) (eq (car u) 'apply) 
+              (numberp (nth 2 u)) (numberp (nth 3 u)))
+         (<= (nth 2 u) split))
+        (t nil))
+
+  )
+
 (defun ein:worksheet--calc-offset (u)
   "Return length of inserted (or uninserted) text corresponding to undo entry U."
   (cond ((and (consp u) (numberp (car u)) (numberp (cdr u)))
@@ -227,8 +246,38 @@ this value."
          (- (length (car u))))
         (t 0)))
 
-(defun ein:worksheet--shift-undo-list (cell)
-  "Adjust `buffer-undo-list' for deleting CELL if `ein:worksheet-enable-undo' is true.  Shift in list parlance means removing the front."
+(defun ein:worksheet--shift-undo-fixed (cell split)
+  "Adjust `buffer-undo-list' for deleting first SPLIT characters of CELL (a fixed number as opposed to a whole cell).  Shift in list parlance means removing the front."
+  (when ein:worksheet-enable-undo
+    (ein:with-live-buffer (ein:cell-buffer cell)
+      (let* ((after-ids (ein:worksheet--get-ids-after cell))
+             lst wc)
+        (ein:log 'debug "fshf trig=%s split=%s" (ein:worksheet--unique-enough-cell-id cell) split)
+        (ein:worksheet--jigger-undo-list)
+        ;; Deletion of a less recent undo affects a more recent undo (arrow of time)
+        ;; Since buffer-undo-list is ordered most to least recent, we must
+        ;; reverse.
+        (dolist (uc (nreverse (mapcar* 'cons buffer-undo-list ein:%which-cell%)))
+          (let ((u (car uc))
+                (cell-id (or (cdr uc) "")))
+            (if (and (string= (ein:worksheet--unique-enough-cell-id cell) cell-id)
+                     (ein:worksheet--undo-within-first u split))
+                (progn
+                  (setq offset (+ offset (ein:worksheet--calc-offset u)))
+                  (ein:log 'debug "fshf del %s (%s) %s" u (ein:worksheet--calc-offset u) cell-id))
+              (setq wc (nconc wc (list (cdr uc))))
+              (if (plist-member after-ids cell-id)
+                  (progn
+                    (ein:log 'debug "fshf adj %s %s" u cell-id)
+                    (setq lst (nconc lst (list (funcall (hof-add (- offset)) u)))))
+                (setq lst (nconc lst (list u)))))))
+        (setq buffer-undo-list (nreverse lst))
+        (setq ein:%which-cell% (nreverse wc))
+        (ein:worksheet--jigger-undo-list)
+        ))))
+
+(defun ein:worksheet--shift-undo-cell (cell)
+  "Adjust `buffer-undo-list' for deleting CELL.  Shift in list parlance means removing the front."
   (when ein:worksheet-enable-undo
     (ein:with-live-buffer (ein:cell-buffer cell)
       (let* ((pdist (ein:worksheet--prompt-length cell))
@@ -238,6 +287,9 @@ this value."
              lst wc)
         (ein:log 'debug "shft trig=%s pdist=%s odist=%s" (ein:worksheet--unique-enough-cell-id cell) pdist odist)
         (ein:worksheet--jigger-undo-list)
+        ;; Deletion of a less recent undo affects a more recent undo (arrow of time)
+        ;; Since buffer-undo-list is ordered most to least recent, we must
+        ;; reverse.
         (dolist (uc (nreverse (mapcar* 'cons buffer-undo-list ein:%which-cell%)))
           (let ((u (car uc))
                 (cell-id (or (cdr uc) "")))
@@ -287,7 +339,7 @@ this value."
   (ein:events-on events
                  'maybe_reset_undo.Worksheet
                  (lambda (-ignore- cell)
-                   (ein:worksheet--unshift-undo-list cell)))
+                   (ein:worksheet--unshift-undo-cell cell)))
   (ein:events-on events 'set_next_input.Worksheet
                  #'ein:worksheet--set-next-input)
   (ein:events-on events 'set_dirty.Worksheet #'ein:worksheet--set-dirty))
@@ -561,7 +613,7 @@ If you really want use this command, you can do something like this
   (interactive (list (ein:worksheet--get-ws-or-error)
                      (ein:worksheet-get-current-cell)
                      t))
-  (ein:worksheet--shift-undo-list cell)
+  (ein:worksheet--shift-undo-cell cell)
   (let ((inhibit-read-only t)
         (buffer-undo-list t))        ; disable undo recording
     (apply #'ewoc-delete
@@ -663,7 +715,7 @@ after PIVOT and return the new cell."
       (ein:cell-insert-below pivot cell))
      (t (error
          "PIVOT is `nil' but ncells != 0.  There is something wrong...")))
-    (ein:worksheet--unshift-undo-list cell)
+    (ein:worksheet--unshift-undo-cell cell)
     (oset ws :dirty t)
     (when focus (ein:cell-goto cell))
     cell))
@@ -687,7 +739,7 @@ See also: `ein:worksheet-insert-cell-below'."
           (ein:cell-enter-first cell))))
      (t (error
          "PIVOT is `nil' but ncells > 0.  There is something wrong...")))
-    (ein:worksheet--unshift-undo-list cell)
+    (ein:worksheet--unshift-undo-cell cell)
     (oset ws :dirty t)
     (when focus (ein:cell-goto cell))
     cell))
@@ -716,7 +768,7 @@ directly."
           (new (ein:cell-convert-inplace cell type)))
       (when (ein:codecell-p new)
         (setf (slot-value new 'kernel) (slot-value ws 'kernel)))
-      (ein:worksheet--unshift-undo-list cell)
+      (ein:worksheet--unshift-undo-cell cell)
       (when focus (ein:cell-goto new relpos)))))
 
 (defun ein:worksheet-toggle-slide-type (ws cell &optional focus)
@@ -769,7 +821,7 @@ an integer used only when the TYPE is \"heading\"."
       (setf (slot-value new 'kernel) (slot-value ws 'kernel)))
     (when level
       (ein:cell-change-level new level))
-    (ein:worksheet--unshift-undo-list cell)
+    (ein:worksheet--unshift-undo-cell cell)
     (when focus (ein:cell-goto new relpos))))
 
 (defun ein:worksheet-split-cell-at-point (ws cell &optional no-trim focus)
@@ -785,17 +837,21 @@ argument \(C-u)."
          (head (buffer-substring beg pos))
          (new (ein:worksheet-insert-cell-above ws
                                                (slot-value cell 'cell-type)
-                                               cell)))
+                                               cell))
+         (split (marker-position pos)))
     (when (ein:headingcell-p cell)
       (ein:cell-change-level new (slot-value cell 'level)))
-    (delete-region beg pos)
+    (undo-boundary)
+    (delete-region (marker-position beg) (marker-position pos))
     (unless no-trim
       (setq head (ein:trim-right head "\n"))
       (save-excursion
         (goto-char pos)
         (let ((end (set-marker (make-marker) (ein:cell-input-pos-max cell))))
           (while (and (looking-at-p "\n") (< (point) end))
-            (delete-char 1)))))
+            (delete-char 1)
+            (setq split (1+ split))))))
+    ; (ein:worksheet--shift-undo-fixed cell split)
     (ein:cell-set-text new head)
     (when focus (ein:cell-goto cell))))
 
@@ -936,14 +992,17 @@ This does not alter the actual data stored in the cell."
   (let ((buffer-undo-list t))
     (ein:cell-toggle-output cell)
     (setf (slot-value ws 'dirty) t))
-  (ein:worksheet--unshift-undo-list cell))
+  (ein:worksheet--unshift-undo-cell cell))
 
 (defun ein:worksheet-set-output-visibility-all (ws &optional collapsed)
   "Show all cell output.  When prefix is given, hide all cell output."
   (interactive (list (ein:worksheet--get-ws-or-error) current-prefix-arg))
   (when collapsed (setq collapsed t))   ; force it to be a boolean
   (mapc (lambda (c)
-          (when (ein:codecell-p c) (ein:cell-set-collapsed c collapsed)))
+          (when (ein:codecell-p c) 
+            (let ((buffer-undo-list t))
+              (ein:cell-set-collapsed c collapsed))
+            (ein:worksheet--unshift-undo-cell c)))
         (ein:worksheet-get-cells ws))
   (setf (slot-value ws 'dirty) t))
 
@@ -956,7 +1015,7 @@ Do not clear input prompt when the prefix argument is given."
   (ein:cell-clear-output cell t t t)
   (unless preserve-input-prompt
     (ein:cell-set-input-prompt cell))
-  (ein:worksheet--unshift-undo-list cell))
+  (ein:worksheet--unshift-undo-cell cell))
 
 (defun ein:worksheet-clear-all-output (ws &optional preserve-input-prompt)
   "Clear output from all cells.
@@ -1001,7 +1060,7 @@ Do not clear input prompts when the prefix argument is given."
     (ein:kernel-if-ready (slot-value ws 'kernel)
       (ein:cell-execute cell)
       (oset ws :dirty t)))
-  (ein:worksheet--unshift-undo-list cell)
+  (ein:worksheet--unshift-undo-cell cell)
   cell)
 
 (defun ein:worksheet-execute-cell-and-goto-next (ws cell &optional insert)

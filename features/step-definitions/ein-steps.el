@@ -19,8 +19,7 @@
         (let ((cell (call-interactively #'ein:worksheet-execute-cell)))
           (ein:testing-wait-until (lambda () (not (slot-value cell 'running)))))))
 
-(When "^I undo slowly$"
+(When "^I undo again$"
       (lambda ()
-        (undo-only)
-        (sleep-for 1)
+        (undo-more 1)
         ))
