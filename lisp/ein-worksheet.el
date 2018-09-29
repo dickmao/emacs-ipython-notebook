@@ -219,25 +219,6 @@
         (setq buffer-undo-list lst)
         (ein:worksheet--update-cell-lengths cell)))))
 
-(defun ein:worksheet--undo-within-first (u split)
-  "Return t if undo entry U is before SPLIT."
-  (cond ((numberp u) (<= u split))
-        ((and (consp u) (numberp (car u)) (numberp (cdr u)))
-         (<= (car u) split))
-        ((and (consp u) (stringp (car u)) (numberp (cdr u)))
-         (<= (cdr u) split))
-        ((and (consp u) (markerp (car u)))
-         (<= (marker-position (car u)) split))
-        ((and (consp u) (null (car u)) 
-              (numberp (car (last u))) (numberp (cdr (last u))))
-         (<= (car (last u)) split))
-        ((and (consp u) (eq (car u) 'apply) 
-              (numberp (nth 2 u)) (numberp (nth 3 u)))
-         (<= (nth 2 u) split))
-        (t nil))
-
-  )
-
 (defun ein:worksheet--calc-offset (u)
   "Return length of inserted (or uninserted) text corresponding to undo entry U."
   (cond ((and (consp u) (numberp (car u)) (numberp (cdr u)))
@@ -808,19 +789,18 @@ argument \(C-u)."
          (new (ein:worksheet-insert-cell-above ws
                                                (slot-value cell 'cell-type)
                                                cell))
-         (split (marker-position pos)))
+         )
     (when (ein:headingcell-p cell)
       (ein:cell-change-level new (slot-value cell 'level)))
     (undo-boundary)
-    (delete-region (marker-position beg) (marker-position pos))
+    (delete-region beg pos)
     (unless no-trim
       (setq head (ein:trim-right head "\n"))
       (save-excursion
         (goto-char pos)
         (let ((end (set-marker (make-marker) (ein:cell-input-pos-max cell))))
           (while (and (looking-at-p "\n") (< (point) end))
-            (delete-char 1)
-            (setq split (1+ split))))))
+            (delete-char 1)))))
     (ein:cell-set-text new head)
     (when focus (ein:cell-goto cell))))
 
