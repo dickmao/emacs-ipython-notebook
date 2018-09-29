@@ -246,36 +246,6 @@
          (- (length (car u))))
         (t 0)))
 
-(defun ein:worksheet--shift-undo-fixed (cell split)
-  "Adjust `buffer-undo-list' for deleting first SPLIT characters of CELL (a fixed number as opposed to a whole cell).  Shift in list parlance means removing the front."
-  (when ein:worksheet-enable-undo
-    (ein:with-live-buffer (ein:cell-buffer cell)
-      (let* ((after-ids (ein:worksheet--get-ids-after cell))
-             lst wc)
-        (ein:log 'debug "fshf trig=%s split=%s" (ein:worksheet--unique-enough-cell-id cell) split)
-        (ein:worksheet--jigger-undo-list)
-        ;; Deletion of a less recent undo affects a more recent undo (arrow of time)
-        ;; Since buffer-undo-list is ordered most to least recent, we must
-        ;; reverse.
-        (dolist (uc (nreverse (mapcar* 'cons buffer-undo-list ein:%which-cell%)))
-          (let ((u (car uc))
-                (cell-id (or (cdr uc) "")))
-            (if (and (string= (ein:worksheet--unique-enough-cell-id cell) cell-id)
-                     (ein:worksheet--undo-within-first u split))
-                (progn
-                  (setq offset (+ offset (ein:worksheet--calc-offset u)))
-                  (ein:log 'debug "fshf del %s (%s) %s" u (ein:worksheet--calc-offset u) cell-id))
-              (setq wc (nconc wc (list (cdr uc))))
-              (if (plist-member after-ids cell-id)
-                  (progn
-                    (ein:log 'debug "fshf adj %s %s" u cell-id)
-                    (setq lst (nconc lst (list (funcall (hof-add (- offset)) u)))))
-                (setq lst (nconc lst (list u)))))))
-        (setq buffer-undo-list (nreverse lst))
-        (setq ein:%which-cell% (nreverse wc))
-        (ein:worksheet--jigger-undo-list)
-        ))))
-
 (defun ein:worksheet--shift-undo-cell (cell)
   "Adjust `buffer-undo-list' for deleting CELL.  Shift in list parlance means removing the front."
   (when ein:worksheet-enable-undo
@@ -851,7 +821,6 @@ argument \(C-u)."
           (while (and (looking-at-p "\n") (< (point) end))
             (delete-char 1)
             (setq split (1+ split))))))
-    ; (ein:worksheet--shift-undo-fixed cell split)
     (ein:cell-set-text new head)
     (when focus (ein:cell-goto cell))))
 
