@@ -3,15 +3,8 @@ language: python
 
 addons:
   apt:
-    sources:
-    - sourceline: 'ppa:jonathonf/python-2.7'
     packages:
     - gnutls-bin
-    - python-tornado
-    - python-zmq
-    - python-jinja2
-    - python-jsonschema
-    - python2.7
 
 cache:
   directories:
@@ -32,8 +25,7 @@ matrix:
 
 install:
   - pip install jupyter ipython\<=6.4.0
-  - pip2 install ipykernel
-  - python2 -m ipykernel install --user
+  - jupyter kernelspec list
 
 before_script:
   - sh tools/install-evm.sh
