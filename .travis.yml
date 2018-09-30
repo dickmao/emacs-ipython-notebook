@@ -1,5 +1,5 @@
 sudo: false
-language: emacs-lisp
+language: python
 
 addons:
   apt:
@@ -10,14 +10,12 @@ addons:
     - python-jinja2
     - python-jsonschema
 
-addons:
-  apt:
-    packages:
-    - gnutls-bin
-
 cache:
   directories:
   - $HOME/local
+
+python:
+  - "2.7"
 
 env:
   global:
