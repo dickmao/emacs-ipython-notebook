@@ -27,7 +27,6 @@
 
 (Setup
  (setq ein:force-sync t)
- (setq ein:worksheet-enable-undo t)
  (setq ein:jupyter-server-args '("--no-browser" "--debug"))
  (deferred:sync! (ein:jupyter-server-start (executable-find "jupyter") (concat default-directory "log")))
  (assert (processp %ein:jupyter-server-session%) t "notebook server defunct")

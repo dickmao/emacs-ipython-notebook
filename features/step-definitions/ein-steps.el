@@ -21,5 +21,13 @@
 
 (When "^I undo again$"
       (lambda ()
-        (undo-more 1)
-        ))
+        (undo-more 1)))
+
+(When "^I enable undo$"
+      (lambda ()
+        (setq ein:worksheet-enable-undo t)))
+
+(When "^I undo demoting errors$"
+      (lambda ()
+        (with-demoted-errors "demoted: %s"
+          (undo))))

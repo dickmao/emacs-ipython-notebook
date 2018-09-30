@@ -1,4 +1,12 @@
+Scenario: Undo by default turned off
+  Given new python2 notebook
+  When I type "import math"
+  And I wait for cell to execute
+  And I undo demoting errors
+  Then I should see message "demoted: (user-error No undo information in this buffer)"
+
 Scenario: Kill yank doesn't break undo
+  Given I enable undo
   Given new python2 notebook
   When I type "import math"
   And I press "M-RET"
@@ -15,6 +23,7 @@ Scenario: Kill yank doesn't break undo
   Then the cursor should be at point "74"
 
 Scenario: Collapse doesn't break undo
+  Given I enable undo
   Given new python2 notebook
   When I type "from time import sleep"
   And I press "RET"
@@ -38,6 +47,7 @@ Scenario: Collapse doesn't break undo
   Then the cursor should be at point "54"
 
 Scenario: Test the conflagrative commands
+  Given I enable undo
   Given new python2 notebook
   When I type "import math"
   And I press "RET"
@@ -68,6 +78,7 @@ Scenario: Test the conflagrative commands
   Then the cursor should be at point "80"
 
 Scenario: Clear output doesn't break undo
+  Given I enable undo
   Given new python2 notebook
   When I type "from time import sleep"
   And I press "RET"
@@ -91,6 +102,7 @@ Scenario: Clear output doesn't break undo
   Then the cursor should be at point "54"
 
 Scenario: Moving cells doesn't break undo
+  Given I enable undo
   Given new python2 notebook
   When I type "100"
   And I press "C-c C-b"
@@ -112,6 +124,7 @@ Scenario: Moving cells doesn't break undo
   Then the cursor should be at point "66"
 
 Scenario: Split and merge don't break undo
+  Given I enable undo
   Given new python2 notebook
   When I type "print "hello""
   And I press "C-c C-b"
