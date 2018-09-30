@@ -35,7 +35,7 @@ install:
   - sudo add-apt-repository ppa:jonathonf/python-2.7 -y
   - sudo apt-get update
   - sudo apt-get install python2.7
-  - python2.7 -m pip install ipykernel
+  - python2.7 -m pip install ipykernel --upgrade --user
   - python2.7 -m ipykernel install --user
 
 before_script:
