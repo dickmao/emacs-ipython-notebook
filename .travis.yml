@@ -32,8 +32,11 @@ matrix:
 
 install:
   - pip install jupyter ipython\<=6.4.0
-  - python2 -m pip install ipykernel
-  - python2 -m ipykernel install --user
+  - sudo add-apt-repository ppa:deadsnakes/ppa
+  - sudo apt-get update
+  - sudo apt-get install python2.7
+  - python2.7 -m pip install ipykernel
+  - python2.7 -m ipykernel install --user
 
 before_script:
   - sh tools/install-evm.sh
