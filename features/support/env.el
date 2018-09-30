@@ -62,3 +62,6 @@
    (ein:jupyter-server-stop t))
  (assert (not (processp %ein:jupyter-server-session%)) t "notebook server orphaned"))
 
+(Fail
+ (if (not noninteractive)
+     (keyboard-quit))) ;; useful to prevent emacs from quitting
