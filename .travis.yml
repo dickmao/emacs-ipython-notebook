@@ -19,7 +19,6 @@ cache:
 
 python:
   - "3.5"
-  - "2.7"
 
 env:
   global:
@@ -33,7 +32,8 @@ matrix:
 
 install:
   - pip install jupyter ipython\<=6.4.0
-  - python2.7 -m ipykernel install --user
+  - pip2 install ipykernel
+  - python2 -m ipykernel install --user
 
 before_script:
   - sh tools/install-evm.sh
