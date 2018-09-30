@@ -14,7 +14,7 @@
               (switch-to-buffer buf-name)
               (Then "I should be in buffer \"%s\"" buf-name))))))
 
-(When "^I execute cell$"
+(When "^I wait for cell to execute$"
       (lambda ()
         (let ((cell (call-interactively #'ein:worksheet-execute-cell)))
           (ein:testing-wait-until (lambda () (not (slot-value cell 'running)))))))
