@@ -175,10 +175,10 @@
 
 (defun ein:worksheet--jigger-undo-list ()
   (if (/= (length buffer-undo-list) (length ein:%which-cell%))
-      (ein:log 'debug "Jiggering %s to %s: %S %S" (length ein:%which-cell%) (length buffer-undo-list) buffer-undo-list ein:%which-cell%))
+      (ein:log 'debug "jig %s to %s: %S %S" (length ein:%which-cell%) (length buffer-undo-list) buffer-undo-list ein:%which-cell%))
   (let ((fill (- (length buffer-undo-list) (length ein:%which-cell%))))
     (if (> (abs fill) 1)
-        (error "Show stopper")
+        (error "show stopper")
       (if (< fill 0)
           (setq ein:%which-cell% (nthcdr (- fill)  ein:%which-cell%))
         (if (> fill 0)
@@ -203,7 +203,7 @@
              (func-same-cell (hof-add pdist))
              (func-after-cell (hof-add (if (zerop otl) ntl (+ pdist odist))))
              lst)
-        (ein:log 'debug "unsh trig=%s pdist=%s odist=%s" (ein:worksheet--unique-enough-cell-id cell) pdist odist)
+        (ein:log 'debug "unsh trig=%s pdist=%s odist=%s otl=%s ntl=%s" (ein:worksheet--unique-enough-cell-id cell) pdist odist otl ntl)
         (ein:worksheet--jigger-undo-list)
         (dolist (uc (mapcar* 'cons buffer-undo-list ein:%which-cell%))
           (let ((u (car uc))
@@ -603,12 +603,12 @@ kill-ring of Emacs (kill-ring for texts)."
     (ein:log 'info "%s cells are copied." (length  cells))
     (ein:kill-new cells)))
 
-(defun ein:worksheet-insert-clone-below (ws cell pivot)
+(defun ein:worksheet-insert-clone (ws cell pivot up)
   (let ((clone (ein:cell-copy cell)))
     ;; Cell can be from another buffer, so reset `ewoc'.
     (setf (ein:basecell--ewoc clone) (ein:worksheet--ewoc ws))
-    ;(oset clone :ewoc (oref ws :ewoc))
-    (ein:worksheet-insert-cell-below ws clone pivot)
+                                        ;(oset clone :ewoc (oref ws :ewoc))
+    (funcall (intern (concat "ein:worksheet-insert-cell-" up)) ws clone pivot)
     clone))
 
 (defun ein:worksheet-yank-cell (ws &optional n)
@@ -623,7 +623,7 @@ Prefixes are act same as the normal `yank' command."
          (killed (ein:current-kill n)))
     (loop for c in killed
           with last = cell
-          do (setq last (ein:worksheet-insert-clone-below ws c last))
+          do (setq last (ein:worksheet-insert-clone ws c last "below"))
           finally (ein:cell-goto last))))
 
 (defun ein:worksheet--node-positions (cell)
@@ -906,16 +906,18 @@ It is set in `ein:notebook-multilang-mode'."
 ;;; Cell movement
 
 (defun ein:worksheet-move-cell (ws cell up)
+  ;; effectively kill and yank modulo dirtying kill ring
   (ein:aif (if up (ein:cell-prev cell) (ein:cell-next cell))
       (let ((inhibit-read-only t)
-            (pivot-cell it))
+            (pivot-cell it) clone)
         (ein:cell-save-text cell)
         (ein:worksheet-delete-cell ws cell)
-        (funcall (if up
-                     #'ein:worksheet-insert-cell-above
-                   #'ein:worksheet-insert-cell-below)
-                 ws cell pivot-cell)
-        (ein:cell-goto cell)
+        (ein:cell-deactivate cell)
+
+        ;; the clone conveniently makes otl zero
+        ;; (as opposed to ein:worksheet-insert-cell)
+        (setq clone (ein:worksheet-insert-clone ws cell pivot-cell (if up "above" "below")))
+        (ein:cell-goto clone)
         (oset ws :dirty t))
     (error "No %s cell" (if up "previous" "next"))))
 

@@ -520,9 +520,10 @@ of minor mode."
 (defun ein:list-available-kernels (url-or-port)
   (let ((kernelspecs (gethash url-or-port ein:available-kernelspecs)))
     (if kernelspecs
-        (loop for (key spec) on (ein:plist-exclude kernelspecs '(:default)) by 'cddr
-              collecting (cons (ein:$kernelspec-name spec)
-                               (ein:$kernelspec-display-name spec))))))
+        (sort (loop for (key spec) on (ein:plist-exclude kernelspecs '(:default)) by 'cddr
+                    collecting (cons (ein:$kernelspec-name spec)
+                                     (ein:$kernelspec-display-name spec)))
+              (lambda (c1 c2) (string< (cdr c1) (cdr c2)))))))
 
 (defun ein:query-kernelspecs (url-or-port &optional force-refresh)
   "Query jupyter server for the list of available
