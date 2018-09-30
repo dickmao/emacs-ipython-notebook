@@ -1,4 +1,4 @@
-sudo: required
+sudo: false
 language: python
 
 addons:
@@ -29,12 +29,12 @@ matrix:
     - env: EVM_EMACS=emacs-snapshot
 
 install:
-  - sudo pip install jupyter ipython\<=6.4.0
-  - sudo add-apt-repository ppa:jonathonf/python-2.7 -y
-  - sudo apt-get update
-  - sudo apt-get install python2.7
-  - sudo python2.7 -m pip install ipykernel
-  - sudo python2.7 -m ipykernel install
+  - pip install jupyter ipython\<=6.4.0
+  - add-apt-repository ppa:jonathonf/python-2.7 -y
+  - apt-get update
+  - apt-get install python2.7
+  - python2.7 -m pip install ipykernel
+  - python2.7 -m ipykernel install --user
 
 before_script:
   - sh tools/install-evm.sh
