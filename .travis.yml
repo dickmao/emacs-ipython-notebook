@@ -25,7 +25,6 @@ env:
     - PATH=$HOME/local/bin:$HOME/local/evm/bin:$HOME/local/cask/bin:$PATH
   matrix:
     - EVM_EMACS=emacs-25.2-travis EL_REQUEST_BACKEND=curl
-    - EVM_EMACS=emacs-26.1-travis EL_REQUEST_BACKEND=curl
 
 matrix:
   allow_failures:
@@ -33,7 +32,7 @@ matrix:
 
 install:
   - pip install jupyter ipython\<=6.4.0
-  - python2.7 -m pip install ipykernel
+  - sudo python2.7 -m pip install ipykernel
   - python2.7 -m ipykernel install --user
 
 before_script:
