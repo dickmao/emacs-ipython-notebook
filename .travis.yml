@@ -33,7 +33,7 @@ matrix:
 install:
   - pip install jupyter ipython\<=6.4.0
   - python2 -m pip install ipykernel
-  - python2 -m ipykernel --install --user
+  - python2 -m ipykernel install --user
 
 before_script:
   - sh tools/install-evm.sh
