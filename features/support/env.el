@@ -43,8 +43,7 @@
          (urlport (ein:$notebooklist-url-or-port ein:%notebooklist%)))
      (ein:content-query-sessions sessions urlport)
      (loop repeat 4
-           if (null (gethash :pending sessions))
-           return t
+           until (null (gethash :pending sessions))
            do (sleep-for 0 50))
      (loop for note in (ein:$notebooklist-data ein:%notebooklist%)
            for path = (plist-get note :path)

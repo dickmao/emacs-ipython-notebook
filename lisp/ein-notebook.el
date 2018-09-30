@@ -956,17 +956,17 @@ NAME is any non-empty string that does not contain '/' or '\\'.
     ;; Let `ein:notebook-kill-buffer-callback' do its job.
     (mapc #'kill-buffer (ein:notebook-buffer-list notebook))))
 
-(defun ein:notebook-kill-kernel-then-close-command ()
+(defun ein:notebook-kill-kernel-then-close-command (notebook &optional force)
   "Kill kernel and then kill notebook buffer.
 To close notebook without killing kernel, just close the buffer
 as usual."
-  (interactive)
-  (when (ein:notebook-ask-before-kill-buffer)
-    (let ((kernel (ein:$notebook-kernel ein:%notebook%)))
+  (interactive (list ein:%notebook%))
+  (when (or force (ein:notebook-ask-before-kill-buffer))
+    (let ((kernel (ein:$notebook-kernel notebook)))
       ;; If kernel is live, kill it before closing.
       (if (ein:kernel-live-p kernel)
-          (ein:kernel-kill kernel #'ein:notebook-close (list ein:%notebook%))
-        (ein:notebook-close ein:%notebook%)))))
+          (ein:kernel-kill kernel #'ein:notebook-close (list notebook))
+        (ein:notebook-close notebook)))))
 
 (defun ein:fast-content-from-notebook (notebook)
   "Quickly generate a basic content structure from notebook. This

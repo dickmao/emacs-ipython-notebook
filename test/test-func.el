@@ -288,9 +288,15 @@ See the definition of `create-image' for how it works."
      (lambda () (ein:aand (ein:$notebook-kernel notebook)
                           (ein:kernel-live-p it)))
      nil)
-    (cl-letf (((symbol-function 'y-or-n-p) #'ignore))
+    (cl-letf (((symbol-function 'y-or-n-p) (lambda (prompt) t)))
       (ein:jupyter-server-stop t ein:testing-dump-server-log))
     (should-not (processp %ein:jupyter-server-session%))
-    (should-not (seq-filter (lambda (pid)
-                              (search (ein:$kernel-kernel-id (ein:$notebook-kernel notebook)) (alist-get 'args (process-attributes pid)))) (list-system-processes))))
+    (cl-flet ((orphans-find (pid) (search (ein:$kernel-kernel-id (ein:$notebook-kernel notebook)) (alist-get 'args (process-attributes pid)))))
+      (should-not (loop repeat 10
+                        with orphans = (seq-filter #'orphans-find
+                                                   (list-system-processes))
+                        until (null orphans)
+                        do (sleep-for 0 1000) 
+                           (setq orphans (seq-filter #'orphans-find (list-system-processes)))
+                        finally return orphans))))
   (ein:log 'verbose "ERT TESTING-JUPYTER-STOP-SERVER end"))
