@@ -38,7 +38,7 @@ Scenario: Collapse doesn't break undo
   And I wait for cell to execute
   And I press "C-<down>"
   And I press "C-n"
-  And I type "undo meee"
+  And I type "9"
   And I press "C-<up>"
   And I press "C-c C-e"
   And I press "C-/"
