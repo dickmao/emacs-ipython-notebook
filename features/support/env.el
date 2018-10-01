@@ -56,8 +56,8 @@
            end))))
 
 (Teardown
- (cl-letf (((symbol-function 'y-or-n-p) #'ignore))
-   (ein:jupyter-server-stop t))
+ (cl-letf (((symbol-function 'y-or-n-p) (lambda (prompt) t)))
+   (ein:jupyter-server-stop t "log/ecukes.server"))
  (assert (not (processp %ein:jupyter-server-session%)) t "notebook server orphaned"))
 
 (Fail

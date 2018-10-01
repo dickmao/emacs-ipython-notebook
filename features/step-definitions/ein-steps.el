@@ -7,8 +7,7 @@
                   (setq notebook nb)))
             (ein:testing-wait-until (lambda () (and (not (null notebook))
                                                     (ein:aand (ein:$notebook-kernel notebook)
-                                                              (ein:kernel-live-p it)))) 
-                                    nil 15000)
+                                                              (ein:kernel-live-p it)))))
             (let ((buf-name (format ein:notebook-buffer-name-template
                                     (ein:$notebook-url-or-port notebook)
                                     (ein:$notebook-notebook-name notebook))))
