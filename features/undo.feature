@@ -1,5 +1,5 @@
 Scenario: Undo by default turned off
-  Given new python2 notebook
+  Given new default notebook
   When I type "import math"
   And I wait for cell to execute
   And I undo demoting errors
@@ -7,7 +7,7 @@ Scenario: Undo by default turned off
 
 Scenario: Kill yank doesn't break undo
   Given I enable undo
-  Given new python2 notebook
+  Given new default notebook
   When I type "import math"
   And I press "M-RET"
   And I type "[i for i in [1,2]]"
@@ -24,7 +24,7 @@ Scenario: Kill yank doesn't break undo
 
 Scenario: Collapse doesn't break undo
   Given I enable undo
-  Given new python2 notebook
+  Given new default notebook
   When I type "from time import sleep"
   And I press "RET"
   And I press "C-c C-b"
@@ -32,7 +32,7 @@ Scenario: Collapse doesn't break undo
   And I press "RET"
   And I press "C-<up>"
   And I press "C-n"
-  And I type "print "abba\nabba""
+  And I type "print("abba\nabba")"
   And I press "RET"
   And I type "1.618"
   And I wait for cell to execute
@@ -42,13 +42,13 @@ Scenario: Collapse doesn't break undo
   And I press "C-<up>"
   And I press "C-c C-e"
   And I press "C-/"
-  Then the cursor should be at point "75"
+  Then the cursor should be at point "76"
   And I undo again
-  Then the cursor should be at point "54"
+  Then the cursor should be at point "55"
 
 Scenario: Test the conflagrative commands
   Given I enable undo
-  Given new python2 notebook
+  Given new default notebook
   When I type "import math"
   And I press "RET"
   And I press "M-RET"
@@ -59,27 +59,28 @@ Scenario: Test the conflagrative commands
   And I press "C-<up>"
   And I press "C-<up>"
   And I press "C-n"
-  And I type "print "math imported""
+  And I type "print("math imported")"
   And I wait for cell to execute
   And I press "C-u C-c C-v"
   And I press "C-/"
-  Then the cursor should be at point "22"
+  Then the cursor should be at point "43"
+  And I undo again
   And I undo again
   Then the cursor should be at point "83"
   And I press "C-c C-v"
   And I press "C-/"
   And I undo again
-  Then the cursor should be at point "22"
+  Then the cursor should be at point "43"
   And I press "C-c C-S-l"
   And I press "C-/"
   And I undo again
   And I undo again
   And I undo again
-  Then the cursor should be at point "80"
+  Then the cursor should be at point "22"
 
 Scenario: Clear output doesn't break undo
   Given I enable undo
-  Given new python2 notebook
+  Given new default notebook
   When I type "from time import sleep"
   And I press "RET"
   And I press "C-c C-b"
@@ -87,7 +88,7 @@ Scenario: Clear output doesn't break undo
   And I press "RET"
   And I press "C-<up>"
   And I press "C-n"
-  And I type "print "abba\nabba""
+  And I type "print("abba\nabba")"
   And I press "RET"
   And I type "1.618"
   And I wait for cell to execute
@@ -97,36 +98,36 @@ Scenario: Clear output doesn't break undo
   And I press "C-<up>"
   And I press "C-c C-l"
   And I press "C-/"
-  Then the cursor should be at point "73"
+  Then the cursor should be at point "74"
   And I undo again
-  Then the cursor should be at point "54"
+  Then the cursor should be at point "55"
 
 Scenario: Moving cells doesn't break undo
   Given I enable undo
-  Given new python2 notebook
+  Given new default notebook
   When I type "100"
   And I press "C-c C-b"
   And I type "200"
   And I press "C-c C-b"
-  And I type "print "hello""
+  And I type "print("hello")"
   And I wait for cell to execute
   And I press "C-<up>"
   And I wait for cell to execute
   And I press "C-<down>"
   And I press "C-c <up>"
   And I press "C-/"
-  Then the cursor should be at point "53"
+  Then the cursor should be at point "54"
   And I press "C-<up>"
   And I press "C-<up>"
   And I wait for cell to execute
   And I press "C-c <down>"
   And I press "C-/"
-  Then the cursor should be at point "66"
+  Then the cursor should be at point "67"
 
 Scenario: Split and merge don't break undo
   Given I enable undo
-  Given new python2 notebook
-  When I type "print "hello""
+  Given new default notebook
+  When I type "print("hello")"
   And I press "C-c C-b"
   And I type "abba"
   And I press "RET"
@@ -156,7 +157,7 @@ Scenario: Split and merge don't break undo
   And I undo again
   And I undo again
   And I undo again
-  Then the cursor should be at point "218"
+  Then the cursor should be at point "219"
   And I press "C-c C-m"
   And I press "C-c C-m"
   And I press "C-/"
