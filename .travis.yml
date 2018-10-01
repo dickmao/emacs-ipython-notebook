@@ -38,6 +38,4 @@ before_script:
   - cask install
 
 script:
-  - make test
-  - cat log/testfunc.server
-  - cat log/ecukes.server
+  - make test || cat log/*.server
