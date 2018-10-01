@@ -39,3 +39,5 @@ before_script:
 
 script:
   - make test
+  - cat log/testfunc.server
+  - cat log/ecukes.server
