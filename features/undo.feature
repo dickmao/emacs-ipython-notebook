@@ -165,3 +165,32 @@ Scenario: Split and merge don't break undo
   And I undo again
   And I undo again
   Then the cursor should be at point "199"
+
+@reopened
+Scenario: Undo needs to at least work for reopened notebooks
+  Given I enable undo
+  Given old notebook "undo.ipynb"
+  When I press "C-<down>"
+  And I type "howdy"
+  And I press "RET"
+  And I press "C-<down>"
+  And I press "C-<down>"
+  And I type "rowdy"
+  And I press "RET"
+  And I press "C-<up>"
+  And I press "C-<up>"
+  And I press "C-c C-k"
+  And I type "bowdy"
+  And I press "RET"
+  And I press "C-c C-y"
+  And I press "C-/"
+  Then the cursor should be at point "15"
+  And I press "C-/"
+  And I press "C-n"
+  And I press "C-n"
+  And I press "C-c C-s"
+  And I press "C-/"
+  And I undo again
+  And I undo again
+  And I undo again
+  Then the cursor should be at point "26"

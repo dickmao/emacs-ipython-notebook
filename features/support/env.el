@@ -5,12 +5,16 @@
 
 (let* ((support-path (f-dirname load-file-name))
        (root-path (f-parent (f-parent support-path))))
-  (add-to-list 'load-path (concat root-path "/lisp")))
+  (add-to-list 'load-path (concat root-path "/lisp"))
+  (add-to-list 'load-path (concat root-path "/test")))
 
 (require 'ein-loaddefs)
 (require 'ein-notebooklist)
 (require 'ein-jupyter)
+(require 'ein-dev)
+(require 'ein-testing)
 
+(defvar ein:testing-jupyter-server-root (f-parent (f-dirname load-file-name)))
 (ein:deflocal ein:%testing-port% nil)
 
 (defun ein:testing-wait-until (predicate &optional predargs ms)
@@ -27,8 +31,13 @@
 
 (Setup
  (setq ein:force-sync t)
+ (ein:dev-start-debug)
+ (ein:setq-if-not ein:testing-dump-file-log "./log/ecukes.log")
+ (ein:setq-if-not ein:testing-dump-file-messages "./log/ecukes.messages")
+ (ein:setq-if-not ein:testing-dump-server-log  "./log/ecukes.server")
+
  (setq ein:jupyter-server-args '("--no-browser" "--debug"))
- (deferred:sync! (ein:jupyter-server-start (executable-find "jupyter") (concat default-directory "log")))
+ (deferred:sync! (ein:jupyter-server-start (executable-find "jupyter") ein:testing-jupyter-server-root))
  (assert (processp %ein:jupyter-server-session%) t "notebook server defunct")
  (setq ein:%testing-url% (car (ein:jupyter-server-conn-info))
 ))
@@ -47,17 +56,17 @@
            do (sleep-for 0 50))
      (loop for note in (ein:$notebooklist-data ein:%notebooklist%)
            for path = (plist-get note :path)
-           for session = (car (gethash path sessions))
-           if (not (null session)) 
-             do (ein:kernel-kill (make-ein:$kernel 
-                                  :url-or-port urlport
-                                  :session-id session))
-                (ein:notebooklist-delete-notebook path)
+           for notebook = (ein:notebook-get-opened-notebook urlport path)
+           if (not (null notebook))
+             do (ein:notebook-kill-kernel-then-close-command notebook t)
+                (if (search "Untitled" path) 
+                    (ein:notebooklist-delete-notebook path))
            end))))
 
 (Teardown
  (cl-letf (((symbol-function 'y-or-n-p) (lambda (prompt) t)))
-   (ein:jupyter-server-stop t "log/ecukes.server"))
+   (ein:jupyter-server-stop t))
+ (ein:testing-dump-logs)
  (assert (not (processp %ein:jupyter-server-session%)) t "notebook server orphaned"))
 
 (Fail

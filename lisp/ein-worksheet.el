@@ -59,8 +59,8 @@
 
 
 
-(ein:deflocal buffer-local-enable-undo '()
-  "Buffer local variable with activating undo accounting.")
+(ein:deflocal buffer-local-enable-undo t
+  "Buffer local variable with activating undo accounting.  Should not modify.")
 
 (ein:deflocal ein:%cell-lengths% '()
   "Buffer local variable with buffer-undo-list's current knowledge of cell lengths.")
@@ -178,7 +178,7 @@
       (ein:log 'debug "jig %s to %s: %S %S" (length ein:%which-cell%) (length buffer-undo-list) buffer-undo-list ein:%which-cell%))
   (let ((fill (- (length buffer-undo-list) (length ein:%which-cell%))))
     (if (> (abs fill) 1)
-        (error "show stopper")
+        (error "show stopper %s %s | %s" buffer-undo-list ein:%which-cell%)
       (if (< fill 0)
           (setq ein:%which-cell% (nthcdr (- fill)  ein:%which-cell%))
         (if (> fill 0)
@@ -377,11 +377,10 @@
       (setq ein:%cell-lengths% nil))
 
     (setq buffer-local-enable-undo ein:worksheet-enable-undo)
-    (if buffer-local-enable-undo
-        (ein:worksheet-reinstall-which-cell-hook)
-      (ein:worksheet-deinstall-which-cell-hook)
-      (setq buffer-undo-list t))
+    (if (not buffer-local-enable-undo)
+        (setq buffer-undo-list t))
 
+    (ein:worksheet-reinstall-which-cell-hook)
     (let ((inhibit-read-only t))
       (erase-buffer)
       (let ((ewoc (let ((buffer-undo-list t))
@@ -1227,10 +1226,9 @@ function."
 
 (defun ein:worksheet-reinstall-which-cell-hook ()
   "Fontify clobbers the which-cell hook."
-  (add-hook 'after-change-functions 'ein:worksheet--which-cell-hook t t))
-
-(defun ein:worksheet-deinstall-which-cell-hook ()
-  (remove-hook 'after-change-functions 'ein:worksheet--which-cell-hook t))
+  (if buffer-local-enable-undo
+      (add-hook 'after-change-functions 'ein:worksheet--which-cell-hook t t)
+    (remove-hook 'after-change-functions 'ein:worksheet--which-cell-hook t)))
 
 (defun ein:worksheet-imenu-setup ()
   "Called via notebook mode hooks."

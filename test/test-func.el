@@ -14,10 +14,6 @@
     (message "Using request-backend = %S" request-backend)))
 
 
-(ein:setq-if-not ein:testing-dump-file-log "func-test-batch-log.log")
-(ein:setq-if-not ein:testing-dump-file-messages "func-test-batch-messages.log")
-(ein:setq-if-not ein:testing-dump-server-log "func-test_server_batch_emacs.log")
-
 (setq message-log-max t)
 
 (defun ein:testing-wait-until (message predicate &optional predargs max-count)
