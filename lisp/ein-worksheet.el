@@ -53,11 +53,14 @@
   "When non-`nil', allow undo of cell inputs only (as opposed to
   whole-cell operations such as killing, moving, executing cells).
  
-  You cannot enable this feature midstream, and must restart emacs."
+  Changes to this variable only take effect for newly opened worksheets."
   :type 'boolean
   :group 'ein)
 
 
+
+(ein:deflocal buffer-local-enable-undo '()
+  "Buffer local variable with activating undo accounting.")
 
 (ein:deflocal ein:%cell-lengths% '()
   "Buffer local variable with buffer-undo-list's current knowledge of cell lengths.")
@@ -103,6 +106,9 @@
         (if (eq key :output)
             (ein:worksheet--element-start cell :footer))))))
   
+(defsubst ein:worksheet--saved-input-length (cell)
+  (or (fourth (plist-get ein:%cell-lengths% (oref cell :cell-id))) 0))
+
 (defsubst ein:worksheet--prompt-length (cell &optional cached)
   (if cached
       (or (first (plist-get ein:%cell-lengths% (oref cell :cell-id))) 0)
@@ -123,18 +129,12 @@
     (- (ein:worksheet--next-cell-start cell)
        (ein:worksheet--element-start cell :prompt))))
 
-(defun ein:worksheet--update-cell-lengths (cell)
+(defun ein:worksheet--update-cell-lengths (cell &optional saved-input-length)
   (setq ein:%cell-lengths% (plist-put ein:%cell-lengths% (oref cell :cell-id) 
                                       (list (ein:worksheet--prompt-length cell)
                                             (ein:worksheet--output-length cell)
                                             (ein:worksheet--total-length cell)
-                                            (plist-put (plist-put '() :prompt (ein:worksheet--element-start cell :prompt)) :output (ein:worksheet--element-start cell (if (string= (oref cell :cell-type) "code") :output :footer)))))))
-
-(defun ein:worksheet-restart-undo-list ()
-  (interactive)
-  (when ein:worksheet-enable-undo
-    (setq buffer-undo-list nil)
-    (setq ein:%which-cell% nil)))
+                                            (or saved-input-length (ein:worksheet--saved-input-length cell))))))
 
 ;; can use apply-partially instead here
 (defmacro hof-add (distance)
@@ -189,7 +189,7 @@
 
 (defun ein:worksheet--unshift-undo-cell (cell)
   "Adjust `buffer-undo-list' for adding CELL.  Unshift in list parlance means prepending to list."
-  (when ein:worksheet-enable-undo
+  (when buffer-local-enable-undo
     (ein:with-live-buffer (ein:cell-buffer cell)
       (let* ((opl (ein:worksheet--prompt-length cell t))
              (ool (ein:worksheet--output-length cell t))
@@ -229,14 +229,15 @@
 
 (defun ein:worksheet--shift-undo-cell (cell)
   "Adjust `buffer-undo-list' for deleting CELL.  Shift in list parlance means removing the front."
-  (when ein:worksheet-enable-undo
+  (when buffer-local-enable-undo
     (ein:with-live-buffer (ein:cell-buffer cell)
       (let* ((pdist (ein:worksheet--prompt-length cell))
              (odist (ein:worksheet--output-length cell))
+             (sdist (ein:worksheet--saved-input-length cell))
              (after-ids (ein:worksheet--get-ids-after cell))
              (offset 0)
              lst wc)
-        (ein:log 'debug "shft trig=%s pdist=%s odist=%s" (ein:worksheet--unique-enough-cell-id cell) pdist odist)
+        (ein:log 'debug "shft trig=%s pdist=%s odist=%s sdist=%s" (ein:worksheet--unique-enough-cell-id cell) pdist odist sdist)
         (ein:worksheet--jigger-undo-list)
         ;; Deletion of a less recent undo affects a more recent undo (arrow of time)
         ;; Since buffer-undo-list is ordered most to least recent, we must
@@ -253,7 +254,7 @@
                   (progn
                     (ein:log 'debug "shft adj %s %s" u cell-id)
                     ;; 1 for when cell un-executed, there is still a newline
-                    (setq lst (nconc lst (list (funcall (hof-add (- (+ 1 offset pdist odist))) u)))))
+                    (setq lst (nconc lst (list (funcall (hof-add (- (+ 1 offset pdist odist sdist))) u)))))
                 (setq lst (nconc lst (list u)))))))
         (setq buffer-undo-list (nreverse lst))
         (setq ein:%which-cell% (nreverse wc))
@@ -369,6 +370,18 @@
 (defmethod ein:worksheet-render ((ws ein:worksheet))
   (with-current-buffer (ein:worksheet--get-buffer ws)
     (setq ein:%worksheet% ws)
+
+    (when buffer-local-enable-undo
+      (setq buffer-undo-list nil)
+      (setq ein:%which-cell% nil)
+      (setq ein:%cell-lengths% nil))
+
+    (setq buffer-local-enable-undo ein:worksheet-enable-undo)
+    (if buffer-local-enable-undo
+        (ein:worksheet-reinstall-which-cell-hook)
+      (ein:worksheet-deinstall-which-cell-hook)
+      (setq buffer-undo-list t))
+
     (let ((inhibit-read-only t))
       (erase-buffer)
       (let ((ewoc (let ((buffer-undo-list t))
@@ -377,21 +390,20 @@
                                      nil t)))
             (cells (ein:worksheet--saved-cells ws)))
         (setf (ein:worksheet--ewoc ws) ewoc)
-        (ein:worksheet-reinstall-which-cell-hook)
         (if cells
             (let ((buffer-undo-list t))
               (mapc (lambda (c)
                       (setf (slot-value c 'ewoc) ewoc)
-                      (ein:cell-enter-last c))
+                      (ein:cell-enter-last c)
+                      (ein:worksheet--update-cell-lengths c (- (ein:cell-input-pos-max c)
+                                                               (ein:cell-input-pos-min c))))
                     cells))
-          (ein:worksheet-insert-cell-below ws 'code nil t)))
+          (ein:worksheet-insert-cell-below ws 'code nil t))))
     (set-buffer-modified-p nil)
-    (unless ein:worksheet-enable-undo
-      (setq buffer-undo-list t))
     (ein:worksheet-bind-events ws)
     (ein:worksheet-set-kernel ws)
     (ein:gc-complete-operation)
-    (ein:log 'info "Worksheet %s is ready" (ein:worksheet-full-name ws)))))
+    (ein:log 'info "Worksheet %s is ready" (ein:worksheet-full-name ws))))
 
 (defun ein:worksheet-pp (ewoc-data)
   (let ((path (ein:$node-path ewoc-data))
@@ -1216,6 +1228,9 @@ function."
 (defun ein:worksheet-reinstall-which-cell-hook ()
   "Fontify clobbers the which-cell hook."
   (add-hook 'after-change-functions 'ein:worksheet--which-cell-hook t t))
+
+(defun ein:worksheet-deinstall-which-cell-hook ()
+  (remove-hook 'after-change-functions 'ein:worksheet--which-cell-hook t))
 
 (defun ein:worksheet-imenu-setup ()
   "Called via notebook mode hooks."
