@@ -136,35 +136,34 @@ the source is in git repository."
         (throw 'error "Null value passed to ein:get-ipython-major-version.")
       (ein:log 'warn "Null value passed to ein:get-ipython-major-version."))))
 
+(defun ein:query-ipython-version-volley (url-or-port)
+  (let* ((resp (request (ein:jupyterhub-correct-query-url-maybe 
+                         (ein:url url-or-port "api"))
+                        :parser (lambda () (ignore-errors (ein:json-read)))
+                        :timeout 3
+                        :sync t))
+         (resp-data (request-response-data resp))
+         (resp-string (format "RESPONSE: %s DATA: %s" resp resp-data)))
+    (ein:log 'debug "ipython version %s" resp-string)
+    (ein:aif (plist-get resp-data :version)
+        (setf (gethash url-or-port *running-ipython-version*)
+              (ein:get-ipython-major-version it))
+      (case (request-response-status-code resp)
+        (404 (ein:log 'warn "ipython version api not implemented")
+             (setf (gethash url-or-port *running-ipython-version*) 2))
+        (t (ein:log 'warn "ipython version currently unknowable")))))
+  )
+
 ;; TODO: Use symbols instead of numbers for ipython version ('jupyter and 'legacy)?
-(defun ein:query-ipython-version (&optional url-or-port force)
-  (ein:aif (and (not force) (gethash (or url-or-port (ein:default-url-or-port)) *running-ipython-version*))
-      it
-    (let ((resp (request
-                 (ein:jupyterhub-correct-query-url-maybe (ein:url (or url-or-port
-                                                                      (ein:default-url-or-port))
-                                                                  "api"))
-                 :parser #'(lambda ()
-                             (ignore-errors
-                               (ein:json-read)))
-                 :timeout 5.0
-                 :sync t)))
-      (if (eql 408 (request-response-status-code resp))
-          (progn
-            (ein:log 'blather "Version request timed out, could be the server is still warming up. Assuming we are working Jupyter 4.x, and will recheck later.")
-            4)
-        (if (eql 404 (request-response-status-code resp))
-            (progn
-              (ein:log 'blather "Version api not implemented, assuming we are working with IPython 2.x")
-              (setf (gethash url-or-port *running-ipython-version*) 2))
-          (condition-case nil
-              (if (plist-get (request-response-data resp) :version)
-                  (setf (gethash url-or-port *running-ipython-version*)
-                        (ein:get-ipython-major-version (plist-get (request-response-data resp) :version)))
-                (progn
-                  (sit-for 0.1)
-                  (ein:query-ipython-version url-or-port t)))
-            (error (ein:force-ipython-version-check))))))))
+(defun ein:query-ipython-version (url-or-port &optional refresh)
+  (let ((cached (gethash url-or-port *running-ipython-version*)))
+    (when (or refresh (null cached))
+      (loop repeat 3
+            do (ein:query-ipython-version-volley url-or-port) 
+            until (gethash url-or-port *running-ipython-version*)
+            do (sleep-for 3 500)))
+    (ein:aif (gethash url-or-port *running-ipython-version*)
+        it (error "Cannot query ipython version from notebook server"))))
 
 (defun ein:force-ipython-version-check ()
   (interactive)
