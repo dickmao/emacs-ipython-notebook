@@ -53,7 +53,10 @@
                                   :url-or-port urlport
                                   :session-id session))
                 (ein:notebooklist-delete-notebook path)
-           end))))
+           end)))
+ ;; unfortunately needed for notebook server to 
+ ;; evacuate content list queries
+ (sleep-for 3))
 
 (Teardown
  (cl-letf (((symbol-function 'y-or-n-p) #'ignore))
