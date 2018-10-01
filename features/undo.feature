@@ -193,4 +193,8 @@ Scenario: Undo needs to at least work for reopened notebooks
   And I undo again
   And I undo again
   And I undo again
-  Then the cursor should be at point "26"
+  And I undo again
+  Then the cursor should be at point "20"
+  And I undo again
+  Then the cursor should be at point "83"
+
