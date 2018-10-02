@@ -116,13 +116,13 @@ Scenario: Moving cells doesn't break undo
   And I press "C-<down>"
   And I press "C-c <up>"
   And I press "C-/"
-  Then the cursor should be at point "54"
+  Then the cursor should be at point "55"
   And I press "C-<up>"
   And I press "C-<up>"
   And I wait for cell to execute
   And I press "C-c <down>"
   And I press "C-/"
-  Then the cursor should be at point "67"
+  Then the cursor should be at point "69"
 
 Scenario: Split and merge don't break undo
   Given I enable undo
@@ -157,14 +157,14 @@ Scenario: Split and merge don't break undo
   And I undo again
   And I undo again
   And I undo again
-  Then the cursor should be at point "219"
+  Then the cursor should be at point "223"
   And I press "C-c C-m"
   And I press "C-c C-m"
   And I press "C-/"
   And I undo again
   And I undo again
   And I undo again
-  Then the cursor should be at point "199"
+  Then the cursor should be at point "201"
 
 @reopened
 Scenario: Undo needs to at least work for reopened notebooks
