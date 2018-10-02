@@ -196,5 +196,24 @@ Scenario: Undo needs to at least work for reopened notebooks
   And I undo again
   Then the cursor should be at point "20"
   And I undo again
-  Then the cursor should be at point "83"
+  Then the cursor should be at point "88"
+  And I press "C-<down>"
+  And I press "C-k"
+  And I press "C-k"
+  And I press "C-k"
+  And I type "1.618"
+  And I wait for cell to execute
+  And I press "C-<up>"
+  And I press "C-c C-m"
+  And I press "C-n"
+  And I press "C-n"
+  And I press "C-c C-s"
+  And I press "C-/"
+  And I undo again
+  And I undo again
+  And I undo again
+  And I undo again
+  Then the cursor should be at point "145"
+
+
 
