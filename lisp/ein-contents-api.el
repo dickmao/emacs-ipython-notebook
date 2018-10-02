@@ -56,71 +56,30 @@ global setting.  For global setting and more information, see
   :group 'ein)
 
 (defun ein:content-url (content &rest params)
-  (let ((url-or-port (ein:$content-url-or-port content))
-        (path (ein:$content-path content)))
-    (if params
-        (url-encode-url (apply #'ein:url
-                               url-or-port
-                               "api/contents"
-                               path
-                               params))
-      (url-encode-url (ein:url url-or-port "api/contents" path)))))
+  (apply #'ein:content-url* (ein:$content-url-or-port content) (ein:$content-path content) params))
 
-(defun ein:content-url-legacy (content &rest params)
-  "Generate content url's for IPython Notebook version 2.x"
-  (let ((url-or-port (ein:$content-url-or-port content))
-        (path (ein:$content-path content)))
-    (if params
-        (url-encode-url (apply #'ein:url
-                               url-or-port
-                               "api/notebooks"
-                               path
-                               params))
-      (url-encode-url (ein:url url-or-port "api/notebooks" path)))))
+(defun ein:content-url* (url-or-port path &rest params)
+  (let* ((which (if (<= (ein:query-ipython-version url-or-port) 2)
+                    "notebooks" "contents"))
+         (api-path (concat "api/" which)))
+    (url-encode-url (apply #'ein:url
+                           url-or-port
+                           api-path
+                           path
+                           params))))
 
-(defun ein:content-query-contents (path &optional url-or-port force-sync callback retry-p)
-  "Return the contents of the object at the specified path from the Jupyter server."
-  (condition-case err
-      (let* ((url-or-port (or url-or-port (ein:default-url-or-port)))
-             (new-content (make-ein:$content
-                           :url-or-port url-or-port
-                           :ipython-version (ein:query-ipython-version url-or-port)
-                           :path path))
-             (url (ein:content-url new-content)))
-        (if (= 2 (ein:$content-ipython-version new-content))
-            (setq new-content (ein:content-query-contents-legacy path url-or-port ein:force-sync callback))
-          (ein:query-singleton-ajax
-           (list 'content-query-contents url-or-port path)
-           url
-           :type "GET"
-           :timeout ein:content-query-timeout
-           :parser #'ein:json-read
-           :sync (or force-sync ein:force-sync)
-           :success (apply-partially #'ein:new-content new-content callback)
-           :error (apply-partially #'ein:content-query-contents-error url retry-p
-                                   (list path url-or-port force-sync callback t))))
-        new-content)
-    (error (progn (message "Error %s on query contents, try calling `ein:notebooklist-login` first..." err)
-                  (if (>= ein:log-level (ein:log-level-name-to-int 'debug))
-                      (throw 'error err))))))
-
-(defun ein:content-query-contents-legacy (path &optional url-or-port force-sync callback)
-  "Return contents of object at specified path for IPython Notebook versions 2.x"
-  (let* ((url-or-port (or url-or-port (ein:default-url-or-port)))
-         (new-content (make-ein:$content :url-or-port url-or-port
-                                         :ipython-version (ein:query-ipython-version url-or-port)
-                                         :path path))
-         (url (ein:content-url-legacy new-content)))
-    (ein:query-singleton-ajax
-     (list 'content-query-contents-legacy url-or-port path)
-     url
-     :type "GET"
-     :timeout ein:content-query-timeout
-     :parser #'ein:json-read
-     :sync ein:force-sync
-     :success (apply-partially #'ein:query-contents-legacy-success path new-content callback)
-     :error (apply-partially #'ein:content-query-contents-error url))
-    new-content))
+(defun ein:content-query-contents (path url-or-port callback)
+  "Issue CALLBACK for the contents at PATH from the Jupyter URL-OR_PORT."
+  (ein:query-singleton-ajax
+   (list 'content-query-contents url-or-port path)
+   (ein:content-url* url-or-port path)
+   :type "GET"
+   :timeout ein:content-query-timeout
+   :parser #'ein:json-read
+   :sync ein:force-sync
+   :success (apply-partially #'ein:content-query-contents--success url-or-port path callback)
+   :error (apply-partially #'ein:content-query-contents--error url-or-port path callback)
+   ))
 
 (defun ein:fix-legacy-content-data (data)
   (if (listp (car data))
@@ -130,49 +89,6 @@ global setting.  For global setting and more information, see
     (if (string= (plist-get data :path) "")
         (plist-put data :path (plist-get data :name))
       (plist-put data :path (format "%s/%s" (plist-get data :path) (plist-get data :name))))))
-
-(defun* ein:query-contents-legacy-success (path content callback &key data &allow-other-keys)
-  (if (not (plist-get data :type))
-      ;; Content API in 2.x a bit inconsistent.
-      (progn
-        (setf (ein:$content-name content) (substring path (or (cl-position ?/ path) 0))
-              (ein:$content-path content) path
-              (ein:$content-type content) "directory"
-              ;;(ein:$content-created content) (plist-get data :created)
-              ;;(ein:$content-last-modified content) (plist-get data :last_modified)
-              (ein:$content-format content) nil
-              (ein:$content-writable content) nil
-              (ein:$content-mimetype content) nil
-              (ein:$content-raw-content content) (ein:fix-legacy-content-data data))
-        (when callback
-          (funcall callback content))
-        content)
-    (ein:new-content content callback :data data)))
-
-;; TODO: This is one place to check for redirects - update the url slot if so.
-;; Will need to pass the response object and check either request-response-history
-;; or request-response-url.
-(defun* ein:new-content (content callback &key data response &allow-other-keys)
-  (setf (ein:$content-name content) (plist-get data :name)
-        (ein:$content-path content) (plist-get data :path)
-        (ein:$content-type content) (plist-get data :type)
-        (ein:$content-created content) (plist-get data :created)
-        (ein:$content-last-modified content) (plist-get data :last_modified)
-        (ein:$content-format content) (plist-get data :format)
-        (ein:$content-writable content) (plist-get data :writable)
-        (ein:$content-mimetype content) (plist-get data :mimetype)
-        (ein:$content-raw-content content) (plist-get data :content))
-  (ein:aif response
-      (setf (ein:$content-url-or-port content) (ein:get-response-redirect it)))
-  ;; (if (length (request-response-history response))
-  ;;     (let ((url (url-generic-parse-url (format "%s" (request-response-url response)))))
-  ;;       (setf (ein:$content-url-or-port content) (format "%s://%s:%s"
-  ;;                                                        (url-type url)
-  ;;                                                        (url-host url)
-  ;;                                                        (url-port url)))))
-  (when callback
-    (funcall callback content))
-  content)
 
 (defun ein:content-to-json (content)
   (let ((path (if (>= (ein:$content-ipython-version content) 3)
@@ -196,20 +112,6 @@ global setting.  For global setting and more information, see
                        :ipython-version (ein:$notebook-api-version nb)
                        :raw-content nb-content)))
 
-
-(defun* ein:content-query-contents-error (url retry-p packed &key symbol-status response &allow-other-keys)
-  (ein:gc-complete-operation)
-  (if (and (eql symbol-status 'parse-error)
-           (not retry-p))
-      (progn
-        (message "Content list call failed, maybe because curl hasn't updated it's cookie jar yet? Let's try one more time....")
-        (apply #'ein:content-query-contents packed))
-    (progn
-      (ein:log 'verbose
-        "Error thrown: %S" (request-response-error-thrown response))
-      (ein:log 'error
-        "Content list call %s failed with status %s." url symbol-status))))
-
 
 ;;; Managing/listing the content hierarchy
 
@@ -219,22 +121,93 @@ global setting.  For global setting and more information, see
   (or (gethash url-or-port *ein:content-hierarchy*)
       (ein:refresh-content-hierarchy url-or-port)))
 
-(defun ein:make-content-hierarchy (path url-or-port)
-  (let* ((node (ein:content-query-contents path url-or-port t))
-         (active-sessions (make-hash-table :test 'equal))
+
+
+(defun* ein:content-query-contents--error (url-or-port path callback &key error-thrown &allow-other-keys)
+  (ein:log 'error "ein:content-query-contents--error: ERROR %s DATA %s" (car error-thrown) (cdr error-thrown)))
+
+
+(defun ein:new-content-legacy (url-or-port path data)
+      (cl-assert (< (ein:query-ipython-version url-or-port) 3) nil "Content response from version %s lacking :type in %s" (ein:query-ipython-version url-or-port) data)
+      (setf (ein:$content-name content) (substring path (or (cl-position ?/ path) 0))
+            (ein:$content-path content) path
+            (ein:$content-type content) "directory"
+            ;;(ein:$content-created content) (plist-get data :created)
+            ;;(ein:$content-last-modified content) (plist-get data :last_modified)
+            (ein:$content-format content) nil
+            (ein:$content-writable content) nil
+            (ein:$content-mimetype content) nil
+            (ein:$content-raw-content content) (ein:fix-legacy-content-data data)))
+  (if (not (plist-get data :type))
+      ;; Content API in 2.x a bit inconsistent.
+      (progn
+        (setf (ein:$content-name content) (substring path (or (cl-position ?/ path) 0))
+              (ein:$content-path content) path
+              (ein:$content-type content) "directory"
+              ;;(ein:$content-created content) (plist-get data :created)
+              ;;(ein:$content-last-modified content) (plist-get data :last_modified)
+              (ein:$content-format content) nil
+              (ein:$content-writable content) nil
+              (ein:$content-mimetype content) nil
+              (ein:$content-raw-content content) (ein:fix-legacy-content-data data))
+        (when callback
+          (funcall callback content))
+        content)
+    (ein:new-content content callback :data data)))
+
+
+(defun* ein:new-content (content data)
+  (setf (ein:$content-name content) (plist-get data :name)
+        (ein:$content-path content) (plist-get data :path)
+        (ein:$content-type content) (plist-get data :type)
+        (ein:$content-created content) (plist-get data :created)
+        (ein:$content-last-modified content) (plist-get data :last_modified)
+        (ein:$content-format content) (plist-get data :format)
+        (ein:$content-writable content) (plist-get data :writable)
+        (ein:$content-mimetype content) (plist-get data :mimetype)
+        (ein:$content-raw-content content) (plist-get data :content))
+  content)
+
+;; TODO: This is one place to check for redirects - update the url slot if so.
+;; Will need to pass the response object and check either request-response-history
+;; or request-response-url.
+(defun* ein:content-query-contents--success (url-or-port path callback &key data symbol-status response &allow-other-keys)
+  (let (content)
+    (if (<= (ein:query-ipython-version url-or-port) 2)
+        (setq content (ein:new-content-legacy url-or-port path data))
+      (setq content (ein:new-content url-or-port path data))
+      )
+                                        ; Content API in 2.x a bit inconsistent.
+      (setq content (ein:new-content-legacy url-or-port path data))
+    (ein:aif response
+        (setf (ein:$content-url-or-port content) (ein:get-response-redirect it)))
+    ;; (if (length (request-response-history response))
+    ;;     (let ((url (url-generic-parse-url (format "%s" (request-response-url response)))))
+    ;;       (setf (ein:$content-url-or-port content) (format "%s://%s:%s"
+    ;;                                                        (url-type url)
+    ;;                                                        (url-host url)
+    ;;                                                        (url-port url)))))
+    (when callback
+      (funcall callback content))))
+
+(defun* ein:make-content-hierarchy--callback (url-or-port &key data symbol-status response &allow-other-keys)
+  (let* ((active-sessions (make-hash-table :test 'equal))
          (items (ein:$content-raw-content node)))
-    (ein:content-query-sessions active-sessions url-or-port t)
+    (ein:content-query-sessions active-sessions url-or-port)
     (ein:flatten (loop for item in items
                        for c = (make-ein:$content :url-or-port url-or-port)
-                   do (ein:new-content c nil :data item)
-                   collect
-                   (cond ((string= (ein:$content-type c) "directory")
-                          (cons c
-                                (ein:make-content-hierarchy (ein:$content-path c) url-or-port)))
-                         (t (progn
-                              (setf (ein:$content-session-p c)
-                                    (gethash (ein:$content-path c) active-sessions))
-                              c)))))))
+                       do (ein:new-content c nil :data item)
+                       collect
+                       (cond ((string= (ein:$content-type c) "directory")
+                              (cons c
+                                    (ein:make-content-hierarchy (ein:$content-path c) url-or-port)))
+                             (t (progn
+                                  (setf (ein:$content-session-p c)
+                                        (gethash (ein:$content-path c) active-sessions))
+                                  c)))))))
+
+(defun ein:make-content-hierarchy (path url-or-port)
+  (ein:content-query-contents path url-or-port #'ein:make-content-hierarchy--callback))
 
 (defun ein:refresh-content-hierarchy (&optional url-or-port)
   (let ((url-or-port (or url-or-port (ein:default-url-or-port))))
@@ -243,16 +216,17 @@ global setting.  For global setting and more information, see
 
 
 ;;; Save Content
+
 (defun ein:content-save-legacy (content &optional callback cbargs errcb errcbargs)
   (ein:query-singleton-ajax
-       (list 'content-save (ein:$content-url-or-port content) (ein:$content-path content))
-       (ein:content-url-legacy content)
-       :type "PUT"
-       :headers '(("Content-Type" . "application/json"))
-       :timeout ein:content-query-timeout
-       :data (ein:content-to-json content)
-       :success (apply-partially #'ein:content-save-success callback cbargs)
-       :error (apply-partially #'ein:content-save-error (ein:content-url-legacy content) errcb errcbargs)))
+   (list 'content-save (ein:$content-url-or-port content) (ein:$content-path content))
+   (ein:content-url content)
+   :type "PUT"
+   :headers '(("Content-Type" . "application/json"))
+   :timeout ein:content-query-timeout
+   :data (ein:content-to-json content)
+   :success (apply-partially #'ein:content-save-success callback cbargs)
+   :error (apply-partially #'ein:content-save-error (ein:content-url content) errcb errcbargs)))
 
 (defun ein:content-save (content &optional callback cbargs errcb errcbargs)
   (if (>= (ein:$content-ipython-version content) 3)
@@ -283,12 +257,13 @@ global setting.  For global setting and more information, see
 
 ;;; Rename Content
 
+
 (defun ein:content-legacy-rename (content new-path callback cbargs)
   (let ((path (substring new-path 0 (or (position ?/ new-path :from-end t) 0)))
         (name (substring new-path (or (position ?/ new-path :from-end t) 0))))
     (ein:query-singleton-ajax
      (list 'content-rename (ein:$content-url-or-port content) (ein:$content-path content))
-     (ein:content-url-legacy content)
+     (ein:content-url content)
      :type "PATCH"
      :data (json-encode `((name . ,name)
                           (path . ,path)))
@@ -333,17 +308,16 @@ global setting.  For global setting and more information, see
 
 ;;; Sessions
 
-(defun ein:content-query-sessions (session-hash url-or-port &optional force-sync)
-  (unless force-sync
-    (setq force-sync ein:force-sync))
+
+(defun ein:content-query-sessions (session-hash url-or-port)
   (ein:query-singleton-ajax
-     (list 'content-query-sessions)
-     (ein:url url-or-port "api/sessions")
-     :type "GET"
-     :parser #'ein:json-read
-     :success (apply-partially #'ein:content-query-sessions-success session-hash url-or-port)
-     :error (apply-partially #'ein:content-query-sessions-error session-hash)
-     :sync force-sync))
+   (list 'content-query-sessions)
+   (ein:url url-or-port "api/sessions")
+   :type "GET"
+   :parser #'ein:json-read
+   :success (apply-partially #'ein:content-query-sessions-success session-hash url-or-port)
+   :error (apply-partially #'ein:content-query-sessions-error session-hash)
+   :sync ein:force-sync))
 
 (defun* ein:content-query-sessions-success (session-hash url-or-port &key data &allow-other-keys)
   (cl-flet ((read-name (nb-json)
@@ -364,6 +338,7 @@ global setting.  For global setting and more information, see
 
 
 ;;; Checkpoints
+
 
 (defun ein:content-query-checkpoints (content &optional callback cbargs)
   (let* ((url (ein:content-url content "checkpoints")))
@@ -427,6 +402,7 @@ global setting.  For global setting and more information, see
 
 
 ;;; Uploads
+
 
 (defun ein:get-local-file (path)
   "If path exists, get contents and try to guess type of file (one of file, notebook, or directory)

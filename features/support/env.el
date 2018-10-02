@@ -29,21 +29,7 @@
                   do (sleep-for 0 subms))
       (error "Timeout: %s" predicate))))
 
-(Setup
- (setq ein:force-sync t)
- (ein:dev-start-debug)
- (setq ein:notebook-autosave-frequency 10000)
- (setq ein:testing-dump-file-log "./log/ecukes.log")
- (setq ein:testing-dump-file-messages "./log/ecukes.messages")
- (setq ein:testing-dump-server-log  "./log/ecukes.server")
-
- (setq ein:jupyter-server-args '("--no-browser" "--debug"))
- (deferred:sync! (ein:jupyter-server-start (executable-find "jupyter") ein:testing-jupyter-server-root))
- (assert (processp %ein:jupyter-server-session%) t "notebook server defunct")
- (setq ein:%testing-url% (car (ein:jupyter-server-conn-info))
-))
-
-(After
+(defun ein:testing-after-scenario ()
  (with-current-buffer (ein:notebooklist-get-buffer ein:%testing-url%)
    (loop for buffer in (ein:notebook-opened-buffers)
          do (let ((kill-buffer-query-functions nil))
@@ -62,7 +48,26 @@
              do (ein:notebook-kill-kernel-then-close-command notebook t)
                 (if (search "Untitled" path) 
                     (ein:notebooklist-delete-notebook path))
-           end))))
+           end)))
+)
+(Setup
+ (setq ein:force-sync t)
+ (ein:dev-start-debug)
+ (setq ein:notebook-autosave-frequency 10000)
+ (setq ein:testing-dump-file-log "./log/ecukes.log")
+ (setq ein:testing-dump-file-messages "./log/ecukes.messages")
+ (setq ein:testing-dump-server-log  "./log/ecukes.server")
+ (setq request-log-level (quote debug))
+ (setq request-message-level (quote debug))
+
+ (setq ein:jupyter-server-args '("--no-browser" "--debug"))
+ (deferred:sync! (ein:jupyter-server-start (executable-find "jupyter") ein:testing-jupyter-server-root))
+ (assert (processp %ein:jupyter-server-session%) t "notebook server defunct")
+ (setq ein:%testing-url% (car (ein:jupyter-server-conn-info))
+))
+
+(After
+ (ein:testing-after-scenario))
 
 (Teardown
  (cl-letf (((symbol-function 'y-or-n-p) (lambda (prompt) t)))
@@ -71,5 +76,6 @@
  (assert (not (processp %ein:jupyter-server-session%)) t "notebook server orphaned"))
 
 (Fail
- (if (not noninteractive)
-     (keyboard-quit))) ;; useful to prevent emacs from quitting
+ (if noninteractive
+     (ein:testing-after-scenario)
+   (keyboard-quit))) ;; useful to prevent emacs from quitting

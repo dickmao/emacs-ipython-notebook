@@ -220,7 +220,7 @@ To suppress popup, you can pass `ignore' as CALLBACK."
              (pop-to-buffer
               (funcall #'ein:notebooklist-url-retrieve-callback content))))))
     (ein:query-kernelspecs url-or-port)
-    (ein:content-query-contents path url-or-port t success))
+    (ein:content-query-contents path url-or-port success))
   ;(ein:notebooklist-get-buffer url-or-port)
   )
 
@@ -275,7 +275,7 @@ automatically be called during calls to `ein:notebooklist-open`."
              (ein:log 'info "Refreshing notebooklist connection.")))
           (refresh-time (* ein:notebooklist-keepalive-refresh-time 60 60)))
       (setq ein:notebooklist--keepalive-timer
-            (run-at-time 0.1 refresh-time #'ein:content-query-contents "" url-or-port nil success)))))
+            (run-at-time 0.1 refresh-time #'ein:content-query-contents "" url-or-port success)))))
 
 ;;;###autoload
 (defun ein:notebooklist-disable-keepalive ()
@@ -678,7 +678,7 @@ IPY-AT-LEAST-3 used to keep track of version."
   (unless ipy-at-least-3
     (let (api-version (ein:$notebooklist-api-version ein:%notebooklist%))))
   (let ((sessions #s(hash-table test equal data (:pending t))))
-    (ein:content-query-sessions sessions (ein:$notebooklist-url-or-port ein:%notebooklist%) t)
+    (ein:content-query-sessions sessions (ein:$notebooklist-url-or-port ein:%notebooklist%))
     (loop repeat 4
           when (null (gethash :pending sessions))
           return t

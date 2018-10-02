@@ -7,8 +7,6 @@ ELCFILES = $(SRC:.el=.elc)
 .PHONY: clean
 clean:
 	cask clean-elc
-	-rm -f log/testein*
-	-rm -f log/testfunc*
 
 env-ipy.%:
 	tools/makeenv.sh env/ipy.$* tools/requirement-ipy.$*.txt
