@@ -32,9 +32,10 @@
 (Setup
  (setq ein:force-sync t)
  (ein:dev-start-debug)
- (ein:setq-if-not ein:testing-dump-file-log "./log/ecukes.log")
- (ein:setq-if-not ein:testing-dump-file-messages "./log/ecukes.messages")
- (ein:setq-if-not ein:testing-dump-server-log  "./log/ecukes.server")
+ (setq ein:notebook-autosave-frequency 10000)
+ (setq ein:testing-dump-file-log "./log/ecukes.log")
+ (setq ein:testing-dump-file-messages "./log/ecukes.messages")
+ (setq ein:testing-dump-server-log  "./log/ecukes.server")
 
  (setq ein:jupyter-server-args '("--no-browser" "--debug"))
  (deferred:sync! (ein:jupyter-server-start (executable-find "jupyter") ein:testing-jupyter-server-root))

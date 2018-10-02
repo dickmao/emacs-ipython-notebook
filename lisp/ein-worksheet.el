@@ -187,7 +187,7 @@
                          ein:%which-cell%))))))
   (cl-assert (= (length buffer-undo-list) (length ein:%which-cell%))))
 
-(defun ein:worksheet--unshift-undo-cell (cell)
+(defun ein:worksheet--unshift-undo-list (cell &optional exogenous-input)
   "Adjust `buffer-undo-list' for adding CELL.  Unshift in list parlance means prepending to list."
   (when buffer-local-enable-undo
     (ein:with-live-buffer (ein:cell-buffer cell)
@@ -217,7 +217,7 @@
                 (setq lst (nconc lst (list u)))))))
         (cl-assert (= (length buffer-undo-list) (length lst)))
         (setq buffer-undo-list lst)
-        (ein:worksheet--update-cell-lengths cell)))))
+        (ein:worksheet--update-cell-lengths cell exogenous-input)))))
 
 (defun ein:worksheet--calc-offset (u)
   "Return length of inserted (or uninserted) text corresponding to undo entry U."
@@ -227,7 +227,7 @@
          (- (length (car u))))
         (t 0)))
 
-(defun ein:worksheet--shift-undo-cell (cell)
+(defun ein:worksheet--shift-undo-list (cell)
   "Adjust `buffer-undo-list' for deleting CELL.  Shift in list parlance means removing the front."
   (when buffer-local-enable-undo
     (ein:with-live-buffer (ein:cell-buffer cell)
@@ -291,7 +291,7 @@
   (ein:events-on events
                  'maybe_reset_undo.Worksheet
                  (lambda (-ignore- cell)
-                   (ein:worksheet--unshift-undo-cell cell)))
+                   (ein:worksheet--unshift-undo-list cell)))
   (ein:events-on events 'set_next_input.Worksheet
                  #'ein:worksheet--set-next-input)
   (ein:events-on events 'set_dirty.Worksheet #'ein:worksheet--set-dirty))
@@ -575,7 +575,7 @@ If you really want use this command, you can do something like this
   (interactive (list (ein:worksheet--get-ws-or-error)
                      (ein:worksheet-get-current-cell)
                      t))
-  (ein:worksheet--shift-undo-cell cell)
+  (ein:worksheet--shift-undo-list cell)
   (let ((inhibit-read-only t)
         (buffer-undo-list t))        ; disable undo recording
     (apply #'ewoc-delete
@@ -677,7 +677,8 @@ after PIVOT and return the new cell."
       (ein:cell-insert-below pivot cell))
      (t (error
          "PIVOT is `nil' but ncells != 0.  There is something wrong...")))
-    (ein:worksheet--unshift-undo-cell cell)
+    (ein:worksheet--unshift-undo-list cell (- (ein:cell-input-pos-max cell)
+                                              (ein:cell-input-pos-min cell)))
     (oset ws :dirty t)
     (when focus (ein:cell-goto cell))
     cell))
@@ -701,7 +702,8 @@ See also: `ein:worksheet-insert-cell-below'."
           (ein:cell-enter-first cell))))
      (t (error
          "PIVOT is `nil' but ncells > 0.  There is something wrong...")))
-    (ein:worksheet--unshift-undo-cell cell)
+    (ein:worksheet--unshift-undo-list cell (- (ein:cell-input-pos-max cell)
+                                              (ein:cell-input-pos-min cell)))
     (oset ws :dirty t)
     (when focus (ein:cell-goto cell))
     cell))
@@ -730,7 +732,7 @@ directly."
           (new (ein:cell-convert-inplace cell type)))
       (when (ein:codecell-p new)
         (setf (slot-value new 'kernel) (slot-value ws 'kernel)))
-      (ein:worksheet--unshift-undo-cell cell)
+      (ein:worksheet--unshift-undo-list cell)
       (when focus (ein:cell-goto new relpos)))))
 
 (defun ein:worksheet-toggle-slide-type (ws cell &optional focus)
@@ -783,7 +785,7 @@ an integer used only when the TYPE is \"heading\"."
       (setf (slot-value new 'kernel) (slot-value ws 'kernel)))
     (when level
       (ein:cell-change-level new level))
-    (ein:worksheet--unshift-undo-cell cell)
+    (ein:worksheet--unshift-undo-list cell)
     (when focus (ein:cell-goto new relpos))))
 
 (defun ein:worksheet-split-cell-at-point (ws cell &optional no-trim focus)
@@ -954,7 +956,7 @@ This does not alter the actual data stored in the cell."
   (let ((buffer-undo-list t))
     (ein:cell-toggle-output cell)
     (setf (slot-value ws 'dirty) t))
-  (ein:worksheet--unshift-undo-cell cell))
+  (ein:worksheet--unshift-undo-list cell))
 
 (defun ein:worksheet-set-output-visibility-all (ws &optional collapsed)
   "Show all cell output.  When prefix is given, hide all cell output."
@@ -964,7 +966,7 @@ This does not alter the actual data stored in the cell."
           (when (ein:codecell-p c) 
             (let ((buffer-undo-list t))
               (ein:cell-set-collapsed c collapsed))
-            (ein:worksheet--unshift-undo-cell c)))
+            (ein:worksheet--unshift-undo-list c)))
         (ein:worksheet-get-cells ws))
   (setf (slot-value ws 'dirty) t))
 
@@ -977,7 +979,7 @@ Do not clear input prompt when the prefix argument is given."
   (ein:cell-clear-output cell t t t)
   (unless preserve-input-prompt
     (ein:cell-set-input-prompt cell))
-  (ein:worksheet--unshift-undo-cell cell))
+  (ein:worksheet--unshift-undo-list cell))
 
 (defun ein:worksheet-clear-all-output (ws &optional preserve-input-prompt)
   "Clear output from all cells.
@@ -1022,7 +1024,7 @@ Do not clear input prompts when the prefix argument is given."
     (ein:kernel-if-ready (slot-value ws 'kernel)
       (ein:cell-execute cell)
       (oset ws :dirty t)))
-  (ein:worksheet--unshift-undo-cell cell)
+  (ein:worksheet--unshift-undo-list cell)
   cell)
 
 (defun ein:worksheet-execute-cell-and-goto-next (ws cell &optional insert)
