@@ -136,23 +136,25 @@ the source is in git repository."
         (throw 'error "Null value passed to ein:get-ipython-major-version.")
       (ein:log 'warn "Null value passed to ein:get-ipython-major-version."))))
 
+(defun ein:need-ipython-version (url-or-port)
+  "Callers assume ein:query-ipython-version succeeded.  If not, we hardcode a guess."
+  (ein:aif (gethash url-or-port *running-ipython-version*)
+           it 5))
+
 ;; TODO: Use symbols instead of numbers for ipython version ('jupyter and 'legacy)?
 (defun ein:query-ipython-version (url-or-port)
-  "Return ipython version of URL-OR-PORT if we have it, otherwise send for it and return nil"
-  (ein:aif (gethash url-or-port *running-ipython-version*)
-      it
-    (ein:query-singleton-ajax
-     (list 'query-ipython-version url-or-port)
-     (ein:jupyterhub-correct-query-url-maybe 
-      (ein:url url-or-port "api"))
-     :parser #'ein:json-read
-     :complete (apply-partially #'ein:query-ipython-version--callback url-or-port))
-    nil))
+  "Send for ipython version of URL-OR-PORT"
+  (ein:query-singleton-ajax
+   (list 'query-ipython-version url-or-port)
+   (ein:jupyterhub-correct-query-url-maybe 
+    (ein:url url-or-port "api"))
+   :parser #'ein:json-read
+   :complete (apply-partially #'ein:query-ipython-version--callback url-or-port)))
 
-(defun ein:query-ipython-version--callback (url-or-port 
-                                            &key data symbol-status response
-                                            &allow-other-keys
-                                            &aux (resp-string (format "RESPONSE: %s DATA: %s" response data)))
+(defun* ein:query-ipython-version--callback (url-or-port 
+                                             &key data symbol-status response
+                                             &allow-other-keys
+                                             &aux (resp-string (format "RESPONSE: %s DATA: %s" response data)))
   (ein:log 'debug "ipython version %s" resp-string)
   (ein:aif (plist-get data :version)
       (setf (gethash url-or-port *running-ipython-version*)

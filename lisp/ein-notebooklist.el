@@ -403,7 +403,7 @@ This function is called via `ein:notebook-after-rename-hook'."
   (if data
       (let ((name (plist-get data :name))
             (path (plist-get data :path)))
-        (if (= (ein:query-ipython-version url-or-port) 2)
+        (if (= (ein:need-ipython-version url-or-port) 2)
             (if (string= path "")
                 (setq path name)
               (setq path (format "%s/%s" path name))))
