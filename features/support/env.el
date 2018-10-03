@@ -56,7 +56,8 @@
  (setq ein:notebook-autosave-frequency 10000)
  (setq ein:testing-dump-file-log "./log/ecukes.log")
  (setq ein:testing-dump-file-messages "./log/ecukes.messages")
- (setq ein:testing-dump-server-log  "./log/ecukes.server")
+ (setq ein:testing-dump-file-server  "./log/ecukes.server")
+ (setq ein:testing-dump-file-request  "./log/ecukes.request")
  (setq request-log-level (quote debug))
  (setq request-message-level (quote verbose))
 

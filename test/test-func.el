@@ -285,7 +285,7 @@ See the definition of `create-image' for how it works."
                           (ein:kernel-live-p it)))
      nil)
     (cl-letf (((symbol-function 'y-or-n-p) (lambda (prompt) t)))
-      (ein:jupyter-server-stop t ein:testing-dump-server-log))
+      (ein:jupyter-server-stop t ein:testing-dump-file-server))
     (should-not (processp %ein:jupyter-server-session%))
     (cl-flet ((orphans-find (pid) (search (ein:$kernel-kernel-id (ein:$notebook-kernel notebook)) (alist-get 'args (process-attributes pid)))))
       (should-not (loop repeat 10

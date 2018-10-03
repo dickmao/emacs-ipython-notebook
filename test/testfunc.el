@@ -19,7 +19,7 @@
 
 (ein:setq-if-not ein:testing-dump-file-log "./log/testfunc.log")
 (ein:setq-if-not ein:testing-dump-file-messages "./log/testfunc.messages")
-(ein:setq-if-not ein:testing-dump-server-log  "./log/testfunc.server")
+(ein:setq-if-not ein:testing-dump-file-server  "./log/testfunc.server")
 (setq message-log-max t)
 (setq ein:force-sync t)
 (setq ein:jupyter-server-run-timeout 120000)
