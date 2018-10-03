@@ -220,7 +220,7 @@ To suppress popup, you can pass `ignore' as CALLBACK."
              (pop-to-buffer
               (funcall #'ein:notebooklist-url-retrieve-callback content))))))
     (ein:query-kernelspecs url-or-port)
-    (ein:content-query-contents path url-or-port success))
+    (ein:content-query-contents url-or-port path success))
   ;(ein:notebooklist-get-buffer url-or-port)
   )
 
@@ -275,7 +275,7 @@ automatically be called during calls to `ein:notebooklist-open`."
              (ein:log 'info "Refreshing notebooklist connection.")))
           (refresh-time (* ein:notebooklist-keepalive-refresh-time 60 60)))
       (setq ein:notebooklist--keepalive-timer
-            (run-at-time 0.1 refresh-time #'ein:content-query-contents "" url-or-port success)))))
+            (run-at-time 0.1 refresh-time #'ein:content-query-contents url-or-port "" success)))))
 
 ;;;###autoload
 (defun ein:notebooklist-disable-keepalive ()
@@ -794,7 +794,7 @@ is a string of the format \"URL-OR-PORT/NOTEBOOK-NAME\"."
                                          (ein:$content-path note)
                                          ))
                ;; (if (= api-version 3)
-               ;;     (loop for note in (ein:make-content-hierarchy "" url-or-port)
+               ;;     (loop for note in (ein:make-content-hierarchy url-or-port "")
                ;;           collect (format "%s/%s" url-or-port
                ;;                           (ein:$content-path note)
                ;;                           ))
@@ -855,7 +855,7 @@ See also:
         for ipython-version = (ein:$notebooklist-api-version nblist)
         do
         (if (>= ipython-version 3)
-            (loop for note in (ein:make-content-hierarchy "" url-or-port)
+            (loop for note in (ein:make-content-hierarchy url-or-port "")
                   when (equal (ein:$content-name note) name)
                   do (return-from outer
                        (list url-or-port (ein:$content-path note))))

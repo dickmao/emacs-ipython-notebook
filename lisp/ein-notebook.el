@@ -373,7 +373,7 @@ See `ein:notebook-open' for more information."
   (let ((notebook (ein:notebook-new url-or-port path kernelspec)))
     (ein:gc-prepare-operation)
     (ein:log 'debug "Opening notebook at %s" path)
-    (ein:content-query-contents path url-or-port 
+    (ein:content-query-contents url-or-port path
          (apply-partially #'ein:notebook-request-open-callback-with-callback
                           notebook callback cbargs))
     ;; (ein:query-singleton-ajax

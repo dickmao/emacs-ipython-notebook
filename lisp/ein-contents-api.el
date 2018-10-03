@@ -68,19 +68,27 @@ global setting.  For global setting and more information, see
                            path
                            params))))
 
-(defun ein:content-query-contents (path url-or-port callback)
-  "Issue CALLBACK for the contents at PATH from the Jupyter URL-OR_PORT."
-  (lexical-let (result)
-    (ein:query-singleton-ajax
-     (list 'content-query-contents url-or-port path)
-     (ein:content-url* url-or-port path)
-     :type "GET"
-     :timeout ein:content-query-timeout
-     :parser #'ein:json-read
-     :sync ein:force-sync
-     :success (apply-partially #'ein:content-query-contents--success url-or-port path callback)
-     :error (apply-partially #'ein:content-query-contents--error url-or-port path callback)
-     )))
+(defun ein:content-query-contents (url-or-port path callback)
+  "Register CALLBACK of arity 1 for the contents at PATH from the Jupyter URL-OR_PORT."
+  (ein:query-singleton-ajax
+   (list 'content-query-contents url-or-port path)
+   (ein:content-url* url-or-port path)
+   :type "GET"
+   :timeout ein:content-query-timeout
+   :parser #'ein:json-read
+   :sync ein:force-sync
+   :success (apply-partially #'ein:content-query-contents--success url-or-port path callback)
+   :error (apply-partially #'ein:content-query-contents--error url-or-port path)
+   ))
+
+(defun ein:content-query-contents-now (url-or-port path callback)
+  "Modify CALLBACK of arity 1 to store result in lexically scoped variable and wait for it."
+  (let ((ein:force-sync t))
+    (lexical-let* (result 
+                   (callback0 (lambda (content) (setq result (funcall callback content)))))
+      (ein:content-query-contents url-or-port path callback0)
+      result
+      )))
 
 (defun ein:fix-legacy-content-data (data)
   (if (listp (car data))
@@ -122,8 +130,8 @@ global setting.  For global setting and more information, see
   (or (gethash url-or-port *ein:content-hierarchy*)
       (ein:refresh-content-hierarchy url-or-port)))
 
-(defun* ein:content-query-contents--error (url-or-port path callback &key error-thrown &allow-other-keys)
-  (ein:log 'error "ein:content-query-contents--error: ERROR %s DATA %s" (car error-thrown) (cdr error-thrown)))
+(defun* ein:content-query-contents--error (url-or-port path &key error-thrown &allow-other-keys)
+  (ein:log 'error "ein:content-query-contents--error %s%s: ERROR %s DATA %s" url-or-port path (car error-thrown) (cdr error-thrown)))
 
 (defun ein:new-content-legacy (url-or-port path data)
   "Content API in 2.x a bit inconsistent."
@@ -165,7 +173,7 @@ global setting.  For global setting and more information, see
 ;; or request-response-url.
 (defun* ein:content-query-contents--success (url-or-port path callback &key data symbol-status response &allow-other-keys)
   (let (content)
-    (if (<= (ein:find-ipython-version url-or-port) 2)
+    (if (<= (ein:need-ipython-version url-or-port) 2)
         (setq content (ein:new-content-legacy url-or-port path data))
       (setq content (ein:new-content url-or-port path data)))
     (ein:aif response
@@ -178,29 +186,32 @@ global setting.  For global setting and more information, see
     ;;                                                        (url-port url)))))
     (funcall callback content)))
 
-(defun ein:make-content-hierarchy--callback (url-or-port path content)
-  (let ((active-sessions (make-hash-table :test 'equal))
-        (items (ein:$content-raw-content content)))
-    (ein:content-query-sessions active-sessions url-or-port)
+(defun ein:make-content-hierarchy--callback (url-or-port path content active-sessions)
+  (let ((items (ein:$content-raw-content content)))
     (ein:flatten (loop for item in items
                        with c
                        do (setq c (ein:new-content url-or-port path item))
                        collect
                        (if (string= (ein:$content-type c) "directory")
-                           (cons c
-                                   (ein:make-content-hierarchy (ein:$content-path c) url-or-port))
-                             (t (progn
-                                  (setf (ein:$content-session-p c)
-                                        (gethash (ein:$content-path c) active-sessions))
-                                  c)))))))
+                           (cons c (ein:make-content-hierarchy* url-or-port (ein:$content-path c) active-sessions))
+                         (setf (ein:$content-session-p c)
+                               (gethash (ein:$content-path c) active-sessions))
+                         c)))))
 
-(defun ein:make-content-hierarchy (path url-or-port)
-  (ein:content-query-contents path url-or-port 
-                              (apply-partially #'ein:make-content-hierarchy--callback url-or-port path)))
+(defun ein:make-content-hierarchy* (url-or-port path active-sessions)
+  (ein:content-query-contents-now url-or-port path
+                                  (apply-partially #'ein:make-content-hierarchy--callback url-or-port path active-sessions)))
+
+(defun ein:make-content-hierarchy (url-or-port path)
+  (let ((active-sessions (make-hash-table :test 'equal)))
+    (let ((ein:force-sync t))
+      (ein:content-query-sessions active-sessions url-or-port))
+    (ein:content-query-contents-now url-or-port path
+                                    (apply-partially #'ein:make-content-hierarchy--callback url-or-port path active-sessions))))
 
 (defun ein:refresh-content-hierarchy (url-or-port)
   (setf (gethash url-or-port *ein:content-hierarchy*)
-        (ein:make-content-hierarchy "" url-or-port)))
+        (ein:make-content-hierarchy url-or-port "")))
 
 
 ;;; Save Content
@@ -299,7 +310,7 @@ global setting.  For global setting and more information, see
 
 (defun ein:content-query-sessions (session-hash url-or-port)
   (ein:query-singleton-ajax
-   (list 'content-query-sessions)
+   (list 'content-query-sessions url-or-port)
    (ein:url url-or-port "api/sessions")
    :type "GET"
    :parser #'ein:json-read
