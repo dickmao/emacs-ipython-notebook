@@ -359,7 +359,7 @@ notebook buffer when CALLBACK is called."
           (when callback
             (apply callback ein:%notebook% nil cbargs))
           ein:%notebook%)
-      (ein:log 'info "Opening notebook %s..." path)
+      (ein:log 'info "Opening notebook %s." path)
       (ein:notebook-request-open url-or-port path kernelspec callback cbargs))))
 
 (defun ein:notebook-request-open (url-or-port path &optional kernelspec callback cbargs)
@@ -372,7 +372,6 @@ argument `t' indicates that the notebook is newly opened.
 See `ein:notebook-open' for more information."
   (let ((notebook (ein:notebook-new url-or-port path kernelspec)))
     (ein:gc-prepare-operation)
-    (ein:log 'debug "Opening notebook at %s" path)
     (ein:content-query-contents url-or-port path
          (apply-partially #'ein:notebook-request-open-callback-with-callback
                           notebook callback cbargs))
@@ -465,7 +464,7 @@ of minor mode."
       (error "Fix me!")) ;; FIXME
   (setf (ein:$notebook-autosave-timer notebook)
         (run-at-time 0 ein:notebook-autosave-frequency #'ein:notebook-maybe-save-notebook notebook 0))
-  (ein:log 'info "Enabling autosaves for %s with frequency %s seconds."
+  (ein:log 'verbose "Enabling autosaves for %s with frequency %s seconds."
            (ein:$notebook-notebook-name notebook)
            ein:notebook-autosave-frequency))
 
@@ -477,7 +476,7 @@ of minor mode."
                          "Select notebook [URL-OR-PORT/NAME]: "
                          (ein:notebook-opened-buffer-names)))))
      (list notebook)))
-  (ein:log 'info "Disabling auto checkpoints for notebook %s" (ein:$notebook-notebook-name notebook))
+  (ein:log 'verbose "Disabling auto checkpoints for notebook %s" (ein:$notebook-notebook-name notebook))
   (when (ein:$notebook-autosave-timer notebook)
     (cancel-timer (ein:$notebook-autosave-timer notebook))))
 
@@ -538,7 +537,7 @@ on server url/port."
      :parser 'ein:json-read
      :sync t
      :success (apply-partially #'ein:query-kernelspecs-success url-or-port)
-     :error (apply-partially #'ein:query-kernelspecs-error))))
+     :error (apply-partially #'ein:query-kernelspecs-error url-or-port))))
 
 (defun* ein:query-kernelspecs-success (url-or-port &key data &allow-other-keys)
   (let ((ks (list :default (plist-get data :default)))
@@ -556,11 +555,9 @@ on server url/port."
                                                                   :spec (plist-get info :spec)))
                                  ks)))))))
 
-(defun* ein:query-kernelspecs-error (&key symbol-status response &allow-other-keys)
-  (ein:log 'verbose
-    "Error thrown: %S" (request-response-error-thrown response))
+(defun* ein:query-kernelspecs-error (url-or-port &key error-thrown &allow-other-keys)
   (ein:log 'error
-    "Kernelspc query call failed with status %s." symbol-status))
+    "ein:query-kernelspecs-error %s: ERROR %s DATA %s" url-or-port (car error-thrown) (cdr error-thrown)))
 
 (defun ein:notebook-switch-kernel (notebook kernel-name)
   "Change the kernel for a running notebook. If not called from a
@@ -765,7 +762,6 @@ This is equivalent to do ``C-c`` in the console program."
 (defun ein:read-nbformat4-worksheets (notebook data)
   "Convert a notebook in nbformat4 to a list of worksheet-like
   objects suitable for processing in ein:notebook-from-json."
-  (ein:log 'info "Reading nbformat4 notebook.")
   (let* ((cells (plist-get data :cells))
          (ws-cells (mapcar (lambda (data) (ein:cell-from-json data)) cells))
          (worksheet (ein:notebook--worksheet-new notebook)))

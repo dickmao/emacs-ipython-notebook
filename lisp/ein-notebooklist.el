@@ -175,7 +175,7 @@ To suppress popup, you can pass `ignore' as CALLBACK."
 (defun ein:notebooklist-new-url (url-or-port version &optional path)
   (let ((base-path (cond ((= version 2) "api/notebooks")
                          ((>= version 3) "api/contents"))))
-    (ein:log 'info "New notebook. Port: %s, Path: %s" url-or-port path)
+    (ein:log 'info "New notebook %s" (concat (file-name-as-directory url-or-port) path))
     (if (and path (not (string= path "")))
         (ein:url url-or-port base-path path)
       (ein:url url-or-port base-path))))
@@ -211,7 +211,7 @@ To suppress popup, you can pass `ignore' as CALLBACK."
   (unless path (setq path ""))
   (if (and (stringp url-or-port) (not (string-match-p "^https?" url-or-port)))
       (setq url-or-port (format "http://%s" url-or-port)))
-  (ein:log 'debug "NOTEBOOKLIST-OPEN: %s/%s" url-or-port path)
+  (ein:log 'debug "NOTEBOOKLIST-OPEN: %s" (concat (file-name-as-directory url-or-port) path))
   (ein:subpackages-load)
   (let ((success
          (if no-popup
@@ -219,10 +219,9 @@ To suppress popup, you can pass `ignore' as CALLBACK."
            (lambda (content)
              (pop-to-buffer
               (funcall #'ein:notebooklist-url-retrieve-callback content))))))
+    (ein:query-ipython-version url-or-port)
     (ein:query-kernelspecs url-or-port)
-    (ein:content-query-contents url-or-port path success))
-  ;(ein:notebooklist-get-buffer url-or-port)
-  )
+    (ein:content-query-contents url-or-port path success)))
 
 ;;;###autoload
 (defun ein:notebooklist-refresh-kernelspecs (&optional url-or-port)
@@ -306,7 +305,7 @@ automatically be called during calls to `ein:notebooklist-open`."
             (ein:notebooklist-render-ipy2)
           (ein:notebooklist-render))
         (goto-char orig-point)
-        (ein:log 'info "Opened notebook list at %s with path %s." url-or-port path)
+        (ein:log 'info "Opened notebooklist at %s" (concat (file-name-as-directory url-or-port) path))
         (unless already-opened-p
           (run-hooks 'ein:notebooklist-first-open-hook))
         (when ein:enable-keepalive
@@ -314,13 +313,10 @@ automatically be called during calls to `ein:notebooklist-open`."
         (current-buffer)))))
 
 (defun* ein:notebooklist-open-error (url-or-port path
-                                     &key symbol-status response
+                                     &key error-thrown
                                      &allow-other-keys)
-  (ein:log 'verbose
-    "Error thrown: %S" (request-response-error-thrown response))
   (ein:log 'error
-    "Error (%s) while opening notebook list with path %s at the server %s."
-    symbol-status path url-or-port))
+    "ein:notebooklist-open-error %s: ERROR %s DATA %s" (concat (file-name-as-directory url-or-port) path) (car error-thrown) (cdr error-thrown)))
 
 ;;;###autoload
 (defun ein:notebooklist-reload (&optional notebooklist)

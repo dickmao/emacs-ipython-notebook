@@ -139,7 +139,9 @@ the source is in git repository."
 (defun ein:need-ipython-version (url-or-port)
   "Callers assume ein:query-ipython-version succeeded.  If not, we hardcode a guess."
   (ein:aif (gethash url-or-port *running-ipython-version*)
-           it 5))
+           it
+    (ein:log 'warn "No recorded ipython version for %s" url-or-port)
+    5))
 
 ;; TODO: Use symbols instead of numbers for ipython version ('jupyter and 'legacy)?
 (defun ein:query-ipython-version (url-or-port)
@@ -149,17 +151,17 @@ the source is in git repository."
    (ein:jupyterhub-correct-query-url-maybe 
     (ein:url url-or-port "api"))
    :parser #'ein:json-read
-   :complete (apply-partially #'ein:query-ipython-version--callback url-or-port)))
+   :complete (apply-partially #'ein:query-ipython-version--complete url-or-port)))
 
-(defun* ein:query-ipython-version--callback (url-or-port 
+(defun* ein:query-ipython-version--complete (url-or-port 
                                              &key data symbol-status response
                                              &allow-other-keys
-                                             &aux (resp-string (format "RESPONSE: %s DATA: %s" response data)))
+                                             &aux (resp-string (format "STATUS: %s DATA: %s" (request-response-status-code response) data)))
   (ein:log 'debug "ipython version %s" resp-string)
   (ein:aif (plist-get data :version)
       (setf (gethash url-or-port *running-ipython-version*)
             (ein:get-ipython-major-version it))
-    (case (request-response-status-code resp)
+    (case (request-response-status-code response)
       (404 (ein:log 'warn "ipython version api not implemented")
            (setf (gethash url-or-port *running-ipython-version*) 2))
       (t (ein:log 'warn "ipython version currently unknowable")))))

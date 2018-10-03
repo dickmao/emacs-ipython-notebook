@@ -131,7 +131,7 @@ global setting.  For global setting and more information, see
       (ein:refresh-content-hierarchy url-or-port)))
 
 (defun* ein:content-query-contents--error (url-or-port path &key error-thrown &allow-other-keys)
-  (ein:log 'error "ein:content-query-contents--error %s%s: ERROR %s DATA %s" url-or-port path (car error-thrown) (cdr error-thrown)))
+  (ein:log 'error "ein:content-query-contents--error %s: ERROR %s DATA %s" (concat (file-name-as-directory url-or-port) path) (car error-thrown) (cdr error-thrown)))
 
 (defun ein:new-content-legacy (url-or-port path data)
   "Content API in 2.x a bit inconsistent."
