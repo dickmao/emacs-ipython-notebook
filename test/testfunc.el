@@ -20,6 +20,7 @@
 (ein:setq-if-not ein:testing-dump-file-log "./log/testfunc.log")
 (ein:setq-if-not ein:testing-dump-file-messages "./log/testfunc.messages")
 (ein:setq-if-not ein:testing-dump-file-server  "./log/testfunc.server")
+(ein:setq-if-not ein:testing-dump-file-request  "./log/testfunc.request")
 (setq message-log-max t)
 (setq ein:force-sync t)
 (setq ein:jupyter-server-run-timeout 120000)
@@ -30,7 +31,9 @@
 
 (setq ein:jupyter-server-args '("--no-browser" "--debug"))
 
-(deferred:sync! (ein:jupyter-server-start *ein:testing-jupyter-server-command* *ein:testing-jupyter-server-directory*))
+(ein:dev-start-debug)
+(deferred:sync! (ein:jupyter-server-start *ein:testing-jupyter-server-command* *ein:testing-jupyter-server-directory* t t))
+(deferred:sync! (ein:jupyter-server-login-and-open t))
 (multiple-value-bind (url token) (ein:jupyter-server-conn-info)
   (ein:log 'info (format "testing-start-server url: %s, token: %s" url token))
   (setq *ein:testing-port* url)

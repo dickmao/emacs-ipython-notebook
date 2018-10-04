@@ -68,8 +68,8 @@ Make MAX-COUNT larger \(default 50) to wait longer before timeout."
 
 (defvar ein:notebooklist-after-open-hook nil)
 
-(defadvice ein:notebooklist-url-retrieve-callback
-  (after ein:testing-notebooklist-url-retrieve-callback activate)
+(defadvice ein:notebooklist-query-contents--callback
+  (after ein:testing-notebooklist-query-contents--callback activate)
   "Advice to add `ein:notebooklist-after-open-hook'."
   (run-hooks 'ein:notebooklist-after-open-hook))
 
@@ -113,10 +113,9 @@ Make MAX-COUNT larger \(default 50) to wait longer before timeout."
 
 (ert-deftest 00-query-kernelspecs ()
   (ein:log 'info "ERT QUERY-KERNELSPECS")
-  (ein:log 'info (format "ERT QUERY-KERNELSPECS: Pre-query kernelspec count %s." (hash-table-count ein:available-kernelspecs)))
-  (ein:query-kernelspecs *ein:testing-port*)
-  (should (>= (hash-table-count ein:available-kernelspecs) 1))
-  (ein:log 'info (format "ERT QUERY-KERNELSPECS: Post-query kernelspec %S." (ein:list-available-kernels *ein:testing-port*))))
+  (ein:log 'info (format "ERT QUERY-KERNELSPECS: Pre-query kernelspec count %s." (hash-table-count *ein:kernelspecs*)))
+  (should (>= (hash-table-count *ein:kernelspecs*) 1))
+  (ein:log 'info (format "ERT QUERY-KERNELSPECS: Post-query kernelspec %S." (ein:need-kernelspecs *ein:testing-port*))))
 
 (ert-deftest 10-get-untitled0-or-create ()
   (ein:log 'verbose "ERT TESTING-GET-UNTITLED0-OR-CREATE start")

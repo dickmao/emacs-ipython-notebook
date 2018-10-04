@@ -46,9 +46,9 @@
 (defcustom ein:notebook-list-render-order
   '(render-header
     render-opened-notebooks
-    render-directory-ipy3)
+    render-directory)
   "Order of notebook list sections.
-Must contain render-header, render-opened-notebooks, and render-directory-ipy3."
+Must contain render-header, render-opened-notebooks, and render-directory."
   :group 'ein
   :type 'list
 )
@@ -211,29 +211,40 @@ To suppress popup, you can pass `ignore' as CALLBACK."
   (unless path (setq path ""))
   (if (and (stringp url-or-port) (not (string-match-p "^https?" url-or-port)))
       (setq url-or-port (format "http://%s" url-or-port)))
-  (ein:log 'debug "NOTEBOOKLIST-OPEN: %s" (concat (file-name-as-directory url-or-port) path))
   (ein:subpackages-load)
-  (let ((success
-         (if no-popup
-             #'ein:notebooklist-url-retrieve-callback
-           (lambda (content)
-             (pop-to-buffer
-              (funcall #'ein:notebooklist-url-retrieve-callback content))))))
-    (ein:query-ipython-version url-or-port)
-    (ein:query-kernelspecs url-or-port)
-    (ein:content-query-contents url-or-port path success)))
+  (lexical-let ((url-or-port url-or-port) (path path)
+                (success (if no-popup
+                             #'ein:notebooklist-query-contents--callback
+                           (lambda (content)
+                             (pop-to-buffer
+                              (funcall #'ein:notebooklist-query-contents--callback content))))))
+    (deferred:$
+      (deferred:parallel
+        (lexical-let ((d (deferred:new #'identity)))
+          (ein:query-ipython-version url-or-port (lambda ()
+                                                   (deferred:callback-post d)))
+          d)
+        (lexical-let ((d (deferred:new #'identity)))
+          (ein:query-kernelspecs url-or-port (lambda ()
+                                               (deferred:callback-post d)))
+          d))
+      (deferred:nextc it
+        (lambda (results)
+          (ein:content-query-contents url-or-port path success))))))
 
-;;;###autoload
-(defun ein:notebooklist-refresh-kernelspecs (&optional url-or-port)
-  (interactive (list (or (and ein:%notebooklist% (ein:$notebooklist-url-or-port ein:%notebooklist%))
-                         (ein:notebooklist-ask-url-or-port))))
-  (unless url-or-port
-    (if ein:%notebooklist%
-        (setq url-or-port (ein:$notebooklist-url-or-port ein:%notebooklist%))
-      (setq url-or-port (ein:default-url-or-port))))
-  (ein:query-kernelspecs url-or-port t)
-  (when ein:%notebooklist%
-    (ein:notebooklist-reload ein:%notebooklist%)))
+;; point of order (poo): ein:notebooklist-refresh-kernelspecs requeries the kernelspecs and calls ein:notebooklist-reload.  ein:notebooklist-reload already requeries the kernelspecs in one of its callbacks, so this function seems redundant.
+
+;; (defun ein:notebooklist-refresh-kernelspecs (&optional url-or-port)
+;;   (interactive (list (or (and ein:%notebooklist% (ein:$notebooklist-url-or-port ein:%notebooklist%))
+;;                          (ein:notebooklist-ask-url-or-port))))
+;;   (unless url-or-port
+;;     (if ein:%notebooklist%
+;;         (setq url-or-port (ein:$notebooklist-url-or-port ein:%notebooklist%))
+;;       (setq url-or-port (ein:default-url-or-port))))
+;;   (ein:query-kernelspecs url-or-port)
+;;   (when ein:%notebooklist%
+;;     (ein:notebooklist-reload ein:%notebooklist%))
+;; )
 
 (defcustom ein:notebooklist-keepalive-refresh-time 1
   "When the notebook keepalive is enabled, the frequency, IN
@@ -284,14 +295,12 @@ automatically be called during calls to `ein:notebooklist-open`."
   (cancel-timer ein:notebooklist--keepalive-timer)
   (setq ein:notebooklist--keepalive-timer nil))
 
-(defun* ein:notebooklist-url-retrieve-callback (content)
+(defun ein:notebooklist-query-contents--callback (content)
   "Called via `ein:notebooklist-open'."
   (let ((url-or-port (ein:$content-url-or-port content))
         (path (ein:$content-path content))
         (ipy-version (ein:$content-ipython-version content))
         (data (ein:$content-raw-content content)))
-    (when (>= ipy-version 3)
-      (ein:query-kernelspecs url-or-port))
     (with-current-buffer (ein:notebooklist-get-buffer url-or-port)
       (let ((already-opened-p (ein:notebooklist-list-get url-or-port))
             (orig-point (point)))
@@ -499,7 +508,7 @@ Notebook list data is passed via the buffer local variable
   (remove-overlays)
 
   (render-header-ipy2)
-  (render-directory-ipy2)
+  (render-directory)
 
   (ein:notebooklist-mode)
   (widget-setup))
@@ -603,12 +612,7 @@ Notebook list data is passed via the buffer local variable
     (widget-create
      'link
      :notify (lambda (&rest ignore) (ein:notebooklist-reload))
-     "Reload List")
-    (widget-insert " ")
-    (widget-create
-     'link
-     :notify (lambda (&rest ignore) (ein:notebooklist-refresh-kernelspecs))
-     "Query Kernelspecs")
+     "Resync")
     (widget-insert " ")
     (widget-create
      'link
@@ -617,7 +621,7 @@ Notebook list data is passed via the buffer local variable
                 (ein:url url-or-port)))
      "Open In Browser")
 
-    (widget-insert "\n\nCreate New Notebooks Using Kernel: \n")
+    (widget-insert "\n\nCreate New Notebooks Using Kernel:\n")
     (let* ((radio-widget (widget-create 'radio-button-choice
                                         :value (and ein:%notebooklist-new-kernel% (ein:$kernelspec-name ein:%notebooklist-new-kernel%))
                                         :notify (lambda (widget &rest ignore)
@@ -625,10 +629,17 @@ Notebook list data is passed via the buffer local variable
                                                         (ein:get-kernelspec url-or-port (widget-value widget)))
                                                   (message "New notebooks will be started using the %s kernel."
                                                            (ein:$kernelspec-display-name ein:%notebooklist-new-kernel%))))))
-      (dolist (k kernels)
-        (widget-radio-add-item radio-widget (list 'item :value (car k)
-                                                  :format (format "%s\n" (cdr k)))))))
-  (widget-insert "\n"))
+      (if (null kernels)
+          (progn
+            (widget-insert "\n  No kernels.  Try ")
+            (widget-create
+             'link
+             :notify (lambda (&rest ignore) (ein:notebooklist-reload))
+             "Resync"))
+        (dolist (k kernels)
+          (widget-radio-add-item radio-widget (list 'item :value (car k)
+                                                    :format (format "%s\n" (cdr k))))))
+      (widget-insert "\n"))))
 
 (defun render-opened-notebooks ()
   "Render the opened notebooks section (for ipython>=3)."
@@ -654,112 +665,104 @@ Notebook list data is passed via the buffer local variable
                   (widget-insert "\n"))))
 
 
-(defun render-directory-ipy3 ()
-  "Call render-direcory with ipy-at-least-3 true."
-  (render-directory t))
-
-(defun render-directory-ipy2 ()
-  "Call render-direcory with ipy-at-least-3 false."
-  (render-directory nil))
-
 (defun ein:format-nbitem-data (name last-modified)
   (let ((dt (date-to-time last-modified)))
     (format "%-40s%+20s" name
             (ein:format-time-string ein:notebooklist-date-format dt))))
 
-(defun render-directory (ipy-at-least-3)
-  "Render directory.
-IPY-AT-LEAST-3 used to keep track of version."
+(defun render-directory ()
   (widget-insert "\n------------------------------------------\n\n")
-  (unless ipy-at-least-3
-    (let (api-version (ein:$notebooklist-api-version ein:%notebooklist%))))
-  (let ((sessions #s(hash-table test equal data (:pending t))))
-    (ein:content-query-sessions sessions (ein:$notebooklist-url-or-port ein:%notebooklist%))
-    (loop repeat 4
-          when (null (gethash :pending sessions))
-          return t
-          do (sleep-for 0 50))
-    (ein:make-sorting-widget "Sort by" ein:notebooklist-sort-field)
-    (ein:make-sorting-widget "In Order" ein:notebooklist-sort-order)
-    (widget-insert "\n")
-    (loop for note in (ein:notebooklist--order-data (ein:$notebooklist-data ein:%notebooklist%)
-                                                    ein:notebooklist-sort-field
-                                                    ein:notebooklist-sort-order)
-          for urlport = (ein:$notebooklist-url-or-port ein:%notebooklist%)
-          for name = (plist-get note :name)
-          for path = (plist-get note :path)
-          for last-modified = (plist-get note :last_modified)
-          ;; (cond ((= 2 api-version)
-          ;;        (plist-get note :path))
-          ;;       ((= 3 api-version)
-          ;;        (ein:get-actual-path (plist-get note :path))))
-          for type = (plist-get note :type)
-          for opened-notebook-maybe = (ein:notebook-get-opened-notebook urlport path)
-          do (widget-insert " ")
-          if (string= type "directory")
-          do (progn (widget-create
-                     'link
-                     :notify (lexical-let ((urlport urlport)
-                                           (path name))
-                               (lambda (&rest ignore)
-                                 (ein:notebooklist-open urlport
-                                                        (ein:url (ein:$notebooklist-path ein:%notebooklist%)
-                                                                 path))))
-                     "Dir")
-                    (widget-insert " : " name)
-                    (widget-insert "\n"))
-          if (and (string= type "file") ipy-at-least-3)
-          do (progn (widget-create
-                     'link
-                     :notify (lexical-let ((urlport urlport)
-                                           (path path))
-                               (lambda (&rest ignore)
-                                 (ein:notebooklist-open-file urlport path)))
-                     "Open")
-                    (widget-insert " ------ ")
-                    (widget-create
-                     'link
-                     :notify (lexical-let ((path path))
-                               (lambda (&rest ignore)
-                                 (message "[EIN]: NBlist delete file command. Implement me!")))
-                     "Delete")
-                    (widget-insert " : " (ein:format-nbitem-data name last-modified))
-                    (widget-insert "\n"))
-          if (string= type "notebook")
-          do (progn (widget-create
-                     'link
-                     :notify (lexical-let ((name name)
-                                           (path path))
-                               (lambda (&rest ignore)
-                                 (run-at-time 3 nil
-                                              #'ein:notebooklist-reload ein:%notebooklist%) ;; TODO using deferred better?
-                                 (ein:notebooklist-open-notebook
-                                  ein:%notebooklist% path)))
-                     "Open")
-                    (widget-insert " ")
-                    (if (gethash path sessions)
-                        (widget-create
-                         'link
-                         :notify (lexical-let ((session (car (gethash path sessions)))
-                                               (nblist ein:%notebooklist%))
-                                   (lambda (&rest ignore)
-                                     (run-at-time 1 nil
-                                                  #'ein:notebooklist-reload
-                                                  ein:%notebooklist%)
-                                     (ein:kernel-kill (make-ein:$kernel :url-or-port (ein:$notebooklist-url-or-port nblist)
-                                                                        :session-id session))))
-                         "Stop")
-                      (widget-insert "------"))
-                    (widget-insert " ")
-                    (widget-create
-                     'link
-                     :notify (lexical-let ((path path))
-                               (lambda (&rest ignore)
-                                 (ein:notebooklist-delete-notebook-ask
-                                  path)))
-                     "Delete")
-                    (widget-insert " : " (ein:format-nbitem-data name last-modified))
-                    (widget-insert "\n")))))
+  
+  (lexical-let ((url-or-port (ein:$notebooklist-url-or-port ein:%notebooklist%)))
+    (deferred:$
+      (deferred:next
+        (lambda ()
+          (lexical-let ((d (deferred:new #'identity)))
+            (ein:content-query-sessions url-or-port 
+                                        (lambda (sessions) (deferred:callback-post d sessions)))
+            d)))
+      (deferred:nextc it
+        (lambda (sessions)
+          (ein:make-sorting-widget "Sort by" ein:notebooklist-sort-field)
+          (ein:make-sorting-widget "In Order" ein:notebooklist-sort-order)
+          (widget-insert "\n")
+          (loop for note in (ein:notebooklist--order-data (ein:$notebooklist-data ein:%notebooklist%)
+                                                          ein:notebooklist-sort-field
+                                                          ein:notebooklist-sort-order)
+                for name = (plist-get note :name)
+                for path = (plist-get note :path)
+                for last-modified = (plist-get note :last_modified)
+                ;; (cond ((= 2 api-version)
+                ;;        (plist-get note :path))
+                ;;       ((= 3 api-version)
+                ;;        (ein:get-actual-path (plist-get note :path))))
+                for type = (plist-get note :type)
+                for opened-notebook-maybe = (ein:notebook-get-opened-notebook url-or-port path)
+                do (widget-insert " ")
+                if (string= type "directory")
+                do (progn (widget-create
+                           'link
+                           :notify (lexical-let ((url-or-port url-or-port)
+                                                 (path name))
+                                     (lambda (&rest ignore)
+                                       (ein:notebooklist-open url-or-port
+                                                              (ein:url (ein:$notebooklist-path ein:%notebooklist%)
+                                                                       path))))
+                           "Dir")
+                          (widget-insert " : " name)
+                          (widget-insert "\n"))
+                if (and (string= type "file") (> (ein:need-ipython-version url-or-port) 2))
+                do (progn (widget-create
+                           'link
+                           :notify (lexical-let ((url-or-port url-or-port)
+                                                 (path path))
+                                     (lambda (&rest ignore)
+                                       (ein:notebooklist-open-file url-or-port path)))
+                           "Open")
+                          (widget-insert " ------ ")
+                          (widget-create
+                           'link
+                           :notify (lexical-let ((path path))
+                                     (lambda (&rest ignore)
+                                       (message "[EIN]: NBlist delete file command. Implement me!")))
+                           "Delete")
+                          (widget-insert " : " (ein:format-nbitem-data name last-modified))
+                          (widget-insert "\n"))
+                if (string= type "notebook")
+                do (progn (widget-create
+                           'link
+                           :notify (lexical-let ((name name)
+                                                 (path path))
+                                     (lambda (&rest ignore)
+                                       (run-at-time 3 nil
+                                                    #'ein:notebooklist-reload ein:%notebooklist%) ;; TODO using deferred better?
+                                       (ein:notebooklist-open-notebook
+                                        ein:%notebooklist% path)))
+                           "Open")
+                          (widget-insert " ")
+                          (if (gethash path sessions)
+                              (widget-create
+                               'link
+                               :notify (lexical-let ((session (car (gethash path sessions)))
+                                                     (nblist ein:%notebooklist%))
+                                         (lambda (&rest ignore)
+                                           (run-at-time 1 nil
+                                                        #'ein:notebooklist-reload
+                                                        ein:%notebooklist%)
+                                           (ein:kernel-kill (make-ein:$kernel :url-or-port (ein:$notebooklist-url-or-port nblist)
+                                                                              :session-id session))))
+                               "Stop")
+                            (widget-insert "------"))
+                          (widget-insert " ")
+                          (widget-create
+                           'link
+                           :notify (lexical-let ((path path))
+                                     (lambda (&rest ignore)
+                                       (ein:notebooklist-delete-notebook-ask
+                                        path)))
+                           "Delete")
+                          (widget-insert " : " (ein:format-nbitem-data name last-modified))
+                          (widget-insert "\n"))))))))
 
 
 (defun ein:notebooklist-render ()
@@ -785,12 +788,12 @@ is a string of the format \"URL-OR-PORT/NOTEBOOK-NAME\"."
                for url-or-port = (ein:$notebooklist-url-or-port nblist)
                for api-version = (ein:$notebooklist-api-version nblist)
                collect
-               (loop for note in (ein:get-content-hierarchy url-or-port)
+               (loop for note in (ein:content-need-hierarchy url-or-port)
                          collect (format "%s/%s" url-or-port
                                          (ein:$content-path note)
                                          ))
                ;; (if (= api-version 3)
-               ;;     (loop for note in (ein:make-content-hierarchy url-or-port "")
+               ;;     (loop for note in (ein:content-need-hierarchy url-or-port)
                ;;           collect (format "%s/%s" url-or-port
                ;;                           (ein:$content-path note)
                ;;                           ))
@@ -851,7 +854,7 @@ See also:
         for ipython-version = (ein:$notebooklist-api-version nblist)
         do
         (if (>= ipython-version 3)
-            (loop for note in (ein:make-content-hierarchy url-or-port "")
+            (loop for note in (ein:content-need-hierarchy url-or-port)
                   when (equal (ein:$content-name note) name)
                   do (return-from outer
                        (list url-or-port (ein:$content-path note))))
@@ -908,7 +911,6 @@ FIMXE: document how to use `ein:notebooklist-find-file-callback'
   "Login to IPython notebook server."
   (interactive (list (ein:notebooklist-ask-url-or-port)
                      (read-passwd "Password: ")))
-  (ein:log 'debug "NOTEBOOKLIST-LOGIN: %s:%s" url-or-port password)
   (ein:query-singleton-ajax
    (list 'notebooklist-login url-or-port)
    (ein:url url-or-port "login")

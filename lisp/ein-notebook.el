@@ -499,15 +499,13 @@ of minor mode."
 
 ;;; Kernel related things
 
-(defvar ein:available-kernelspecs (make-hash-table :test #'equal))
-
 (defun ein:kernelspec-for-nb-metadata (kernelspec)
   (let ((display-name (plist-get (ein:$kernelspec-spec kernelspec) :display_name)))
     `((:name . ,(ein:$kernelspec-name kernelspec))
       (:display_name . ,(format "%s" display-name)))))
 
 (defun ein:get-kernelspec (url-or-port name)
-  (let* ((kernelspecs (gethash url-or-port ein:available-kernelspecs))
+  (let* ((kernelspecs (ein:need-kernelspecs url-or-port))
          (name (if (stringp name)
                    (intern (format ":%s" name))
                  name))
@@ -517,47 +515,12 @@ of minor mode."
       ks)))
 
 (defun ein:list-available-kernels (url-or-port)
-  (let ((kernelspecs (gethash url-or-port ein:available-kernelspecs)))
+  (let ((kernelspecs (ein:need-kernelspecs url-or-port)))
     (if kernelspecs
         (sort (loop for (key spec) on (ein:plist-exclude kernelspecs '(:default)) by 'cddr
                     collecting (cons (ein:$kernelspec-name spec)
                                      (ein:$kernelspec-display-name spec)))
               (lambda (c1 c2) (string< (cdr c1) (cdr c2)))))))
-
-(defun ein:query-kernelspecs (url-or-port &optional force-refresh)
-  "Query jupyter server for the list of available
-kernels. Results are stored in ein:available-kernelspec, hashed
-on server url/port."
-  (unless (and (not force-refresh) (gethash url-or-port ein:available-kernelspecs))
-    (ein:query-singleton-ajax
-     (list 'ein:query-kernelspecs url-or-port)
-     (ein:url url-or-port "api/kernelspecs")
-     :type "GET"
-     :timeout ein:content-query-timeout
-     :parser 'ein:json-read
-     :sync t
-     :success (apply-partially #'ein:query-kernelspecs-success url-or-port)
-     :error (apply-partially #'ein:query-kernelspecs-error url-or-port))))
-
-(defun* ein:query-kernelspecs-success (url-or-port &key data &allow-other-keys)
-  (let ((ks (list :default (plist-get data :default)))
-        (specs (ein:plist-iter (plist-get data :kernelspecs))))
-    (setf (gethash url-or-port ein:available-kernelspecs)
-          (ein:flatten (dolist (spec specs ks)
-                         (let ((name (car spec))
-                               (info (cdr spec)))
-                           (push (list name (make-ein:$kernelspec :name (plist-get info :name)
-                                                                  :display-name (plist-get (plist-get info :spec)
-                                                                                           :display_name)
-                                                                  :resources (plist-get info :resources)
-                                                                  :language (plist-get (plist-get info :spec)
-                                                                                       :language)
-                                                                  :spec (plist-get info :spec)))
-                                 ks)))))))
-
-(defun* ein:query-kernelspecs-error (url-or-port &key error-thrown &allow-other-keys)
-  (ein:log 'error
-    "ein:query-kernelspecs-error %s: ERROR %s DATA %s" url-or-port (car error-thrown) (cdr error-thrown)))
 
 (defun ein:notebook-switch-kernel (notebook kernel-name)
   "Change the kernel for a running notebook. If not called from a

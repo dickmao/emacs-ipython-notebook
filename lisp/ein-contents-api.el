@@ -69,7 +69,7 @@ global setting.  For global setting and more information, see
                            params))))
 
 (defun ein:content-query-contents (url-or-port path callback)
-  "Register CALLBACK of arity 1 for the contents at PATH from the Jupyter URL-OR_PORT."
+  "Register CALLBACK of arity 1 for the contents at PATH from the Jupyter URL-OR-PORT."
   (ein:query-singleton-ajax
    (list 'content-query-contents url-or-port path)
    (ein:content-url* url-or-port path)
@@ -77,18 +77,40 @@ global setting.  For global setting and more information, see
    :timeout ein:content-query-timeout
    :parser #'ein:json-read
    :sync ein:force-sync
+   :complete (apply-partially #'ein:content-query-contents--complete url-or-port path)
    :success (apply-partially #'ein:content-query-contents--success url-or-port path callback)
    :error (apply-partially #'ein:content-query-contents--error url-or-port path)
    ))
 
-(defun ein:content-query-contents-now (url-or-port path callback)
-  "Modify CALLBACK of arity 1 to store result in lexically scoped variable and wait for it."
-  (let ((ein:force-sync t))
-    (lexical-let* (result 
-                   (callback0 (lambda (content) (setq result (funcall callback content)))))
-      (ein:content-query-contents url-or-port path callback0)
-      result
-      )))
+(defun* ein:content-query-contents--complete (url-or-port path
+                                                          &key data symbol-status response
+                                                          &allow-other-keys
+                                                          &aux (resp-string (format "STATUS: %s DATA: %s" (request-response-status-code response) data)))
+  (ein:log 'debug "ein:query-contents--complete %s" resp-string))
+
+(defun* ein:content-query-contents--error (url-or-port path &key error-thrown &allow-other-keys)
+  (ein:log 'error "ein:content-query-contents--error %s: ERROR %s DATA %s" (concat (file-name-as-directory url-or-port) path) (car error-thrown) (cdr error-thrown)))
+
+
+;; TODO: This is one place to check for redirects - update the url slot if so.
+;; Will need to pass the response object and check either request-response-history
+;; or request-response-url.
+(defun* ein:content-query-contents--success (url-or-port path callback
+                                                         &key data symbol-status response 
+                                                         &allow-other-keys)
+  (let (content)
+    (if (<= (ein:need-ipython-version url-or-port) 2)
+        (setq content (ein:new-content-legacy url-or-port path data))
+      (setq content (ein:new-content url-or-port path data)))
+    (ein:aif response
+        (setf (ein:$content-url-or-port content) (ein:get-response-redirect it)))
+    ;; (if (length (request-response-history response))
+    ;;     (let ((url (url-generic-parse-url (format "%s" (request-response-url response)))))
+    ;;       (setf (ein:$content-url-or-port content) (format "%s://%s:%s"
+    ;;                                                        (url-type url)
+    ;;                                                        (url-host url)
+    ;;                                                        (url-port url)))))
+    (when callback (funcall callback content))))
 
 (defun ein:fix-legacy-content-data (data)
   (if (listp (car data))
@@ -126,12 +148,11 @@ global setting.  For global setting and more information, see
 
 (defvar *ein:content-hierarchy* (make-hash-table :test #'equal))
 
-(defun ein:get-content-hierarchy (url-or-port)
-  (or (gethash url-or-port *ein:content-hierarchy*)
-      (ein:refresh-content-hierarchy url-or-port)))
-
-(defun* ein:content-query-contents--error (url-or-port path &key error-thrown &allow-other-keys)
-  (ein:log 'error "ein:content-query-contents--error %s: ERROR %s DATA %s" (concat (file-name-as-directory url-or-port) path) (car error-thrown) (cdr error-thrown)))
+(defun ein:content-need-hierarchy (url-or-port)
+  "Callers assume ein:content-query-hierarchy succeeded.  If not, nil."
+  (ein:aif (gethash url-or-port *ein:content-hierarchy*) it
+    (ein:log 'warn "No recorded content hierarchy for %s" url-or-port)
+    nil))
 
 (defun ein:new-content-legacy (url-or-port path data)
   "Content API in 2.x a bit inconsistent."
@@ -168,50 +189,67 @@ global setting.  For global setting and more information, see
           (ein:$content-raw-content content) (plist-get data :content))
     content))
 
-;; TODO: This is one place to check for redirects - update the url slot if so.
-;; Will need to pass the response object and check either request-response-history
-;; or request-response-url.
-(defun* ein:content-query-contents--success (url-or-port path callback &key data symbol-status response &allow-other-keys)
-  (let (content)
-    (if (<= (ein:need-ipython-version url-or-port) 2)
-        (setq content (ein:new-content-legacy url-or-port path data))
-      (setq content (ein:new-content url-or-port path data)))
-    (ein:aif response
-        (setf (ein:$content-url-or-port content) (ein:get-response-redirect it)))
-    ;; (if (length (request-response-history response))
-    ;;     (let ((url (url-generic-parse-url (format "%s" (request-response-url response)))))
-    ;;       (setf (ein:$content-url-or-port content) (format "%s://%s:%s"
-    ;;                                                        (url-type url)
-    ;;                                                        (url-host url)
-    ;;                                                        (url-port url)))))
-    (funcall callback content)))
+(defun ein:content-query-hierarchy* (deferred url-or-port path sessions content)
+  (lexical-let ((items (ein:$content-raw-content content))
+                (deferred deferred))
+    (deferred:$
+      (apply #'deferred:parallel
+             (loop for item in items
+                   for c = (ein:new-content url-or-port path item)
+                   collect
+                   (if (string= (ein:$content-type c) "directory")
+                       (lexical-let ((d0 (deferred:new #'identity)) (c c))
+                         (deferred:$
+                           (deferred:next
+                             (let ((d1 (deferred:new #'identity)))
+                               (ein:content-query-contents
+                                url-or-port (ein:$content-path c)
+                                (apply-partially #'ein:content-query-hierarchy* d1 url-or-port (ein:$content-path c) sessions)) 
+                               d1))
+                           (deferred:nextc it
+                             (lambda (content)
+                               (deferred:callback-post d0 (cons c content)))))
+                         d0)
+                     (lambda ()
+                       (setf (ein:$content-session-p c)
+                             (gethash (ein:$content-path c) sessions))
+                       c))))
+      (deferred:nextc it
+        (lambda (contents)
+          (deferred:callback-post deferred (ein:flatten contents)))))))
 
-(defun ein:make-content-hierarchy--callback (url-or-port path content active-sessions)
-  (let ((items (ein:$content-raw-content content)))
-    (ein:flatten (loop for item in items
-                       with c
-                       do (setq c (ein:new-content url-or-port path item))
-                       collect
-                       (if (string= (ein:$content-type c) "directory")
-                           (cons c (ein:make-content-hierarchy* url-or-port (ein:$content-path c) active-sessions))
-                         (setf (ein:$content-session-p c)
-                               (gethash (ein:$content-path c) active-sessions))
-                         c)))))
+(defun ein:content-query-hierarchy (url-or-port path callback)
+  "Send for content hierarchy of URL-OR-PORT/PATH with CALLBACK arity 1 "
+  (lexical-let ((url-or-port url-or-port) (path path))
+    (deferred:$
+      (deferred:next
+        (lexical-let ((d (deferred:new #'identity)))
+          (ein:content-query-sessions 
+           url-or-port 
+           (lambda (sessions) (deferred:callback-post d sessions)))
+          d))
+      (deferred:nextc it
+        (lambda (sessions)
+          (let ((d (deferred:new #'identity)))
+            (ein:content-query-contents
+             url-or-port path
+             (apply-partially #'ein:content-query-hierarchy* d url-or-port path sessions))
+            d)))
+      (deferred:nextc it
+        (lambda (content)
+          (funcall callback content))))))
 
-(defun ein:make-content-hierarchy* (url-or-port path active-sessions)
-  (ein:content-query-contents-now url-or-port path
-                                  (apply-partially #'ein:make-content-hierarchy--callback url-or-port path active-sessions)))
-
-(defun ein:make-content-hierarchy (url-or-port path)
-  (let ((active-sessions (make-hash-table :test 'equal)))
-    (let ((ein:force-sync t))
-      (ein:content-query-sessions active-sessions url-or-port))
-    (ein:content-query-contents-now url-or-port path
-                                    (apply-partially #'ein:make-content-hierarchy--callback url-or-port path active-sessions))))
-
-(defun ein:refresh-content-hierarchy (url-or-port)
-  (setf (gethash url-or-port *ein:content-hierarchy*)
-        (ein:make-content-hierarchy url-or-port "")))
+(defun ein:content-refresh-hierarchy (url-or-port)
+  (lexical-let ((url-or-port url-or-port))
+    (deferred:$
+      (deferred:next
+        (lexical-let ((d (deferred:new #'identity)))
+          (ein:content-query-hierarchy url-or-port ""
+                  (lambda (content) (deferred:callback-post d content)))
+          d))
+      (deferred:nextc it
+        (lambda (content)
+          (setf (gethash url-or-port *ein:content-hierarchy*) content))))))
 
 
 ;;; Save Content
@@ -308,32 +346,38 @@ global setting.  For global setting and more information, see
 ;;; Sessions
 
 
-(defun ein:content-query-sessions (session-hash url-or-port)
+(defun ein:content-query-sessions (url-or-port callback)
+  "Register CALLBACK of arity 1 to retrieve the sessions"
   (ein:query-singleton-ajax
    (list 'content-query-sessions url-or-port)
    (ein:url url-or-port "api/sessions")
    :type "GET"
    :parser #'ein:json-read
-   :success (apply-partially #'ein:content-query-sessions-success session-hash url-or-port)
-   :error (apply-partially #'ein:content-query-sessions-error session-hash)
+   :complete (apply-partially #'ein:content-query-sessions--complete url-or-port callback)
+   :success (apply-partially #'ein:content-query-sessions--success url-or-port callback)
+   :error (apply-partially #'ein:content-query-sessions--error url-or-port)
    :sync ein:force-sync))
 
-(defun* ein:content-query-sessions-success (session-hash url-or-port &key data &allow-other-keys)
+(defun* ein:content-query-sessions--success (url-or-port callback &key data &allow-other-keys)
   (cl-flet ((read-name (nb-json)
                        (if (= (ein:need-ipython-version url-or-port) 2)
                            (if (string= (plist-get nb-json :path) "")
                                (plist-get nb-json :name)
                              (format "%s/%s" (plist-get nb-json :path) (plist-get nb-json :name)))
                          (plist-get nb-json :path))))
-    (clrhash session-hash)
-    (dolist (s data)
-      (setf (gethash (read-name (plist-get s :notebook)) session-hash)
-            (cons (plist-get s :id) (plist-get s :kernel))))
-    session-hash))
+    (let ((session-hash (make-hash-table :test 'equal)))
+      (dolist (s data (funcall callback session-hash))
+        (setf (gethash (read-name (plist-get s :notebook)) session-hash)
+              (cons (plist-get s :id) (plist-get s :kernel)))))))
 
-(defun* ein:content-query-sessions-error (session-hash &key symbol-status response &allow-other-keys)
-  (clrhash session-hash)
-  (ein:log 'error "Session query failed with status %s (%s)." symbol-status response))
+(defun* ein:content-query-sessions--error (url-or-port &key error-thrown &allow-other-keys)
+  (ein:log 'error "ein:content-query-sessions--error %s: ERROR %s DATA %s" url-or-port (car error-thrown) (cdr error-thrown)))
+
+(defun* ein:content-query-sessions--complete (url-or-port callback 
+                                                          &key data response 
+                                                          &allow-other-keys 
+                                                          &aux (resp-string (format "STATUS: %s DATA: %s" (request-response-status-code response) data)))
+  (ein:log 'debug "ein:query-sessions--complete %s" resp-string))
 
 
 ;;; Checkpoints
