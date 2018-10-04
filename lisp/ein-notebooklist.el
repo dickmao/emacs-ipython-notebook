@@ -683,86 +683,87 @@ Notebook list data is passed via the buffer local variable
             d)))
       (deferred:nextc it
         (lambda (sessions)
-          (ein:make-sorting-widget "Sort by" ein:notebooklist-sort-field)
-          (ein:make-sorting-widget "In Order" ein:notebooklist-sort-order)
-          (widget-insert "\n")
-          (loop for note in (ein:notebooklist--order-data (ein:$notebooklist-data ein:%notebooklist%)
-                                                          ein:notebooklist-sort-field
-                                                          ein:notebooklist-sort-order)
-                for name = (plist-get note :name)
-                for path = (plist-get note :path)
-                for last-modified = (plist-get note :last_modified)
-                ;; (cond ((= 2 api-version)
-                ;;        (plist-get note :path))
-                ;;       ((= 3 api-version)
-                ;;        (ein:get-actual-path (plist-get note :path))))
-                for type = (plist-get note :type)
-                for opened-notebook-maybe = (ein:notebook-get-opened-notebook url-or-port path)
-                do (widget-insert " ")
-                if (string= type "directory")
-                do (progn (widget-create
-                           'link
-                           :notify (lexical-let ((url-or-port url-or-port)
-                                                 (path name))
-                                     (lambda (&rest ignore)
-                                       (ein:notebooklist-open url-or-port
-                                                              (ein:url (ein:$notebooklist-path ein:%notebooklist%)
-                                                                       path))))
-                           "Dir")
-                          (widget-insert " : " name)
-                          (widget-insert "\n"))
-                if (and (string= type "file") (> (ein:need-ipython-version url-or-port) 2))
-                do (progn (widget-create
-                           'link
-                           :notify (lexical-let ((url-or-port url-or-port)
-                                                 (path path))
-                                     (lambda (&rest ignore)
-                                       (ein:notebooklist-open-file url-or-port path)))
-                           "Open")
-                          (widget-insert " ------ ")
-                          (widget-create
-                           'link
-                           :notify (lexical-let ((path path))
-                                     (lambda (&rest ignore)
-                                       (message "[EIN]: NBlist delete file command. Implement me!")))
-                           "Delete")
-                          (widget-insert " : " (ein:format-nbitem-data name last-modified))
-                          (widget-insert "\n"))
-                if (string= type "notebook")
-                do (progn (widget-create
-                           'link
-                           :notify (lexical-let ((name name)
-                                                 (path path))
-                                     (lambda (&rest ignore)
-                                       (run-at-time 3 nil
-                                                    #'ein:notebooklist-reload ein:%notebooklist%) ;; TODO using deferred better?
-                                       (ein:notebooklist-open-notebook
-                                        ein:%notebooklist% path)))
-                           "Open")
-                          (widget-insert " ")
-                          (if (gethash path sessions)
-                              (widget-create
-                               'link
-                               :notify (lexical-let ((session (car (gethash path sessions)))
-                                                     (nblist ein:%notebooklist%))
-                                         (lambda (&rest ignore)
-                                           (run-at-time 1 nil
-                                                        #'ein:notebooklist-reload
-                                                        ein:%notebooklist%)
-                                           (ein:kernel-kill (make-ein:$kernel :url-or-port (ein:$notebooklist-url-or-port nblist)
-                                                                              :session-id session))))
-                               "Stop")
-                            (widget-insert "------"))
-                          (widget-insert " ")
-                          (widget-create
-                           'link
-                           :notify (lexical-let ((path path))
-                                     (lambda (&rest ignore)
-                                       (ein:notebooklist-delete-notebook-ask
-                                        path)))
-                           "Delete")
-                          (widget-insert " : " (ein:format-nbitem-data name last-modified))
-                          (widget-insert "\n"))))))))
+          (with-current-buffer (ein:notebooklist-get-buffer url-or-port)
+            (ein:make-sorting-widget "Sort by" ein:notebooklist-sort-field)
+            (ein:make-sorting-widget "In Order" ein:notebooklist-sort-order)
+            (widget-insert "\n")
+            (loop for note in (ein:notebooklist--order-data (ein:$notebooklist-data ein:%notebooklist%)
+                                                            ein:notebooklist-sort-field
+                                                            ein:notebooklist-sort-order)
+                  for name = (plist-get note :name)
+                  for path = (plist-get note :path)
+                  for last-modified = (plist-get note :last_modified)
+                  ;; (cond ((= 2 api-version)
+                  ;;        (plist-get note :path))
+                  ;;       ((= 3 api-version)
+                  ;;        (ein:get-actual-path (plist-get note :path))))
+                  for type = (plist-get note :type)
+                  for opened-notebook-maybe = (ein:notebook-get-opened-notebook url-or-port path)
+                  do (widget-insert " ")
+                  if (string= type "directory")
+                  do (progn (widget-create
+                             'link
+                             :notify (lexical-let ((url-or-port url-or-port)
+                                                   (path name))
+                                       (lambda (&rest ignore)
+                                         (ein:notebooklist-open url-or-port
+                                                                (ein:url (ein:$notebooklist-path ein:%notebooklist%)
+                                                                         path))))
+                             "Dir")
+                            (widget-insert " : " name)
+                            (widget-insert "\n"))
+                  if (and (string= type "file") (> (ein:need-ipython-version url-or-port) 2))
+                  do (progn (widget-create
+                             'link
+                             :notify (lexical-let ((url-or-port url-or-port)
+                                                   (path path))
+                                       (lambda (&rest ignore)
+                                         (ein:notebooklist-open-file url-or-port path)))
+                             "Open")
+                            (widget-insert " ------ ")
+                            (widget-create
+                             'link
+                             :notify (lexical-let ((path path))
+                                       (lambda (&rest ignore)
+                                         (message "[EIN]: NBlist delete file command. Implement me!")))
+                             "Delete")
+                            (widget-insert " : " (ein:format-nbitem-data name last-modified))
+                            (widget-insert "\n"))
+                  if (string= type "notebook")
+                  do (progn (widget-create
+                             'link
+                             :notify (lexical-let ((name name)
+                                                   (path path))
+                                       (lambda (&rest ignore)
+                                         (run-at-time 3 nil
+                                                      #'ein:notebooklist-reload ein:%notebooklist%) ;; TODO using deferred better?
+                                         (ein:notebooklist-open-notebook
+                                          ein:%notebooklist% path)))
+                             "Open")
+                            (widget-insert " ")
+                            (if (gethash path sessions)
+                                (widget-create
+                                 'link
+                                 :notify (lexical-let ((session (car (gethash path sessions)))
+                                                       (nblist ein:%notebooklist%))
+                                           (lambda (&rest ignore)
+                                             (run-at-time 1 nil
+                                                          #'ein:notebooklist-reload
+                                                          ein:%notebooklist%)
+                                             (ein:kernel-kill (make-ein:$kernel :url-or-port (ein:$notebooklist-url-or-port nblist)
+                                                                                :session-id session))))
+                                 "Stop")
+                              (widget-insert "------"))
+                            (widget-insert " ")
+                            (widget-create
+                             'link
+                             :notify (lexical-let ((path path))
+                                       (lambda (&rest ignore)
+                                         (ein:notebooklist-delete-notebook-ask
+                                          path)))
+                             "Delete")
+                            (widget-insert " : " (ein:format-nbitem-data name last-modified))
+                            (widget-insert "\n")))))))))
 
 
 (defun ein:notebooklist-render ()
