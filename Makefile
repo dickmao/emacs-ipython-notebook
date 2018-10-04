@@ -4,6 +4,10 @@ IPY_VERSION = 5.8.0
 SRC=$(shell cask files)
 ELCFILES = $(SRC:.el=.elc)
 
+.PHONY: loaddefs
+loaddefs:
+	sh tools/update-autoloads.sh
+
 .PHONY: clean
 clean:
 	cask clean-elc

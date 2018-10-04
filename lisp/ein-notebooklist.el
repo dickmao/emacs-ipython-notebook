@@ -73,7 +73,7 @@ is opened at first time.::
 `ein:$notebooklist-url-or-port'
   URL or port of IPython server.
 
-`ein:$notbooklist-path'
+`ein:$notebooklist-path'
   The path for the notebooklist.
 
 `ein:$notebooklist-data'
@@ -204,33 +204,35 @@ To suppress popup, you can pass `ignore' as CALLBACK."
       url-or-port)))
 
 ;;;###autoload
-(defun ein:notebooklist-open (&optional url-or-port path no-popup)
+(defun ein:notebooklist-open (url-or-port &optional path no-popup resync)
   "Open notebook list buffer."
   (interactive (list (ein:notebooklist-ask-url-or-port)))
-  (unless url-or-port (setq url-or-port (ein:default-url-or-port)))
   (unless path (setq path ""))
   (if (and (stringp url-or-port) (not (string-match-p "^https?" url-or-port)))
       (setq url-or-port (format "http://%s" url-or-port)))
   (ein:subpackages-load)
-  (lexical-let ((url-or-port url-or-port) (path path)
+  (lexical-let ((url-or-port url-or-port)
                 (success (if no-popup
-                             #'ein:notebooklist-query-contents--callback
+                             #'ein:notebooklist-open--finish
                            (lambda (content)
                              (pop-to-buffer
-                              (funcall #'ein:notebooklist-query-contents--callback content))))))
+                              (funcall #'ein:notebooklist-open--finish content))))))
     (deferred:$
-      (deferred:parallel
-        (lexical-let ((d (deferred:new #'identity)))
-          (ein:query-ipython-version url-or-port (lambda ()
+      (if (or resync (not (ein:notebooklist-list-get url-or-port)))
+          (deferred:parallel
+            (lexical-let ((d (deferred:new #'identity)))
+              (ein:query-ipython-version url-or-port (lambda ()
+                                                       (deferred:callback-post d)))
+              d)
+            (lexical-let ((d (deferred:new #'identity)))
+              (ein:query-kernelspecs url-or-port (lambda ()
                                                    (deferred:callback-post d)))
-          d)
-        (lexical-let ((d (deferred:new #'identity)))
-          (ein:query-kernelspecs url-or-port (lambda ()
-                                               (deferred:callback-post d)))
-          d))
+              d))
+        (deferred:next
+          (lambda () nil))) ;; TODO time this with and without
       (deferred:nextc it
-        (lambda (results)
-          (ein:content-query-contents url-or-port path success))))))
+        (lambda (&rest ignore)
+          (ein:content-query-contents url-or-port "" success))))))
 
 ;; point of order (poo): ein:notebooklist-refresh-kernelspecs requeries the kernelspecs and calls ein:notebooklist-reload.  ein:notebooklist-reload already requeries the kernelspecs in one of its callbacks, so this function seems redundant.
 
@@ -295,7 +297,7 @@ automatically be called during calls to `ein:notebooklist-open`."
   (cancel-timer ein:notebooklist--keepalive-timer)
   (setq ein:notebooklist--keepalive-timer nil))
 
-(defun ein:notebooklist-query-contents--callback (content)
+(defun ein:notebooklist-open--finish (content)
   "Called via `ein:notebooklist-open'."
   (let ((url-or-port (ein:$content-url-or-port content))
         (path (ein:$content-path content))
@@ -328,13 +330,12 @@ automatically be called during calls to `ein:notebooklist-open`."
     "ein:notebooklist-open-error %s: ERROR %s DATA %s" (concat (file-name-as-directory url-or-port) path) (car error-thrown) (cdr error-thrown)))
 
 ;;;###autoload
-(defun ein:notebooklist-reload (&optional notebooklist)
+(defun ein:notebooklist-reload (notebooklist &optional resync)
   "Reload current Notebook list."
-  (interactive)
-  (unless notebooklist
-    (setq notebooklist ein:%notebooklist%))
-  (ein:notebooklist-open (ein:$notebooklist-url-or-port notebooklist)
-                         (ein:$notebooklist-path notebooklist) t))
+  (interactive (list ein:%notebooklist%))
+  (when notebooklist
+    (ein:notebooklist-open (ein:$notebooklist-url-or-port notebooklist)
+                           (ein:$notebooklist-path notebooklist) t resync)))
 
 (defun ein:notebooklist-refresh-related ()
   "Reload notebook list in which current notebook locates.
@@ -433,7 +434,7 @@ This function is called via `ein:notebook-after-rename-hook'."
     "Failed to open new notebook (error: %S). \
 You may find the new one in the notebook list." error)
   (setq no-popup nil)
-  (ein:notebooklist-open url-or-port no-popup))
+  (ein:notebooklist-open url-or-port "" no-popup))
 
 ;;;###autoload
 (defun ein:notebooklist-new-notebook-with-name (name kernelspec url-or-port &optional path)
@@ -468,7 +469,6 @@ You may find the new one in the notebook list." error)
     (ein:notebooklist-delete-notebook path)))
 
 (defun ein:notebooklist-delete-notebook (path)
-  (ein:log 'info "Deleting notebook %s..." path)
   (ein:query-singleton-ajax
    (list 'notebooklist-delete-notebook
          (ein:$notebooklist-url-or-port ein:%notebooklist%) path)
@@ -479,7 +479,7 @@ You may find the new one in the notebook list." error)
    :type "DELETE"
    :success (apply-partially (lambda (path notebook-list &rest ignore)
                                (ein:log 'info
-                                 "Deleting notebook %s... Done." path)
+                                 "Deleted notebook %s" path)
                                (ein:notebooklist-reload notebook-list))
                              path ein:%notebooklist%)))
 
@@ -565,7 +565,7 @@ Notebook list data is passed via the buffer local variable
   (widget-insert " ")
   (widget-create
    'link
-   :notify (lambda (&rest ignore) (ein:notebooklist-reload))
+   :notify (lambda (&rest ignore) (ein:notebooklist-reload ein:%notebooklist% t))
    "Reload List")
   (widget-insert " ")
   (widget-create
@@ -611,11 +611,6 @@ Notebook list data is passed via the buffer local variable
     (widget-insert " ")
     (widget-create
      'link
-     :notify (lambda (&rest ignore) (ein:notebooklist-reload))
-     "Resync")
-    (widget-insert " ")
-    (widget-create
-     'link
      :notify (lambda (&rest ignore)
                (browse-url
                 (ein:url url-or-port)))
@@ -630,16 +625,11 @@ Notebook list data is passed via the buffer local variable
                                                   (message "New notebooks will be started using the %s kernel."
                                                            (ein:$kernelspec-display-name ein:%notebooklist-new-kernel%))))))
       (if (null kernels)
-          (progn
-            (widget-insert "\n  No kernels.  Try ")
-            (widget-create
-             'link
-             :notify (lambda (&rest ignore) (ein:notebooklist-reload))
-             "Resync"))
+          (widget-insert "\n  No kernels found.")
         (dolist (k kernels)
           (widget-radio-add-item radio-widget (list 'item :value (car k)
-                                                    :format (format "%s\n" (cdr k))))))
-      (widget-insert "\n"))))
+                                                    :format (format "%s\n" (cdr k)))))
+      (widget-insert "\n")))))
 
 (defun render-opened-notebooks ()
   "Render the opened notebooks section (for ipython>=3)."
@@ -706,6 +696,7 @@ Notebook list data is passed via the buffer local variable
                              :notify (lexical-let ((url-or-port url-or-port)
                                                    (path name))
                                        (lambda (&rest ignore)
+                                         ;; each directory creates a whole new notebooklist
                                          (ein:notebooklist-open url-or-port
                                                                 (ein:url (ein:$notebooklist-path ein:%notebooklist%)
                                                                          path))))
@@ -844,7 +835,7 @@ in order to make this code work.
 
 See also:
 `ein:connect-to-default-notebook', `ein:connect-default-notebook'."
-  (ein:notebooklist-open url-or-port t))
+  (ein:notebooklist-open url-or-port "" t))
 
 
 (defun ein:notebooklist-find-server-by-notebook-name (name)
@@ -978,7 +969,7 @@ on all the notebooks opened from the current notebooklist."
          (open-nb (ein:notebook-opened-notebooks #'(lambda (nb)
                                                      (equal (ein:$notebook-url-or-port nb)
                                                             (ein:$notebooklist-url-or-port current-nblist))))))
-    (ein:notebooklist-open new-url-or-port "/" t)
+    (ein:notebooklist-open new-url-or-port "" t)
     (loop for x upfrom 0 by 1
           until (or (get-buffer (format ein:notebooklist-buffer-name-template new-url-or-port))
                     (= x 100))
@@ -986,7 +977,7 @@ on all the notebooks opened from the current notebooklist."
     (dolist (nb open-nb)
       (ein:notebook-update-url-or-port new-url-or-port nb))
     (kill-buffer (ein:notebooklist-get-buffer old-url))
-    (ein:notebooklist-open new-url-or-port "/" nil)))
+    (ein:notebooklist-open new-url-or-port "" nil)))
 
 (defun ein:notebooklist-change-url-port--deferred (new-url-or-port)
   (lexical-let* ((current-nblist ein:%notebooklist%)
@@ -999,7 +990,7 @@ on all the notebooks opened from the current notebooklist."
     (deferred:$
       (deferred:next
           (lambda ()
-            (ein:notebooklist-open new-url-or-port "/" t)
+            (ein:notebooklist-open new-url-or-port "" t)
             (loop until (get-buffer (format ein:notebooklist-buffer-name-template new-url-or-port))
               do (sit-for 0.1))))
       (deferred:nextc it
@@ -1009,7 +1000,7 @@ on all the notebooks opened from the current notebooklist."
       (deferred:nextc it
           (lambda ()
             (kill-buffer (ein:notebooklist-get-buffer old-url))
-            (ein:notebooklist-open new-url-or-port "/" nil))))))
+            (ein:notebooklist-open new-url-or-port "" nil))))))
 
 ;;; Generic getter
 
@@ -1045,7 +1036,7 @@ on all the notebooks opened from the current notebooklist."
          ("New Junk Notebook" ein:junk-new)))))
 
 (defun ein:notebooklist-revert-wrapper (&optional ignore-auto noconfirm preserve-modes)
-  (ein:notebooklist-reload))
+  (ein:notebooklist-reload ein:%notebooklist%))
 
 (define-derived-mode ein:notebooklist-mode special-mode "ein:notebooklist"
   "IPython notebook list mode.

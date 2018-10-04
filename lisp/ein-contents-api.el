@@ -88,8 +88,8 @@ global setting.  For global setting and more information, see
                                                           &aux (resp-string (format "STATUS: %s DATA: %s" (request-response-status-code response) data)))
   (ein:log 'debug "ein:query-contents--complete %s" resp-string))
 
-(defun* ein:content-query-contents--error (url-or-port path &key error-thrown &allow-other-keys)
-  (ein:log 'error "ein:content-query-contents--error %s: ERROR %s DATA %s" (concat (file-name-as-directory url-or-port) path) (car error-thrown) (cdr error-thrown)))
+(defun* ein:content-query-contents--error (url-or-port path &key symbol-status response error-thrown &allow-other-keys)
+  (ein:log 'error "ein:content-query-contents--error %s REQUEST-STATUS %s DATA %s" (concat (file-name-as-directory url-or-port) path) symbol-status (cdr error-thrown)))
 
 
 ;; TODO: This is one place to check for redirects - update the url slot if so.
@@ -146,7 +146,8 @@ global setting.  For global setting and more information, see
 
 ;;; Managing/listing the content hierarchy
 
-(defvar *ein:content-hierarchy* (make-hash-table :test #'equal))
+(defvar *ein:content-hierarchy* (make-hash-table :test #'equal)
+  "Content tree keyed by URL-OR-PORT.")
 
 (defun ein:content-need-hierarchy (url-or-port)
   "Callers assume ein:content-query-hierarchy succeeded.  If not, nil."

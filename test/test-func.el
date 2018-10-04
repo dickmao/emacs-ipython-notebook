@@ -68,8 +68,8 @@ Make MAX-COUNT larger \(default 50) to wait longer before timeout."
 
 (defvar ein:notebooklist-after-open-hook nil)
 
-(defadvice ein:notebooklist-query-contents--callback
-  (after ein:testing-notebooklist-query-contents--callback activate)
+(defadvice ein:notebooklist-open--finish
+  (after ein:testing-notebooklist-open--finish activate)
   "Advice to add `ein:notebooklist-after-open-hook'."
   (run-hooks 'ein:notebooklist-after-open-hook))
 
