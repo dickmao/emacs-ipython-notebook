@@ -119,8 +119,9 @@ When the prefix argument is given, debugging support for websocket
 callback (`websocket-callback-debug-on-error') is enabled."
   (interactive "P")
   (setq debug-on-error t)
-  (setq deferred:debug-on-signal t)
-  (setq deferred:debug t)
+;; only use these with deferred:sync!  they cause strange failures otherwise!
+;;  (setq deferred:debug-on-signal t)
+;;  (setq deferred:debug t)
   (setq request-log-level (quote debug))
   (setq request-message-level (quote verbose))
   (setq websocket-debug t)

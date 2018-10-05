@@ -43,7 +43,7 @@
 (require 'dash)
 
 
-(defcustom ein:notebook-list-render-order
+(defcustom ein:notebooklist-render-order
   '(render-header
     render-opened-notebooks
     render-directory)
@@ -217,8 +217,8 @@ To suppress popup, you can pass `ignore' as CALLBACK."
                            (lambda (content)
                              (pop-to-buffer
                               (funcall #'ein:notebooklist-open--finish content))))))
-    (deferred:$
-      (if (or resync (not (ein:notebooklist-list-get url-or-port)))
+    (if (or resync (not (ein:notebooklist-list-get url-or-port)))
+        (deferred:$
           (deferred:parallel
             (lexical-let ((d (deferred:new #'identity)))
               (ein:query-ipython-version url-or-port (lambda ()
@@ -228,11 +228,10 @@ To suppress popup, you can pass `ignore' as CALLBACK."
               (ein:query-kernelspecs url-or-port (lambda ()
                                                    (deferred:callback-post d)))
               d))
-        (deferred:next
-          (lambda () nil))) ;; TODO time this with and without
-      (deferred:nextc it
-        (lambda (&rest ignore)
-          (ein:content-query-contents url-or-port "" success))))))
+          (deferred:nextc it
+            (lambda (&rest ignore)
+              (ein:content-query-contents url-or-port "" success))))
+      (ein:content-query-contents url-or-port "" success))))
 
 ;; point of order (poo): ein:notebooklist-refresh-kernelspecs requeries the kernelspecs and calls ein:notebooklist-reload.  ein:notebooklist-reload already requeries the kernelspecs in one of its callbacks, so this function seems redundant.
 
@@ -477,10 +476,10 @@ You may find the new one in the notebook list." error)
     (ein:$notebooklist-api-version ein:%notebooklist%)
     path)
    :type "DELETE"
-   :success (apply-partially (lambda (path notebook-list &rest ignore)
+   :success (apply-partially (lambda (path notebooklist &rest ignore)
                                (ein:log 'info
                                  "Deleted notebook %s" path)
-                               (ein:notebooklist-reload notebook-list))
+                               (ein:notebooklist-reload notebooklist))
                              path ein:%notebooklist%)))
 
 ;; Because MinRK wants me to suffer (not really, I love MinRK)...
@@ -754,22 +753,17 @@ Notebook list data is passed via the buffer local variable
     (erase-buffer))
   (remove-overlays)
 
-  (lexical-let ((url-or-port (ein:$notebooklist-url-or-port ein:%notebooklist%)))
-    (deferred:$
-      (deferred:next
-        (lambda ()
-          (lexical-let ((d (deferred:new #'identity)))
-            (ein:content-query-sessions url-or-port 
-                                        (lambda (sessions) (deferred:callback-post d sessions)))
-            d)))
-      (deferred:nextc it
-        (lambda (sessions)
-          (mapc (lambda (x) (funcall (symbol-function x) url-or-port sessions))
-                ein:notebook-list-render-order)
-          (with-current-buffer (ein:notebooklist-get-buffer url-or-port)
-            (ein:notebooklist-mode)
-            (widget-setup)
-            (goto-char (point-min))))))))
+  (let ((url-or-port (ein:$notebooklist-url-or-port ein:%notebooklist%)))
+    (ein:content-query-sessions url-or-port
+                                (apply-partially #'ein:notebooklist-render--finish url-or-port))))
+
+(defun ein:notebooklist-render--finish (url-or-port sessions)
+  (mapc (lambda (x) (funcall (symbol-function x) url-or-port sessions))
+        ein:notebooklist-render-order)
+  (with-current-buffer (ein:notebooklist-get-buffer url-or-port)
+    (ein:notebooklist-mode)
+    (widget-setup)
+    (goto-char (point-min))))
 
 ;;;###autoload
 
