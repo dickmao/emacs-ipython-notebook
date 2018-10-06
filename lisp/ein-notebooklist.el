@@ -683,12 +683,11 @@ Notebook list data is passed via the buffer local variable
           do (progn (widget-create
                      'link
                      :notify (lexical-let ((url-or-port url-or-port)
-                                           (path name))
+                                           (name name))
                                (lambda (&rest ignore)
                                  ;; each directory creates a whole new notebooklist
                                  (ein:notebooklist-open url-or-port
-                                                        (ein:url (ein:$notebooklist-path ein:%notebooklist%)
-                                                                 path))))
+                                                        (ein:url (ein:$notebooklist-path ein:%notebooklist%) name))))
                      "Dir")
                     (widget-insert " : " name)
                     (widget-insert "\n"))
