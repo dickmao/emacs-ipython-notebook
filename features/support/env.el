@@ -43,14 +43,8 @@
  (setq ein:jupyter-server-args '("--no-browser" "--debug"))
  (setq ein:%testing-url% nil)
  (deferred:sync! (ein:jupyter-server-start (executable-find "jupyter") ein:testing-jupyter-server-root))
-)
-
-(Before
- (when (null ein:%testing-url%)
-   (ein:testing-wait-until (lambda () (not (null (ein:notebooklist-list)))) 
-                           nil 120000 5000)
-   (setq ein:%testing-url% (car (ein:jupyter-server-conn-info))))
- (assert (processp %ein:jupyter-server-session%) t "notebook server defunct"))
+ (assert (processp %ein:jupyter-server-session%) t "notebook server defunct")
+ (setq ein:%testing-url% (car (ein:jupyter-server-conn-info))))
 
 (After
  (ein:testing-after-scenario))
