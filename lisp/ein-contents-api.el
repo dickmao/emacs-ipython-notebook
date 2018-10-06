@@ -40,7 +40,7 @@
 (provide 'ein-contents-api) ; must provide before requiring ein-notebook:
 (require 'ein-notebook)     ; circular: depends on this file!
 
-(defcustom ein:content-query-timeout (* 60 1000) ; 1 min
+(defcustom ein:content-query-timeout (* 60 1000) ;
   "Query timeout for getting content from Jupyter/IPython notebook.
 If you cannot open large notebooks because of a timeout error try
 increasing this value.  Setting this value to `nil' means to use

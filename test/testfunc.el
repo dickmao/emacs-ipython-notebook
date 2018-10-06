@@ -3,6 +3,7 @@
 (require 'ein-dev)
 (require 'ein-testing)
 (require 'ein-jupyter)
+(require 'ein-notebooklist)
 (require 'deferred)
 
 (ein:log 'info "Starting jupyter notebook server.")
@@ -26,14 +27,12 @@
 (setq ein:jupyter-server-run-timeout 120000)
 (setq ein:content-query-timeout nil)
 (setq ein:query-timeout nil)
-
-(ein:log 'info "Staring local jupyter notebook server.")
-
 (setq ein:jupyter-server-args '("--no-browser" "--debug"))
 
 (ein:dev-start-debug)
-(deferred:sync! (ein:jupyter-server-start *ein:testing-jupyter-server-command* *ein:testing-jupyter-server-directory* t t))
-(deferred:sync! (ein:jupyter-server-login-and-open t))
+(deferred:sync! (ein:jupyter-server-start *ein:testing-jupyter-server-command* *ein:testing-jupyter-server-directory*))
+;; (ein:testing-wait-until (lambda () (not (null (ein:notebooklist-list))))
+;;                         nil 120000 5000)
 (multiple-value-bind (url token) (ein:jupyter-server-conn-info)
   (ein:log 'info (format "testing-start-server url: %s, token: %s" url token))
   (setq *ein:testing-port* url)

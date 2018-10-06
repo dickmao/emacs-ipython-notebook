@@ -17,18 +17,6 @@
 (defvar ein:testing-jupyter-server-root (f-parent (f-dirname load-file-name)))
 (ein:deflocal ein:%testing-port% nil)
 
-(defun ein:testing-wait-until (predicate &optional predargs ms)
-  "Wait until PREDICATE function returns non-`nil'.
-  PREDARGS is argument list for the PREDICATE function.
-  MS is milliseconds to wait."
-  (let* ((subms 300)
-         (count (max 1 (if ms (truncate (/ ms subms)) 25))))
-    (unless (loop repeat count
-                  when (apply predicate predargs)
-                  return t
-                  do (sleep-for 0 subms))
-      (error "Timeout: %s" predicate))))
-
 (defun ein:testing-after-scenario ()
  (with-current-buffer (ein:notebooklist-get-buffer ein:%testing-url%)
    (loop for buffer in (ein:notebook-opened-buffers)
@@ -53,11 +41,16 @@
  (setq ein:testing-dump-file-server  "./log/ecukes.server")
  (setq ein:testing-dump-file-request  "./log/ecukes.request")
  (setq ein:jupyter-server-args '("--no-browser" "--debug"))
- (deferred:sync! (ein:jupyter-server-start (executable-find "jupyter") ein:testing-jupyter-server-root t t))
- (deferred:sync! (ein:jupyter-server-login-and-open t))
- (assert (processp %ein:jupyter-server-session%) t "notebook server defunct")
- (setq ein:%testing-url% (car (ein:jupyter-server-conn-info))
-))
+ (setq ein:%testing-url% nil)
+ (deferred:sync! (ein:jupyter-server-start (executable-find "jupyter") ein:testing-jupyter-server-root))
+)
+
+(Before
+ (when (null ein:%testing-url%)
+   (ein:testing-wait-until (lambda () (not (null (ein:notebooklist-list)))) 
+                           nil 120000 5000)
+   (setq ein:%testing-url% (car (ein:jupyter-server-conn-info))))
+ (assert (processp %ein:jupyter-server-session%) t "notebook server defunct"))
 
 (After
  (ein:testing-after-scenario))
@@ -65,7 +58,7 @@
 (Teardown
  (cl-letf (((symbol-function 'y-or-n-p) (lambda (prompt) t)))
    (ein:jupyter-server-stop t))
- (ein:testing-dump-logs)
+; (ein:testing-dump-logs) ; taken care of by ein-testing.el kill-emacs-hook?
  (assert (not (processp %ein:jupyter-server-session%)) t "notebook server orphaned"))
 
 (Fail

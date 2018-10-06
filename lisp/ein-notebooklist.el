@@ -231,7 +231,8 @@ To suppress popup, you can pass `ignore' as CALLBACK."
           (deferred:nextc it
             (lambda (&rest ignore)
               (ein:content-query-contents url-or-port "" success))))
-      (ein:content-query-contents url-or-port "" success))))
+      (ein:content-query-contents url-or-port "" success)))
+  )
 
 ;; point of order (poo): ein:notebooklist-refresh-kernelspecs requeries the kernelspecs and calls ein:notebooklist-reload.  ein:notebooklist-reload already requeries the kernelspecs in one of its callbacks, so this function seems redundant.
 
