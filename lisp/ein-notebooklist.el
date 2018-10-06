@@ -212,6 +212,7 @@ To suppress popup, you can pass `ignore' as CALLBACK."
       (setq url-or-port (format "http://%s" url-or-port)))
   (ein:subpackages-load)
   (lexical-let ((url-or-port url-or-port)
+                (path path)
                 (success (if no-popup
                              #'ein:notebooklist-open--finish
                            (lambda (content)
@@ -230,8 +231,8 @@ To suppress popup, you can pass `ignore' as CALLBACK."
               d))
           (deferred:nextc it
             (lambda (&rest ignore)
-              (ein:content-query-contents url-or-port "" success))))
-      (ein:content-query-contents url-or-port "" success)))
+              (ein:content-query-contents url-or-port path success))))
+      (ein:content-query-contents url-or-port path success)))
   )
 
 ;; point of order (poo): ein:notebooklist-refresh-kernelspecs requeries the kernelspecs and calls ein:notebooklist-reload.  ein:notebooklist-reload already requeries the kernelspecs in one of its callbacks, so this function seems redundant.
@@ -586,7 +587,8 @@ Notebook list data is passed via the buffer local variable
 
     (let ((breadcrumbs (generate-breadcrumbs (ein:$notebooklist-path ein:%notebooklist%))))
       (dolist (p breadcrumbs)
-        (lexical-let ((name (car p))
+        (lexical-let ((url-or-port url-or-port)
+                      (name (car p))
                       (path (cdr p)))
           (widget-insert " | ")
           (widget-create
