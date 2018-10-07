@@ -40,7 +40,7 @@
 (provide 'ein-contents-api) ; must provide before requiring ein-notebook:
 (require 'ein-notebook)     ; circular: depends on this file!
 
-(defcustom ein:content-query-timeout (* 60 1000) ;
+(defcustom ein:content-query-timeout (* 60 1000) ;1 min
   "Query timeout for getting content from Jupyter/IPython notebook.
 If you cannot open large notebooks because of a timeout error try
 increasing this value.  Setting this value to `nil' means to use
@@ -175,6 +175,7 @@ global setting.  For global setting and more information, see
       content)))
 
 (defun ein:new-content (url-or-port path data)
+  ;; data is like (:size 72 :content nil :writable t :path Untitled7.ipynb :name Untitled7.ipynb :type notebook)
   (let ((content (make-ein:$content
                   :url-or-port url-or-port
                   :ipython-version (ein:need-ipython-version url-or-port)
@@ -190,67 +191,43 @@ global setting.  For global setting and more information, see
           (ein:$content-raw-content content) (plist-get data :content))
     content))
 
-(defun ein:content-query-hierarchy* (deferred url-or-port path sessions content)
-  (lexical-let ((items (ein:$content-raw-content content))
-                (deferred deferred))
+(defun ein:content-query-hierarchy* (url-or-port path callback sessions content)
+  "Returns list (tree) of content objects"
+  (lexical-let ((url-or-port url-or-port)
+                (path path)
+                (callback callback)
+                (items (ein:$content-raw-content content)))
     (deferred:$
       (apply #'deferred:parallel
              (loop for item in items
-                   for c = (ein:new-content url-or-port path item)
+                   for c0 = (ein:new-content url-or-port path item)
                    collect
-                   (if (string= (ein:$content-type c) "directory")
-                       (lexical-let ((d0 (deferred:new #'identity)) (c c))
-                         (deferred:$
-                           (deferred:next
-                             (let ((d1 (deferred:new #'identity)))
-                               (ein:content-query-contents
-                                url-or-port (ein:$content-path c)
-                                (apply-partially #'ein:content-query-hierarchy* d1 url-or-port (ein:$content-path c) sessions)) 
-                               d1))
-                           (deferred:nextc it
-                             (lambda (content)
-                               (deferred:callback-post d0 (cons c content)))))
-                         d0)
-                     (lambda ()
-                       (setf (ein:$content-session-p c)
-                             (gethash (ein:$content-path c) sessions))
-                       c))))
+                   (lexical-let ((sessions sessions) (c0 c0))
+                     (cond ((string= (ein:$content-type c0) "directory")
+                            (lexical-let ((d0 (deferred:new #'identity)))
+                              (ein:content-query-contents 
+                               url-or-port 
+                               (ein:$content-path c0)
+                               (apply-partially #'ein:content-query-hierarchy* url-or-port (ein:$content-path c0) (lambda (tree) (deferred:callback-post d0 (cons c0 tree))) sessions))
+                              d0))
+                           (t (lambda ()
+                                (setf (ein:$content-session-p c0)
+                                      (gethash (ein:$content-path c0) sessions))
+                                c0))))))
       (deferred:nextc it
-        (lambda (contents)
-          (deferred:callback-post deferred (ein:flatten contents)))))))
+        (lambda (tree)
+          (if (string= path "")
+              (setf (gethash url-or-port *ein:content-hierarchy*) (ein:flatten tree)))
+          (funcall callback tree))))))
 
-(defun ein:content-query-hierarchy (url-or-port path callback)
-  "Send for content hierarchy of URL-OR-PORT/PATH with CALLBACK arity 1 "
-  (lexical-let ((url-or-port url-or-port) (path path))
-    (deferred:$
-      (deferred:next
-        (lexical-let ((d (deferred:new #'identity)))
-          (ein:content-query-sessions 
-           url-or-port 
-           (lambda (sessions) (deferred:callback-post d sessions)))
-          d))
-      (deferred:nextc it
-        (lambda (sessions)
-          (let ((d (deferred:new #'identity)))
-            (ein:content-query-contents
-             url-or-port path
-             (apply-partially #'ein:content-query-hierarchy* d url-or-port path sessions))
-            d)))
-      (deferred:nextc it
-        (lambda (content)
-          (funcall callback content))))))
-
-(defun ein:content-refresh-hierarchy (url-or-port)
-  (lexical-let ((url-or-port url-or-port))
-    (deferred:$
-      (deferred:next
-        (lexical-let ((d (deferred:new #'identity)))
-          (ein:content-query-hierarchy url-or-port ""
-                  (lambda (content) (deferred:callback-post d content)))
-          d))
-      (deferred:nextc it
-        (lambda (content)
-          (setf (gethash url-or-port *ein:content-hierarchy*) content))))))
+(defun ein:content-query-hierarchy (url-or-port callback)
+  "Send for content hierarchy of URL-OR-PORT with CALLBACK arity 1 for content hierarchy"
+  (lexical-let ((url-or-port url-or-port)
+                (callback callback))
+    (ein:content-query-sessions 
+     url-or-port
+     (lambda (sessions)
+       (ein:content-query-contents url-or-port "" (apply-partially #'ein:content-query-hierarchy* url-or-port "" callback sessions))))))
 
 
 ;;; Save Content

@@ -359,7 +359,6 @@ notebook buffer when CALLBACK is called."
           (when callback
             (apply callback ein:%notebook% nil cbargs))
           ein:%notebook%)
-      (ein:log 'verbose "Opened notebook %s" path)
       (ein:notebook-request-open url-or-port path kernelspec callback cbargs))))
 
 (defun ein:notebook-request-open (url-or-port path &optional kernelspec callback cbargs)
@@ -390,6 +389,7 @@ See `ein:notebook-open' for more information."
                                                          callback
                                                          cbargs
                                                          content)
+  (ein:log 'verbose "Opened notebook %s" (ein:$notebook-notebook-path notebook))
   (funcall #'ein:notebook-request-open-callback notebook content)
   (when callback
     (with-current-buffer (ein:notebook-buffer notebook)

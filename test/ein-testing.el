@@ -44,29 +44,15 @@
   "File to save `request-log-buffer-name`.")
 
 (defun ein:testing-save-buffer (buffer-or-name file-name)
-  (condition-case err
-      (when (and buffer-or-name (get-buffer buffer-or-name) file-name)
-        (with-current-buffer buffer-or-name
-          (write-region (point-min) (point-max) file-name)))
-    (ein:log 'error "ein-testing-save-buffer: %S" err)))
+  (when (and buffer-or-name (get-buffer buffer-or-name) file-name)
+    (with-current-buffer buffer-or-name
+      (write-region (point-min) (point-max) file-name))))
 
 (defun ein:testing-dump-logs ()
-  (ein:testing-save-buffer "*Messages*" (concat default-directory ein:testing-dump-file-messages))
-  (ein:testing-save-buffer "*ein:jupyter-server*" (concat default-directory ein:testing-dump-file-server))
-  (ein:testing-save-buffer ein:log-all-buffer-name (concat default-directory ein:testing-dump-file-log))
-  (ein:testing-save-buffer request-log-buffer-name (concat default-directory  ein:testing-dump-file-request)))
-
-(defun ein:testing-wait-until (predicate &optional predargs ms interval)
-  "Wait until PREDICATE function returns non-`nil'.
-  PREDARGS is argument list for the PREDICATE function.
-  MS is milliseconds to wait.  INTERVAL is polling interval in milliseconds."
-  (let* ((interval (or interval 300))
-         (count (max 1 (if ms (truncate (/ ms interval)) 25))))
-    (unless (loop repeat count
-                  when (apply predicate predargs)
-                  return t
-                  do (sleep-for 0 interval))
-      (error "Timeout: %s" predicate))))
+  (ein:testing-save-buffer "*Messages*" ein:testing-dump-file-messages)
+  (ein:testing-save-buffer "*ein:jupyter-server*" ein:testing-dump-file-server)
+  (ein:testing-save-buffer ein:log-all-buffer-name ein:testing-dump-file-log)
+  (ein:testing-save-buffer request-log-buffer-name ein:testing-dump-file-request))
 
 (defun ein:testing-wait-until (predicate &optional predargs ms interval)
   "Wait until PREDICATE function returns non-`nil'.

@@ -22,9 +22,6 @@
 
 ;;; Commentary:
 
-;;  The rendering is split into a function for ipython2 and one for
-;;  ipython3, ein:notebooklist-render-ipy2 and
-;;  ein:notebooklist-render.
 
 ;;; Code:
 
@@ -228,6 +225,10 @@ To suppress popup, you can pass `ignore' as CALLBACK."
             (lexical-let ((d (deferred:new #'identity)))
               (ein:query-kernelspecs url-or-port (lambda ()
                                                    (deferred:callback-post d)))
+              d)
+            (lexical-let ((d (deferred:new #'identity)))
+              (ein:content-query-hierarchy url-or-port (lambda (tree)
+                                                         (deferred:callback-post d)))
               d))
           (deferred:nextc it
             (lambda (&rest ignore)
@@ -313,9 +314,7 @@ automatically be called during calls to `ein:notebooklist-open`."
                                       :data data
                                       :api-version ipy-version))
         (ein:notebooklist-list-add ein:%notebooklist%)
-        (if (< ipy-version 3)
-            (ein:notebooklist-render-ipy2)
-          (ein:notebooklist-render))
+        (ein:notebooklist-render ipy-version)
         (goto-char orig-point)
         (ein:log 'verbose "Opened notebooklist at %s" (concat (file-name-as-directory url-or-port) path))
         (unless already-opened-p
@@ -499,21 +498,6 @@ You may find the new one in the notebook list." error)
       (setf current-path (concat current-path "/" p)
             pairs (append pairs (list (cons p current-path)))))))
 
-(defun ein:notebooklist-render-ipy2 ()
-  "Render notebook list for IPython 2.x sessions.
-Notebook list data is passed via the buffer local variable
-`ein:notebooklist-data'."
-  (kill-all-local-variables)
-  (let ((inhibit-read-only t))
-    (erase-buffer))
-  (remove-overlays)
-
-  (render-header-ipy2)
-  (render-directory)
-
-  (ein:notebooklist-mode)
-  (widget-setup))
-
 (defun* ein:nblist--sort-group (group by-param order)
   (sort group #'(lambda (x y)
                   (cond ((eql order :ascending)
@@ -540,7 +524,7 @@ Notebook list data is passed via the buffer local variable
                                         sort-order)))
     (-concat dirs nbs files)))
 
-(defun render-header-ipy2 ()
+(defun render-header-ipy2 (&rest args)
   "Render the header (for ipython2)."
   ;; Create notebook list
   (widget-insert (format "IPython %s Notebook list\n\n" (ein:$notebooklist-api-version ein:%notebooklist%)))
@@ -577,7 +561,7 @@ Notebook list data is passed via the buffer local variable
    "Open In Browser")
   (widget-insert "\n"))
 
-(defun render-header (url-or-port &rest args)
+(defun render-header* (url-or-port &rest args)
   "Render the header (for ipython>=3)."
   (with-current-buffer (ein:notebooklist-get-buffer url-or-port)
     (widget-insert
@@ -594,9 +578,7 @@ Notebook list data is passed via the buffer local variable
           (widget-create
            'link
            :notify (lambda (&rest ignore)
-                     (ein:notebooklist-open
-                      url-or-port
-                      path))
+                     (ein:notebooklist-open url-or-port path))
            name)))
       (widget-insert " |\n\n"))
 
@@ -613,9 +595,13 @@ Notebook list data is passed via the buffer local variable
       (widget-insert " ")
       (widget-create
        'link
+       :notify (lambda (&rest ignore) (ein:notebooklist-reload ein:%notebooklist% t))
+       "Resync")
+      (widget-insert " ")
+      (widget-create
+       'link
        :notify (lambda (&rest ignore)
-                 (browse-url
-                  (ein:url url-or-port)))
+                 (browse-url (ein:url url-or-port)))
        "Open In Browser")
 
       (widget-insert "\n\nCreate New Notebooks Using Kernel:\n")
@@ -746,7 +732,7 @@ Notebook list data is passed via the buffer local variable
                     (widget-insert " : " (ein:format-nbitem-data name last-modified))
                     (widget-insert "\n")))))
 
-(defun ein:notebooklist-render ()
+(defun ein:notebooklist-render (ipy-version)
   "Render notebook list widget.
 Notebook list data is passed via the buffer local variable
 `ein:notebooklist-data'."
@@ -757,11 +743,14 @@ Notebook list data is passed via the buffer local variable
 
   (let ((url-or-port (ein:$notebooklist-url-or-port ein:%notebooklist%)))
     (ein:content-query-sessions url-or-port
-                                (apply-partially #'ein:notebooklist-render--finish url-or-port))))
+                                (apply-partially #'ein:notebooklist-render--finish ipy-version url-or-port))))
 
-(defun ein:notebooklist-render--finish (url-or-port sessions)
-  (mapc (lambda (x) (funcall (symbol-function x) url-or-port sessions))
-        ein:notebooklist-render-order)
+(defun ein:notebooklist-render--finish (ipy-version url-or-port sessions)
+  (cl-letf (((symbol-function 'render-header) (if (< ipy-version 3) 
+                                                  #'render-header-ipy2 
+                                                #'render-header*)))
+    (mapc (lambda (x) (funcall (symbol-function x) url-or-port sessions))
+          ein:notebooklist-render-order))
   (with-current-buffer (ein:notebooklist-get-buffer url-or-port)
     (ein:notebooklist-mode)
     (widget-setup)
@@ -775,12 +764,11 @@ is a string of the format \"URL-OR-PORT/NOTEBOOK-NAME\"."
   (apply #'append
          (loop for nblist in (ein:notebooklist-list)
                for url-or-port = (ein:$notebooklist-url-or-port nblist)
-               for api-version = (ein:$notebooklist-api-version nblist)
                collect
-               (loop for note in (ein:content-need-hierarchy url-or-port)
+               (loop for content in (ein:content-need-hierarchy url-or-port)
+                     when (string= (ein:$content-type content) "notebook")
                      collect (format "%s/%s" url-or-port
-                                     (ein:$content-path note)
-                                     ))
+                                     (ein:$content-path content)))
                ;; (if (= api-version 3)
                ;;     (loop for note in (ein:content-need-hierarchy url-or-port)
                ;;           collect (format "%s/%s" url-or-port
@@ -806,13 +794,10 @@ When used in lisp, CALLBACK and CBARGS are passed to `ein:notebook-open'."
    (list (completing-read
           "Open notebook [URL-OR-PORT/NAME]: "
           (ein:notebooklist-list-notebooks))))
-  (let* ((url-or-port (substring nbpath 0 (cl-position ?/ nbpath)))
-         (path (substring nbpath (1+ (cl-position ?/ nbpath)))))
-    (when (and (stringp url-or-port)
-               (string-match "^[0-9]+$" url-or-port))
-      (setq url-or-port (string-to-number url-or-port)))
-    (ein:notebook-open url-or-port path nil callback cbargs)
-    (ein:log 'info "Notebook '%s' not found" nbpath)))
+  (let* ((parsed (url-generic-parse-url nbpath))
+         (path (url-filename parsed)))
+    (ein:notebook-open (substring nbpath 0 (- (length nbpath) (length path))) path nil callback cbargs)
+    ))
 
 ;;;###autoload
 
