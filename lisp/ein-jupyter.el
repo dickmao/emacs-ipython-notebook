@@ -119,9 +119,7 @@ via a call to `ein:notebooklist-open'."
             (sit-for 1.0) ;; FIXME: Do better!
             (ein:notebooklist-open url-or-port nil no-popup))
         (if url-or-port
-            (progn
-              (ein:notebooklist-open url-or-port))
-          
+            (ein:notebooklist-open url-or-port)
           (ein:log 'info "Could not determine port nor login info for jupyter server."))))))
 
 (defsubst ein:jupyter-server--block-on-process ()

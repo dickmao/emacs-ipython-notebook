@@ -135,7 +135,7 @@ callback (`websocket-callback-debug-on-error') is enabled."
 
 ;;;###autoload
 (defun ein:dev-stop-debug ()
-  "Inverse of `ein:dev-start-debug'.  Hard to maintain.  Not really used."
+  "Inverse of `ein:dev-start-debug'.  Hard to maintain because it needs to match start"
   (interactive)
   (setq debug-on-error nil)
   (setq websocket-debug nil)
