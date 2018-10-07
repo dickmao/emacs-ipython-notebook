@@ -1694,6 +1694,7 @@ Called via `kill-emacs-query-functions'."
 ;; -- `kill-buffer-hook'
 (defun ein:notebook-kill-buffer-callback ()
   "Call notebook destructor.  This function is called via `kill-buffer-hook'."
+
   (when (ein:$notebook-p ein:%notebook%)
     (ein:notebook-disable-autosaves ein:%notebook%)
     (ein:notebook-close-worksheet ein:%notebook% ein:%worksheet%)))
