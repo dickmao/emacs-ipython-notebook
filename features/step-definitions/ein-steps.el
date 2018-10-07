@@ -15,7 +15,7 @@
           (sit-for 0.8)
           )))
 
-(When "^I wait \\([0-9]+\\) seconds$"
+(When "^I wait \\([.0-9]+\\) seconds$"
       (lambda (seconds)
         (sit-for (string-to-number seconds))))
 

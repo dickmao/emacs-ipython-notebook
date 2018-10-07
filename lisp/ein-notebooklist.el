@@ -791,13 +791,15 @@ Notebook is specified by a string NBPATH whose format is
 
 When used in lisp, CALLBACK and CBARGS are passed to `ein:notebook-open'."
   (interactive
-   (list (completing-read
-          "Open notebook [URL-OR-PORT/NAME]: "
-          (ein:notebooklist-list-notebooks))))
+   (list (if noninteractive
+             (car (ein:notebooklist-list-notebooks)) 
+           (completing-read
+            "Open notebook [URL-OR-PORT/NAME]: "
+            (ein:notebooklist-list-notebooks)))))
   (let* ((parsed (url-generic-parse-url nbpath))
          (path (url-filename parsed)))
-    (ein:notebook-open (substring nbpath 0 (- (length nbpath) (length path))) path nil callback cbargs)
-    ))
+    (ein:notebook-open (substring nbpath 0 (- (length nbpath) (length path))) 
+                       (substring path 1) nil callback cbargs)))
 
 ;;;###autoload
 
