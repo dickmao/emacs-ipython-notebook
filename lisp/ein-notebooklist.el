@@ -642,13 +642,15 @@ You may find the new one in the notebook list." error)
                      :notify (lexical-let ((buffer buffer))
                                (lambda (&rest ignore)
                                  (if (buffer-live-p buffer)                                 
-                                     (switch-to-buffer buffer))))
+                                     (switch-to-buffer buffer)
+                                   (ein:notebooklist-reload ein:%notebooklist%))))
                      "Open")
                     (widget-create
                      'link
                      :notify (lexical-let ((buffer buffer))
                                (lambda (&rest ignore)
-                                 (kill-buffer buffer)
+                                 (if (buffer-live-p buffer)
+                                     (kill-buffer buffer))
                                  (run-at-time 1 nil
                                               #'ein:notebooklist-reload
                                               ein:%notebooklist%)))
@@ -773,7 +775,7 @@ Notebook list data is passed via the buffer local variable
 
 (defun ein:notebooklist-list-notebooks ()
   "Return a list of notebook path (NBPATH).  Each element NBPATH
-is a string of the format \"URL-OR-PORT/NOTEBOOK-NAME\"."
+is a string of the format \"URL-OR-PORT/PATH\"."
   (apply #'append
          (loop for nblist in (ein:notebooklist-list)
                for url-or-port = (ein:$notebooklist-url-or-port nblist)
@@ -836,6 +838,26 @@ See also:
 `ein:connect-to-default-notebook', `ein:connect-default-notebook'."
   (ein:notebooklist-open url-or-port "" t))
 
+(defun ein:notebooklist-nbpath-of-filepath (filepath)
+  "Find \"URL-OR_PORT/PATH\" of FILEPATH"
+  ;;  (maphash (lambda (url-or-port nblist) (if (search (ein:$notebooklist-path nblist) filepath :end2 (length filepath)))))
+  (mapcar (lambda (nbpath) (string= (subseq filepath (- (length nbpath))) nbpath)) (ein:notebooklist-list-notebooks))
+  (loop named outer
+        for nblist in (ein:notebooklist-list)
+        for url-or-port = (ein:$notebooklist-url-or-port nblist)
+        for ipython-version = (ein:$notebooklist-api-version nblist)
+        do
+        (if (>= ipython-version 3)
+            (loop for note in (ein:make-content-hierarchy "" url-or-port)
+                  do (message "%s %s" (ein:$content-name note) name)
+                  when (equal (ein:$content-name note) name)
+                  do (return-from outer
+                       (list url-or-port (ein:$content-path note))))
+          (loop for note in (ein:$notebooklist-data nblist)
+                when (equal (plist-get note :name) name)
+                do (return-from outer
+                     (list url-or-port
+                           (format "%s/%s" (plist-get note :path) (plist-get note :name))))))))
 
 (defun ein:notebooklist-find-server-by-notebook-name (name)
   "Find a notebook named NAME and return a list (URL-OR-PORT PATH)."
