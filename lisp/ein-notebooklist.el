@@ -831,24 +831,11 @@ See also:
 
 (defun ein:notebooklist-nbpath-of-filepath (filepath)
   "Find \"URL-OR_PORT/PATH\" of FILEPATH"
-  ;;  (maphash (lambda (url-or-port nblist) (if (search (ein:$notebooklist-path nblist) filepath :end2 (length filepath)))))
-  (mapcar (lambda (nbpath) (string= (subseq filepath (- (length nbpath))) nbpath)) (ein:notebooklist-list-notebooks))
-  (loop named outer
-        for nblist in (ein:notebooklist-list)
-        for url-or-port = (ein:$notebooklist-url-or-port nblist)
-        for ipython-version = (ein:$notebooklist-api-version nblist)
-        do
-        (if (>= ipython-version 3)
-            (loop for note in (ein:make-content-hierarchy "" url-or-port)
-                  do (message "%s %s" (ein:$content-name note) name)
-                  when (equal (ein:$content-name note) name)
-                  do (return-from outer
-                       (list url-or-port (ein:$content-path note))))
-          (loop for note in (ein:$notebooklist-data nblist)
-                when (equal (plist-get note :name) name)
-                do (return-from outer
-                     (list url-or-port
-                           (format "%s/%s" (plist-get note :path) (plist-get note :name))))))))
+  (car (mapcar (lambda (nbpath) 
+                     (let* ((parsed (url-generic-parse-url nbpath))
+                            (path (substring (url-filename parsed) 1)))
+                       (string= (subseq filepath (- (length path))) path)))
+                   (ein:notebooklist-list-notebooks))))
 
 (defun ein:notebooklist-find-server-by-notebook-name (name)
   "Find a notebook named NAME and return a list (URL-OR-PORT PATH)."
