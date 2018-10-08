@@ -108,15 +108,9 @@ call to `ein:notebooklist-login' and once authenticated open the notebooklist bu
 via a call to `ein:notebooklist-open'."
   (interactive)
   (when (buffer-live-p (get-buffer ein:jupyter-server-buffer-name))
-    (multiple-value-bind (url-or-port token) (ein:jupyter-server-conn-info)
-      (if (and url-or-port token)
-          (progn
-            (ein:notebooklist-login url-or-port token)
-            (sit-for 1.0) ;; FIXME: Do better!
-            (ein:notebooklist-open url-or-port nil no-popup))
-        (if url-or-port
-            (ein:notebooklist-open url-or-port)
-          (ein:log 'info "Could not determine port nor login info for jupyter server."))))))
+    (multiple-value-bind (url-or-port password) (ein:jupyter-server-conn-info)
+      (ein:notebooklist-login url-or-port password
+                              (apply-partially #'ein:notebooklist-open url-or-port nil no-popup nil)))))
 
 (defsubst ein:jupyter-server--block-on-process ()
   "Return nil if process orphaned."
@@ -137,7 +131,7 @@ via a call to `ein:notebooklist-open'."
   "Start the jupyter notebook server at the given path.
 
 This command opens an asynchronous process running the jupyter
-notebook server and then tries to detect the url and token to
+notebook server and then tries to detect the url and password to
 generate automatic calls to `ein:notebooklist-login' and
 `ein:notebooklist-open'.
 
