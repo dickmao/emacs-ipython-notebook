@@ -641,7 +641,7 @@ You may find the new one in the notebook list." error)
                      'link
                      :notify (lexical-let ((buffer buffer))
                                (lambda (&rest ignore)
-                                 (if (buffer-live-p buffer)                                 
+                                 (if (buffer-live-p buffer)
                                      (switch-to-buffer buffer)
                                    (ein:notebooklist-reload ein:%notebooklist%))))
                      "Open")
