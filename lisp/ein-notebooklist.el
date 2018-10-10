@@ -165,17 +165,7 @@ To suppress popup, you can pass `ignore' as CALLBACK."
 (defun ein:notebooklist-url (url-or-port version &optional path)
   (let ((base-path (cond ((= version 2) "api/notebooks")
                          ((>= version 3) "api/contents"))))
-    (if path
-        (ein:url url-or-port base-path (or path ""))
-      (ein:url url-or-port base-path))))
-
-(defun ein:notebooklist-new-url (url-or-port version &optional path)
-  (let ((base-path (cond ((= version 2) "api/notebooks")
-                         ((>= version 3) "api/contents"))))
-    (ein:log 'info "New notebook %s" (concat (file-name-as-directory url-or-port) path))
-    (if (and path (not (string= path "")))
-        (ein:url url-or-port base-path path)
-      (ein:url url-or-port base-path))))
+    (ein:url url-or-port base-path path)))
 
 (defun ein:notebooklist-get-buffer (url-or-port)
   (get-buffer-create
@@ -202,19 +192,20 @@ To suppress popup, you can pass `ignore' as CALLBACK."
     (ein:url url-or-port)))
 
 ;;;###autoload
-(defun ein:notebooklist-open (url-or-port &optional path no-popup resync)
+(defun ein:notebooklist-open (url-or-port &optional path no-popup resync callback)
   "Open notebook list buffer."
   (interactive (list (ein:notebooklist-ask-url-or-port)))
   (unless path (setq path ""))
   (setq url-or-port (ein:url url-or-port)) ;; should work towards not needing this
   (ein:subpackages-load)
-  (lexical-let ((url-or-port url-or-port)
-                (path path)
-                (success (if no-popup
-                             #'ein:notebooklist-open--finish
-                             (lambda (content)
-                               (pop-to-buffer
-                                (funcall #'ein:notebooklist-open--finish content))))))
+  (lexical-let* ((url-or-port url-or-port)
+                 (path path)
+                 (callback callback)
+                 (success (if no-popup
+                              (apply-partially #'ein:notebooklist-open--finish callback)
+                            (lambda (content)
+                              (pop-to-buffer
+                               (funcall #'ein:notebooklist-open--finish callback content))))))
     (if (or resync (not (ein:notebooklist-list-get url-or-port)))
         (deferred:$
           (deferred:parallel
@@ -300,7 +291,7 @@ automatically be called during calls to `ein:notebooklist-open`."
   (cancel-timer ein:notebooklist--keepalive-timer)
   (setq ein:notebooklist--keepalive-timer nil))
 
-(defun ein:notebooklist-open--finish (content)
+(defun ein:notebooklist-open--finish (callback content)
   "Called via `ein:notebooklist-open'."
   (let ((url-or-port (ein:$content-url-or-port content))
         (path (ein:$content-path content))
@@ -322,6 +313,7 @@ automatically be called during calls to `ein:notebooklist-open`."
           (run-hooks 'ein:notebooklist-first-open-hook))
         (when ein:enable-keepalive
           (ein:notebooklist-enable-keepalive (ein:$content-url-or-port content)))
+        (when callback (funcall callback))
         (current-buffer)))))
 
 (defun* ein:notebooklist-open-error (url-or-port path
@@ -384,10 +376,9 @@ TODO - New and open should be separate, and we should flag an exception if we tr
     (assert url-or-port nil
             (concat "URL-OR-PORT is not given and the current buffer "
                     "is not the notebook list buffer."))
-
-    (let ((url (ein:notebooklist-new-url url-or-port
-                                         version
-                                         path)))
+    (let ((url (ein:notebooklist-url url-or-port
+                                     version
+                                     path)))
       (ein:query-singleton-ajax
        (list 'notebooklist-new-notebook url-or-port path)
        url
