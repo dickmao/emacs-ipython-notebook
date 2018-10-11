@@ -829,69 +829,10 @@ in order to make this code work.
 See also:
 `ein:connect-to-default-notebook', `ein:connect-default-notebook'."
   (ein:notebooklist-open url-or-port "" t))
-
-(defun ein:notebooklist-nbpath-of-filepath (filepath)
-  "Find \"URL-OR_PORT/PATH\" of FILEPATH"
-  (car (mapcar (lambda (nbpath) 
-                     (let* ((parsed (url-generic-parse-url nbpath))
-                            (path (substring (url-filename parsed) 1)))
-                       (string= (subseq filepath (- (length path))) path)))
-                   (ein:notebooklist-list-notebooks))))
-
-(defun ein:notebooklist-find-server-by-notebook-name (name)
-  "Find a notebook named NAME and return a list (URL-OR-PORT PATH)."
-  (loop named outer
-        for nblist in (ein:notebooklist-list)
-        for url-or-port = (ein:$notebooklist-url-or-port nblist)
-        for ipython-version = (ein:$notebooklist-api-version nblist)
-        do
-        (if (>= ipython-version 3)
-            (loop for note in (ein:content-need-hierarchy url-or-port)
-                  when (equal (ein:$content-name note) name)
-                  do (return-from outer
-                       (list url-or-port (ein:$content-path note))))
-          (loop for note in (ein:$notebooklist-data nblist)
-                when (equal (plist-get note :name) name)
-                do (return-from outer
-                     (list url-or-port
-                           (format "%s/%s" (plist-get note :path) (plist-get note :name))))))))
-
-(defun ein:notebooklist-open-notebook-by-file-name (&optional filename buffer-callback)
-  "Find the notebook named as same as the current file in the servers.
-Open the notebook if found.  Note that this command will *not*
-upload the current file to the server.
-
-.. When FILENAME is unspecified the variable `buffer-file-name'
-   is used instead.  BUFFER-CALLBACK is called after opening notebook with the
-   current buffer as the only one argument."
-  (interactive)
-  (unless filename (setq filename buffer-file-name))
-  (assert filename nil "Not visiting a file")
-  (let* ((ein:process-open-file (expand-file-name filename))
-         (callback (lambda (notebook created buffer buffer-callback)
-                     (when (buffer-live-p buffer)
-                       (funcall buffer-callback buffer))))
-         (cbargs (list (current-buffer) (or buffer-callback #'ignore))))
-    (destructuring-bind (url-or-port path) found
-      (ein:notebook-open url-or-port path nil callback cbargs))))
-
-(defvar ein:notebooklist-find-file-buffer-callback #'ignore)
-
-(defun ein:notebooklist-find-file-callback ()
-  "A callback function for `find-file-hook' to open notebook.
-
-FIMXE: document how to use `ein:notebooklist-find-file-callback'
-       when I am convinced with the API."
-  (ein:and-let* ((filename buffer-file-name)
-                 ((string-match-p "\\.ipynb$" filename)))
-                (ein:notebooklist-open-notebook-by-file-name
-                 filename ein:notebooklist-find-file-buffer-callback)))
-
 
 ;;; Login
 
 ;;;###autoload
-
 (defun ein:notebooklist-login (url-or-port password callback &optional retry-p)
   "Login to URL-OR-PORT with PASSWORD with notebooklist-open CALLBACK of arity 0."
   (interactive (list (ein:notebooklist-ask-url-or-port)

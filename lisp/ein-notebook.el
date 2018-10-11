@@ -360,7 +360,6 @@ notebook buffer.  Let's warn for now to see who is doing this.
           (ein:log 'warn "Notebook %s is already opened"
                    (ein:$notebook-notebook-name notebook))
           (funcall callback0))
-      (ein:gc-prepare-operation)
       (ein:content-query-contents url-or-port path
                                   (apply-partially #'ein:notebook-open--callback
                                                    notebook callback0)))
@@ -369,6 +368,7 @@ notebook buffer.  Let's warn for now to see who is doing this.
 (defun ein:notebook-open--callback (notebook callback0 content)
   (ein:log 'verbose "Opened notebook %s" (ein:$notebook-notebook-path notebook))
   (let ((notebook-path (ein:$notebook-notebook-path notebook)))
+    (ein:gc-prepare-operation)
     (setf (ein:$notebook-api-version notebook) (ein:$content-ipython-version content)
           (ein:$notebook-notebook-name notebook) (ein:$content-name content))
     (ein:notebook-bind-events notebook (ein:events-new))
