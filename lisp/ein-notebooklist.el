@@ -190,10 +190,15 @@ To suppress popup, you can pass `ignore' as CALLBACK."
                                      (ein:$notebooklist-url-or-port it)
                                    (ein:default-url-or-port)))))
          (url-or-port
-          (completing-read (format "URL or port number (default %s): " default)
-                           url-or-port-list
-                           nil nil nil nil
-                           default)))
+          (if noninteractive
+              ;; noninteractive for testing only
+              (multiple-value-bind (url-or-port token) (ein:jupyter-server-conn-info)
+                (let ((parsed-url (url-generic-parse-url url-or-port)))
+                  (format "%d" (url-port parsed-url))))
+            (completing-read (format "URL or port number (default %s): " default)
+                             url-or-port-list
+                             nil nil nil nil
+                             default))))
     (if (string-match "^[0-9]+$" url-or-port)
         (string-to-number url-or-port)
       (unless (string-match "^https?:" url-or-port)

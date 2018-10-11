@@ -39,12 +39,6 @@
               (switch-to-buffer buf-name)
               (Then "I should be in buffer \"%s\"" buf-name))))))
 
-(When "^I enter the prevailing port"
-      (lambda ()
-        (multiple-value-bind (url-or-port token) (ein:jupyter-server-conn-info)
-          (let ((parsed-url (url-generic-parse-url url-or-port)))
-            (When "I type \"%d\"") (url-port parsed-url)))))
-
 (When "^I wait for the smoke to clear"
       (lambda ()
         (ein:testing-flush-queries)))

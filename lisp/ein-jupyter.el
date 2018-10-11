@@ -96,6 +96,7 @@ session, along with the login token."
           (progn (re-search-forward "\\(https?://.*:[0-9]+\\)/\\?token=\\([[:alnum:]]*\\)")
                  (let ((url-or-port (match-string 1))
                        (token (match-string 2)))
+                   (setq url-or-port (ein:url (url-or-port (url-generic-parse-url url-or-port))))
                    (list url-or-port token)))
         (error (progn (if (re-search-forward "\\(https?://.*:[0-9]+\\)" nil t)
                           (list (match-string 1) nil)
