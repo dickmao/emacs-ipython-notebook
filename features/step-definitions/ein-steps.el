@@ -39,6 +39,16 @@
               (switch-to-buffer buf-name)
               (Then "I should be in buffer \"%s\"" buf-name))))))
 
+(When "^I enter the prevailing port"
+      (lambda ()
+        (multiple-value-bind (url-or-port token) (ein:jupyter-server-conn-info)
+          (let ((parsed-url (url-generic-parse-url url-or-port)))
+            (When "I type \"%d\"") (url-port parsed-url)))))
+
+(When "^I wait for the smoke to clear"
+      (lambda ()
+        (ein:testing-flush-queries)))
+
 (When "^I click on \"\\(.+\\)\"$"
       (lambda (word)
         ;; from espuds "go to word" without the '\\b's
@@ -48,15 +58,16 @@
           (cl-assert search nil message word (buffer-string))
           (backward-char)
           (When "I press \"RET\"")
-          (sit-for 0.8))))
+          (sit-for 1.8)
+          (When "I wait for the smoke to clear"))))
 
 (When "^I click on dir \"\\(.+\\)\"$"
       (lambda (dir)
         (When (format "I go to word \"%s\"" dir))
         (re-search-backward "Dir" nil t)
         (When "I press \"RET\"")
-        (sit-for 0.8)
-))
+        (sit-for 1.8)
+        (When "I wait for the smoke to clear")))
 
 (When "^old notebook \"\\(.+\\)\"$"
       (lambda (path)

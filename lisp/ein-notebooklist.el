@@ -205,8 +205,7 @@ To suppress popup, you can pass `ignore' as CALLBACK."
   "Open notebook list buffer."
   (interactive (list (ein:notebooklist-ask-url-or-port)))
   (unless path (setq path ""))
-  (if (and (stringp url-or-port) (not (string-match-p "^https?" url-or-port)))
-      (setq url-or-port (format "http://%s" url-or-port)))
+  (setq url-or-port (ein:url url-or-port path))
   (ein:subpackages-load)
   (lexical-let ((url-or-port url-or-port)
                 (path path)
