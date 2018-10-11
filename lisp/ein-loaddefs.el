@@ -203,7 +203,7 @@ token authentication is enabled. If a token is found use it to generate a
 call to `ein:notebooklist-login' and once authenticated open the notebooklist buffer
 via a call to `ein:notebooklist-open'.
 
-\(fn &optional NO-POPUP)" t nil)
+\(fn &optional NO-POPUP CALLBACK)" t nil)
 
 (autoload 'ein:jupyter-server-start "ein-jupyter" "\
 Start the jupyter notebook server at the given path.
@@ -224,7 +224,7 @@ containing the notebooks the user wants to access.
 The buffer named by `ein:jupyter-server-buffer-name' will contain
 the log of the running jupyter server.
 
-\(fn SERVER-CMD-PATH NOTEBOOK-DIRECTORY &optional NO-LOGIN-AFTER-START-P NO-POPUP)" t nil)
+\(fn SERVER-CMD-PATH NOTEBOOK-DIRECTORY &optional NO-LOGIN-AFTER-START-P NO-POPUP CALLBACK)" t nil)
 
 (autoload 'ein:jupyter-server-stop "ein-jupyter" "\
 Stop a running jupyter notebook server.
@@ -298,7 +298,7 @@ and save it immediately.
 (autoload 'ein:notebooklist-open "ein-notebooklist" "\
 Open notebook list buffer.
 
-\(fn URL-OR-PORT &optional PATH NO-POPUP RESYNC)" t nil)
+\(fn URL-OR-PORT &optional PATH NO-POPUP RESYNC CALLBACK)" t nil)
 
 (autoload 'ein:notebooklist-enable-keepalive "ein-notebooklist" "\
 Enable periodic calls to the notebook server to keep long running sessions from expiring.
@@ -340,7 +340,7 @@ Open new notebook and rename the notebook.
 
 (autoload 'ein:notebooklist-list-notebooks "ein-notebooklist" "\
 Return a list of notebook path (NBPATH).  Each element NBPATH
-is a string of the format \"URL-OR-PORT/NOTEBOOK-NAME\".
+is a string of the format \"URL-OR-PORT/PATH\".
 
 \(fn)" nil nil)
 
