@@ -28,10 +28,9 @@
 (eval-when-compile (require 'cl))
 
 (require 'ein-core)
-(require 'ein-notebook)
+(require 'ein-jupyter)
 (require 'ein-file)
-(require 'deferred)
-(require 'dash)
+(require 'f)
 
 (defcustom ein:process-jupyter-regexp "\\(jupyter\\|ipython\\)\\(-\\|\\s-+\\)note"
   "Regexp by which we recognize notebook servers."
@@ -99,15 +98,17 @@
 (defun ein:process-alive-p (proc)
   (not (null (process-attributes (ein:$process-pid proc)))))
 
-(defun ein:process-suitable-notebook-dir (dir)
-"Return the uppermost parent dir of DIR that contains ipynb files."
-  (loop with directory = (directory-file-name dir)
-        with suitable = directory
-        until (string= (file-name-nondirectory directory) "")
-        do (if (directory-files directory nil "\\.ipynb$")
-               (setq suitable directory))
-           (setq directory (directory-file-name (file-name-directory directory)))
-        finally return suitable))
+(defun ein:process-suitable-notebook-dir (filename)
+  "Return the uppermost parent dir of DIR that contains ipynb files."
+  (let ((fn (expand-file-name filename)))
+    (loop with directory = (directory-file-name 
+                            (if (f-file? fn) (f-parent fn) fn))
+          with suitable = directory
+          until (string= (file-name-nondirectory directory) "")
+          do (if (directory-files directory nil "\\.ipynb$")
+                 (setq suitable directory))
+          (setq directory (directory-file-name (file-name-directory directory)))
+          finally return suitable)))
 
 (defun ein:process-refresh-processes ()
   (loop for pid in (list-system-processes)
@@ -140,9 +141,15 @@
   "Construct path by eliding PROC's dir from filename"
   (subseq filename (length (file-name-as-directory (ein:$process-dir proc)))))
 
+;;;###autoload
 (defun ein:process-open-file (filename)
+  (interactive (list (completing-read "Notebook file: " 
+                                      (f-files default-directory 
+                                               (lambda (file) (and (not (f-hidden? file))
+                                                                   (f-ext? file "ipynb"))))
+                                      nil 'confirm)))
   (ein:process-refresh-processes)
-  (let* ((proc (ein:processes-dir-match filename)))
+  (let* ((proc (ein:process-dir-match filename)))
     (when (and proc (not (ein:process-alive-p proc)))
       (ein:log 'warn "Server pid=%s dir=%s no longer running" (ein:$process-pid proc) (ein:$process-dir proc))
       (remhash (ein:$process-dir proc) ein:%processes%)
