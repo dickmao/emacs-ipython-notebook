@@ -355,8 +355,7 @@ This function is called via `ein:notebook-after-rename-hook'."
                      cbargs))
 
 (defun ein:notebooklist-open-file (url-or-port path)
-  (ein:file-open url-or-port
-                 path))
+  (ein:file-open url-or-port path))
 
 ;;;###autoload
 (defun ein:notebooklist-upload-file (upload-path)
@@ -632,9 +631,11 @@ You may find the new one in the notebook list." error)
                      'link
                      :notify (lexical-let ((buffer buffer))
                                (lambda (&rest ignore)
-                                 (if (buffer-live-p buffer)
+                                 (condition-case err 
                                      (switch-to-buffer buffer)
-                                   (ein:notebooklist-reload ein:%notebooklist%))))
+                                   (error
+                                    (message "%S" err)
+                                    (ein:notebooklist-reload ein:%notebooklist%)))))
                      "Open")
                     (widget-create
                      'link
@@ -855,30 +856,22 @@ See also:
                      (list url-or-port
                            (format "%s/%s" (plist-get note :path) (plist-get note :name))))))))
 
-(defun ein:notebooklist-open-notebook-by-file-name
-    (&optional filename noerror buffer-callback)
+(defun ein:notebooklist-open-notebook-by-file-name (&optional filename buffer-callback)
   "Find the notebook named as same as the current file in the servers.
 Open the notebook if found.  Note that this command will *not*
 upload the current file to the server.
 
 .. When FILENAME is unspecified the variable `buffer-file-name'
-   is used instead.  Set NOERROR to non-`nil' to suppress errors.
-   BUFFER-CALLBACK is called after opening notebook with the
+   is used instead.  BUFFER-CALLBACK is called after opening notebook with the
    current buffer as the only one argument."
-  (interactive (progn (assert buffer-file-name nil "Not visiting a file.")
-                      nil))
+  (interactive)
   (unless filename (setq filename buffer-file-name))
-  (assert filename nil "No file found.")
-  (let* ((name (file-name-sans-extension
-                (file-name-nondirectory (or filename))))
-         (found (ein:notebooklist-find-server-by-notebook-name name))
-         (callback (lambda (-ignore-1- -ignore-2- buffer buffer-callback)
-                     (ein:notebook-pop-to-current-buffer) ; default
+  (assert filename nil "Not visiting a file")
+  (let* ((ein:process-open-file (expand-file-name filename))
+         (callback (lambda (notebook created buffer buffer-callback)
                      (when (buffer-live-p buffer)
                        (funcall buffer-callback buffer))))
          (cbargs (list (current-buffer) (or buffer-callback #'ignore))))
-    (unless noerror
-      (assert found nil "No server has notebook named: %s" name))
     (destructuring-bind (url-or-port path) found
       (ein:notebook-open url-or-port path nil callback cbargs))))
 
@@ -892,7 +885,7 @@ FIMXE: document how to use `ein:notebooklist-find-file-callback'
   (ein:and-let* ((filename buffer-file-name)
                  ((string-match-p "\\.ipynb$" filename)))
                 (ein:notebooklist-open-notebook-by-file-name
-                 filename t ein:notebooklist-find-file-buffer-callback)))
+                 filename ein:notebooklist-find-file-buffer-callback)))
 
 
 ;;; Login

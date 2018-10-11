@@ -129,12 +129,12 @@ via a call to `ein:notebooklist-open'."
                               ein:jupyter-default-server-command))
          (server-cmd-path
           (executable-find (if current-prefix-arg
-                               (read-file-name "Server Command: " default-directory nil nil
+                               (read-file-name "Server command: " default-directory nil nil
                                                default-command)
                              default-command)))
          (notebook-directory 
           (or nbdir
-              (read-directory-name "Notebook Directory: "
+              (read-directory-name "Notebook directory: "
                                    (or *ein:last-jupyter-directory*
                                        ein:jupyter-default-notebook-directory)))))
     (list server-cmd-path notebook-directory)))

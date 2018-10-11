@@ -43,7 +43,8 @@
   :type 'string
   :group 'ein)
 
-(defun ein:process-divine-dir (pid args)
+(defun ein:process-divine-dir (pid args &optional error-buffer)
+  "Returns notebook-dir or cwd of PID.  Supply ERROR-BUFFER to capture stderr"
   (if (string-match "\\bnotebook-dir\\(=\\|\\s-+\\)\\(\\S-+\\)" args)
       (directory-file-name (match-string 2 args))
     (if (executable-find ein:process-lsof)
@@ -51,20 +52,22 @@
          (with-output-to-string 
            (shell-command (format "%s -p %d -a -d cwd -Fn | grep ^n | tail -c +2"
                                   ein:process-lsof pid) 
-                          standard-output))))))
+                          standard-output error-buffer))))))
 
-(defun ein:process-divine-port (pid args)
+(defun ein:process-divine-port (pid args &optional error-buffer)
+  "Returns port on which PID is listening or 0 if none.  Supply ERROR-BUFFER to capture stderr"
   (if (string-match "\\bport\\(=\\|\\s-+\\)\\(\\S-+\\)" args)
       (string-to-number (match-string 2 args))
     (if (executable-find ein:process-lsof)
         (string-to-number
          (ein:trim-right 
-          (with-output-to-string 
+          (with-output-to-string
             (shell-command (format "%s -p %d -a -iTCP -sTCP:LISTEN -Fn | grep ^n | sed \"s/[^0-9]//g\""
                                    ein:process-lsof pid) 
-                           standard-output)))))))
+                           standard-output error-buffer)))))))
 
 (defun ein:process-divine-ip (pid args)
+  "Returns notebook-ip of PID"
   (if (string-match "\\bip\\(=\\|\\s-+\\)\\(\\S-+\\)" args)
       (match-string 2 args)
     "localhost"))
@@ -143,6 +146,7 @@
 
 ;;;###autoload
 (defun ein:process-open-file (filename)
+  "Open FILENAME as a notebook and start a notebook server if necessary."
   (interactive (list (completing-read "Notebook file: " 
                                       (f-files default-directory 
                                                (lambda (file) (and (not (f-hidden? file))
@@ -155,7 +159,7 @@
       (remhash (ein:$process-dir proc) ein:%processes%)
       (setq proc nil))
     (if (null proc)
-        (let ((nbdir (read-directory-name "Notebook Directory: " 
+        (let ((nbdir (read-directory-name "Notebook directory: " 
                                           (ein:process-suitable-notebook-dir filename))))
           (apply #'ein:jupyter-server-start
                  (append (ein:jupyter-server-start--arguments nbdir) 

@@ -426,6 +426,17 @@ node `(org) External links' and Info node `(org) Search options'
 
 ;;;***
 
+;;;### (autoloads nil "ein-process" "ein-process.el" (23487 31139
+;;;;;;  726757 574000))
+;;; Generated autoloads from ein-process.el
+
+(autoload 'ein:process-open-file "ein-process" "\
+Open FILENAME as a notebook and start a notebook server if necessary.
+
+\(fn FILENAME)" t nil)
+
+;;;***
+
 ;;;### (autoloads nil "ein-pseudo-console" "ein-pseudo-console.el"
 ;;;;;;  (23064 59027 198301 987000))
 ;;; Generated autoloads from ein-pseudo-console.el
