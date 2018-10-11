@@ -195,10 +195,8 @@ at point, i.e. any word before then \"(\", if it is present."
                        (format ein:url-localhost-template url-or-port)
                      url-or-port)
         for p in paths
-        do (setq url (concat (ein:trim-right url "/")
-                             "/"
-                             (ein:trim-left p "/")))
-        finally return url))
+        do (setq url (concat (file-name-as-directory url) (ein:trim-left (directory-file-name p) "/")))
+        finally return (directory-file-name url)))
 
 (defun ein:url-no-cache (url)
   "Imitate `cache=false' of `jQuery.ajax'.

@@ -14,7 +14,7 @@
                  do (should (equal (ein:url 8888 a b)
                                    "http://127.0.0.1:8888/a/b")))
         do (should (equal (ein:url 8888 a "b/")
-                          "http://127.0.0.1:8888/a/b/"))))
+                          "http://127.0.0.1:8888/a/b"))))
 
 (ert-deftest ein-trim-simple ()
   (should (equal (ein:trim "a") "a"))
