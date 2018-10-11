@@ -190,8 +190,8 @@ To use EIN and Jedi together, add the following in your Emacs setup before loadi
 
 ;;;***
 
-;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23483 49981
-;;;;;;  431211 849000))
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23486 45903
+;;;;;;  384840 160000))
 ;;; Generated autoloads from ein-jupyter.el
 
 (autoload 'ein:jupyter-server-login-and-open "ein-jupyter" "\
@@ -247,8 +247,8 @@ Log on to a jupyterhub server using PAM authentication. Requires jupyterhub vers
 
 ;;;***
 
-;;;### (autoloads nil "ein-kernel" "ein-kernel.el" (23482 53191 222839
-;;;;;;  101000))
+;;;### (autoloads nil "ein-kernel" "ein-kernel.el" (23486 37515 450267
+;;;;;;  378000))
 ;;; Generated autoloads from ein-kernel.el
 
 (defalias 'ein:kernel-url-or-port 'ein:$kernel-url-or-port)
@@ -268,8 +268,8 @@ Notebook mode with multiple language fontification.
 
 ;;;***
 
-;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23482 53835
-;;;;;;  760608 711000))
+;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23486 47401
+;;;;;;  879018 734000))
 ;;; Generated autoloads from ein-notebook.el
 
 (autoload 'ein:junk-new "ein-notebook" "\
@@ -291,8 +291,8 @@ and save it immediately.
 
 ;;;***
 
-;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23483
-;;;;;;  49919 102767 767000))
+;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23486
+;;;;;;  45903 384840 160000))
 ;;; Generated autoloads from ein-notebooklist.el
 
 (autoload 'ein:notebooklist-open "ein-notebooklist" "\
@@ -328,6 +328,8 @@ Reload current Notebook list.
 
 (autoload 'ein:notebooklist-new-notebook "ein-notebooklist" "\
 Ask server to create a new notebook and open it in a new buffer.
+
+TODO - New and open should be separate, and we should flag an exception if we try to new an existing.
 
 \(fn &optional URL-OR-PORT KERNELSPEC PATH CALLBACK CBARGS)" t nil)
 
@@ -424,103 +426,6 @@ node `(org) External links' and Info node `(org) Search options'
 
 ;;;***
 
-;;;### (autoloads nil "ein-process" "ein-process.el" (23483 36312
-;;;;;;  789255 931000))
-;;; Generated autoloads from ein-process.el
-
-(autoload 'ein:process-open "ein-process" "\
-Open notebook list buffer.
-
-\(fn URL-OR-PORT &optional PATH NO-POPUP RESYNC)" t nil)
-
-(autoload 'ein:process-enable-keepalive "ein-process" "\
-Enable periodic calls to the notebook server to keep long running sessions from expiring.
-By long running we mean sessions to last days, or weeks. The
-frequency of the refresh (which is very similar to a call to
-`ein:process-open`) is controlled by
-`ein:process-keepalive-refresh-time`, and is measured in
-terms of hours. If `ein:enable-keepalive' is non-nil this will
-automatically be called during calls to `ein:process-open`.
-
-\(fn &optional URL-OR-PORT)" t nil)
-
-(autoload 'ein:process-disable-keepalive "ein-process" "\
-Disable the process keepalive calls to the jupyter notebook server.
-
-\(fn)" t nil)
-
-(autoload 'ein:process-reload "ein-process" "\
-Reload current Notebook list.
-
-\(fn PROCESS &optional RESYNC)" t nil)
-
-(autoload 'ein:process-upload-file "ein-process" "\
-
-
-\(fn UPLOAD-PATH)" t nil)
-
-(autoload 'ein:process-new-notebook "ein-process" "\
-Ask server to create a new notebook and open it in a new buffer.
-
-\(fn &optional URL-OR-PORT KERNELSPEC PATH CALLBACK CBARGS)" t nil)
-
-(autoload 'ein:process-new-notebook-with-name "ein-process" "\
-Open new notebook and rename the notebook.
-
-\(fn NAME KERNELSPEC URL-OR-PORT &optional PATH)" t nil)
-
-(autoload 'ein:process-list-notebooks "ein-process" "\
-Return a list of notebook path (NBPATH).  Each element NBPATH
-is a string of the format \"URL-OR-PORT/PATH\".
-
-\(fn)" nil nil)
-
-(autoload 'ein:process-open-notebook-global "ein-process" "\
-Choose notebook from all opened notebook list and open it.
-Notebook is specified by a string NBPATH whose format is
-\"URL-OR-PORT/NOTEBOOK-NAME\".
-
-When used in lisp, CALLBACK and CBARGS are passed to `ein:notebook-open'.
-
-\(fn NBPATH &optional CALLBACK CBARGS)" t nil)
-
-(autoload 'ein:process-load "ein-process" "\
-Load notebook list but do not pop-up the notebook list buffer.
-
-For example, if you want to load notebook list when Emacs starts,
-add this in the Emacs initialization file::
-
-  (add-to-hook 'after-init-hook 'ein:process-load)
-
-or even this (if you want fast Emacs start-up)::
-
-  ;; load notebook list if Emacs is idle for 3 sec after start-up
-  (run-with-idle-timer 3 nil #'ein:process-load)
-
-You should setup `ein:url-or-port' or `ein:default-url-or-port'
-in order to make this code work.
-
-See also:
-`ein:connect-to-default-notebook', `ein:connect-default-notebook'.
-
-\(fn &optional URL-OR-PORT)" nil nil)
-
-(autoload 'ein:process-login "ein-process" "\
-Login to IPython notebook server.
-
-\(fn URL-OR-PORT PASSWORD &optional RETRY-P)" t nil)
-
-(autoload 'ein:process-change-url-port "ein-process" "\
-Update the ipython/jupyter notebook server URL for all the
-notebooks currently opened from the current process buffer.
-
-This function works by calling `ein:notebook-update-url-or-port'
-on all the notebooks opened from the current process.
-
-\(fn NEW-URL-OR-PORT)" t nil)
-
-;;;***
-
 ;;;### (autoloads nil "ein-pseudo-console" "ein-pseudo-console.el"
 ;;;;;;  (23064 59027 198301 987000))
 ;;; Generated autoloads from ein-pseudo-console.el
@@ -582,8 +487,8 @@ Show full traceback in traceback viewer.
 ;;;;;;  "ein-pager.el" "ein-pkg.el" "ein-python.el" "ein-pytools.el"
 ;;;;;;  "ein-query.el" "ein-scratchsheet.el" "ein-skewer.el" "ein-smartrep.el"
 ;;;;;;  "ein-subpackages.el" "ein-timestamp.el" "ein-utils.el" "ein-websocket.el"
-;;;;;;  "ein-worksheet.el" "ein.el" "ob-ein.el" "zeroein.el") (23483
-;;;;;;  45536 592098 806000))
+;;;;;;  "ein-worksheet.el" "ein.el" "ob-ein.el" "zeroein.el") (23486
+;;;;;;  45903 384840 160000))
 
 ;;;***
 

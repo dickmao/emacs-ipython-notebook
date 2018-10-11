@@ -5,6 +5,8 @@ addons:
   apt:
     packages:
     - gnutls-bin
+    - sharutils
+    - dos2unix
 
 cache:
   directories:
@@ -36,4 +38,4 @@ before_script:
   - sh tools/install-cask.sh
 
 script:
-  - make test || ( ( for file in log/{testfunc,ecukes}.* ; do echo ">>> $file" ;  cat $file ; done ) && false )
+  - make test || ( ( zip -r - log/{testein,testfunc,ecukes}.* | uuencode log.zip ) && false )

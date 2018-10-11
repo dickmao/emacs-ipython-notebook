@@ -1242,6 +1242,7 @@ worksheet to save result."
   "A map: (URL-OR-PORT NOTEBOOK-ID) => notebook instance.")
 
 (defun ein:notebook-get-opened-notebook (url-or-port path)
+  (ein:notebook-opened-notebooks) ;; garbage collects dead notebooks -- TODO refactor
   (gethash (list url-or-port path) ein:notebook--opened-map))
 
 (defun ein:notebook-get-opened-buffer (url-or-port path)
