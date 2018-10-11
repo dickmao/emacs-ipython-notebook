@@ -15,7 +15,6 @@ Scenario: New Notebook
   Given I am in notebooklist buffer
   When I clear log expr "ein:log-all-buffer-name"
   And I click on "New Notebook"
-  And I wait 5 seconds
   And I switch to log expr "ein:log-all-buffer-name"
   Then I should see "Opened notebook Untitled"
 
@@ -23,7 +22,6 @@ Scenario: Resync
   Given I am in notebooklist buffer
   When I clear log expr "ein:log-all-buffer-name"
   And I click on "Resync"
-  And I wait 5 seconds
   And I switch to log expr "ein:log-all-buffer-name"
   Then I should see "kernelspecs--complete"
 
