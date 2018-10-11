@@ -38,8 +38,8 @@
                notebook)
       (ein:log 'debug
         "TESTING-GET-UNTITLED0-OR-CREATE creating notebook")
-      (let ((created nil)
-            (kernelspec (ein:get-kernelspec url-or-port "default")))
+      (lexical-let (created
+                    (kernelspec (ein:get-kernelspec url-or-port "default")))
         (ein:notebooklist-new-notebook url-or-port kernelspec path
                                        (lambda (&rest -ignore-)
                                          (setq created t)))
