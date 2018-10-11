@@ -190,8 +190,8 @@ To use EIN and Jedi together, add the following in your Emacs setup before loadi
 
 ;;;***
 
-;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23486 45903
-;;;;;;  384840 160000))
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23487 30952
+;;;;;;  571806 820000))
 ;;; Generated autoloads from ein-jupyter.el
 
 (autoload 'ein:jupyter-server-login-and-open "ein-jupyter" "\
@@ -268,8 +268,8 @@ Notebook mode with multiple language fontification.
 
 ;;;***
 
-;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23486 47401
-;;;;;;  879018 734000))
+;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23487 32560
+;;;;;;  507526 494000))
 ;;; Generated autoloads from ein-notebook.el
 
 (autoload 'ein:junk-new "ein-notebook" "\
@@ -291,8 +291,8 @@ and save it immediately.
 
 ;;;***
 
-;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23486
-;;;;;;  45903 384840 160000))
+;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23487
+;;;;;;  32014 600046 378000))
 ;;; Generated autoloads from ein-notebooklist.el
 
 (autoload 'ein:notebooklist-open "ein-notebooklist" "\
@@ -426,6 +426,17 @@ node `(org) External links' and Info node `(org) Search options'
 
 ;;;***
 
+;;;### (autoloads nil "ein-process" "ein-process.el" (23487 31139
+;;;;;;  726757 574000))
+;;; Generated autoloads from ein-process.el
+
+(autoload 'ein:process-open-file "ein-process" "\
+Open FILENAME as a notebook and start a notebook server if necessary.
+
+\(fn FILENAME)" t nil)
+
+;;;***
+
 ;;;### (autoloads nil "ein-pseudo-console" "ein-pseudo-console.el"
 ;;;;;;  (23064 59027 198301 987000))
 ;;; Generated autoloads from ein-pseudo-console.el
@@ -488,7 +499,7 @@ Show full traceback in traceback viewer.
 ;;;;;;  "ein-query.el" "ein-scratchsheet.el" "ein-skewer.el" "ein-smartrep.el"
 ;;;;;;  "ein-subpackages.el" "ein-timestamp.el" "ein-utils.el" "ein-websocket.el"
 ;;;;;;  "ein-worksheet.el" "ein.el" "ob-ein.el" "zeroein.el") (23486
-;;;;;;  45903 384840 160000))
+;;;;;;  55935 242820 657000))
 
 ;;;***
 
