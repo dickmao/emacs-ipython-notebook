@@ -66,6 +66,7 @@
 (require 'ein-traceback)
 (require 'ein-inspector)
 (require 'ein-shared-output)
+(require 'ein-notebooklist)
 
 
 ;;; Configuration
