@@ -1,6 +1,6 @@
 (source gnu)
 (source melpa)
-;;(source org)
+(source org)
 
 (package "ein" "0.14.2" "Emacs IPython Notebook.")
 (package-file "lisp/ein.el")
@@ -14,8 +14,7 @@
  (depends-on "cl-generic")
  (depends-on "company")
  (depends-on "ess")
- ;;  (depends-on "org" "9.0") ;; doesn't work 
- ;; (depends-on "org-plus-contrib" "9.0.0") ;; see https://github.com/cask/cask/issues/119
+ (depends-on "org-plus-contrib") ;; see https://github.com/cask/cask/issues/119
  (depends-on "markdown-mode")
  (depends-on "smartrep")
  (depends-on "ert-runner")
