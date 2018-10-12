@@ -105,10 +105,6 @@
       (lambda ()
         (ein:testing-flush-queries)))
 
-(When "^I wait for the smoke to clear"
-      (lambda ()
-        (ein:testing-flush-queries)))
-
 (When "^I click on \"\\(.+\\)\"$"
       (lambda (word)
         ;; from espuds "go to word" without the '\\b's
