@@ -91,16 +91,11 @@ session, along with the login token."
   (with-current-buffer (process-buffer %ein:jupyter-server-session%)
     (save-excursion
       (goto-char (point-max))
-      (re-search-backward "otebook [iI]s [rR]unning")
-      (condition-case err
-          (progn (re-search-forward "\\(https?://.*:[0-9]+\\)/\\?token=\\([[:alnum:]]*\\)")
-                 (let ((url-or-port (match-string 1))
-                       (token (match-string 2)))
-                   (setq url-or-port (ein:url (url-or-port (url-generic-parse-url url-or-port))))
-                   (list url-or-port token)))
-        (error (progn (if (re-search-forward "\\(https?://.*:[0-9]+\\)" nil t)
-                          (list (match-string 1) nil)
-                        (list nil nil))))))))
+      (re-search-backward "otebook [iI]s [rR]unning" nil t)
+      (re-search-forward "\\(https?://[^:]+:[0-9]+\\)\\(?:/\\?token=\\([[:alnum:]]+\\)\\)?" nil t)
+      (let ((raw-url (match-string 1))
+            (token (match-string 2)))
+        (list (ein:url raw-url) token)))))
 
 ;;;###autoload
 (defun ein:jupyter-server-login-and-open (&optional no-popup)

@@ -38,6 +38,12 @@
                                     (ein:$notebook-notebook-name notebook))))
               (switch-to-buffer buf-name)
               (Then "I should be in buffer \"%s\"" buf-name))))))
+(When "^I login if necessary"
+      (lambda ()
+        (multiple-value-bind (url-or-port token) (ein:jupyter-server-conn-info)
+          (when token
+            (When "I call \"ein:notebooklist-login\"")
+            (And "I wait for the smoke to clear")))))
 
 (When "^I wait for the smoke to clear"
       (lambda ()

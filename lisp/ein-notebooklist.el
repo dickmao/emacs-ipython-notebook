@@ -199,18 +199,14 @@ To suppress popup, you can pass `ignore' as CALLBACK."
                              url-or-port-list
                              nil nil nil nil
                              default))))
-    (if (string-match "^[0-9]+$" url-or-port)
-        (string-to-number url-or-port)
-      (unless (string-match "^https?:" url-or-port)
-        (error "EIN doesn't want to assume what protocol you are using (http or https), so could you please specify the full URL (e.g http://my.jupyter.url:8888?"))
-      url-or-port)))
+    (ein:url url-or-port)))
 
 ;;;###autoload
 (defun ein:notebooklist-open (url-or-port &optional path no-popup resync)
   "Open notebook list buffer."
   (interactive (list (ein:notebooklist-ask-url-or-port)))
   (unless path (setq path ""))
-  (setq url-or-port (ein:url url-or-port path))
+  (setq url-or-port (ein:url url-or-port)) ;; should work towards not needing this
   (ein:subpackages-load)
   (lexical-let ((url-or-port url-or-port)
                 (path path)
@@ -229,16 +225,17 @@ To suppress popup, you can pass `ignore' as CALLBACK."
             (lexical-let ((d (deferred:new #'identity)))
               (ein:query-kernelspecs url-or-port (lambda ()
                                                    (deferred:callback-post d)))
-              d)
-            (lexical-let ((d (deferred:new #'identity)))
-              (ein:content-query-hierarchy url-or-port (lambda (tree)
-                                                         (deferred:callback-post d)))
               d))
           (deferred:nextc it
             (lambda (&rest ignore)
+              (lexical-let ((d (deferred:new #'identity)))
+                (ein:content-query-hierarchy url-or-port (lambda (tree)
+                                                           (deferred:callback-post d)))
+                d)))
+          (deferred:nextc it
+            (lambda (&rest ignore)
               (ein:content-query-contents url-or-port path success))))
-      (ein:content-query-contents url-or-port path success)))
-  )
+      (ein:content-query-contents url-or-port path success))))
 
 ;; point of order (poo): ein:notebooklist-refresh-kernelspecs requeries the kernelspecs and calls ein:notebooklist-reload.  ein:notebooklist-reload already requeries the kernelspecs in one of its callbacks, so this function seems redundant.
 
@@ -679,7 +676,7 @@ You may find the new one in the notebook list." error)
                                (lambda (&rest ignore)
                                  ;; each directory creates a whole new notebooklist
                                  (ein:notebooklist-open url-or-port
-                                                        (ein:url (ein:$notebooklist-path ein:%notebooklist%) name))))
+                                                        (concat (directory-file-name (ein:$notebooklist-path ein:%notebooklist%)) name))))
                      "Dir")
                     (widget-insert " : " name)
                     (widget-insert "\n"))
@@ -893,7 +890,11 @@ FIMXE: document how to use `ein:notebooklist-find-file-callback'
 (defun ein:notebooklist-login (url-or-port password &optional retry-p)
   "Login to IPython notebook server."
   (interactive (list (ein:notebooklist-ask-url-or-port)
-                     (read-passwd "Password: ")))
+                     (if noninteractive
+                         ;; noninteractive for testing only
+                         (multiple-value-bind (url-or-port token) (ein:jupyter-server-conn-info)
+                           token)
+                         (read-passwd "Password: "))))
   (ein:query-singleton-ajax
    (list 'notebooklist-login url-or-port)
    (ein:url url-or-port "login")
