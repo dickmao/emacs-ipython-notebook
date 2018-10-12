@@ -38,4 +38,4 @@ before_script:
   - sh tools/install-cask.sh
 
 script:
-  - make test || ( ( zip -r - log/{testein,testfunc,ecukes}.* | uuencode log.zip ) && false )
+  - make test || ( ( zip - log/{testein,testfunc,ecukes}.* | uuencode log.zip ) && false )

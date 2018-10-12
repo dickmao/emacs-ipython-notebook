@@ -26,8 +26,7 @@
 
 ;;; Code:
 
-(require 'ein-notebooklist)
-
+(require 'ein-process)
 
 (defvar ein:ipynb-parent-mode 'js-mode
   "A mode (a symbol) to use for parent mode for `ein:ipynb-mode'.
@@ -40,12 +39,12 @@ Note that this variable must be set *before* compiling EIN.")
   "A simple mode for ipynb file.")
 
 (let ((map ein:ipynb-mode-map))
-  (define-key map "\C-c\C-z" 'ein:notebooklist-open-notebook-by-file-name)
-  (define-key map "\C-c\C-o" 'ein:notebooklist-open-notebook-by-file-name)
+  (define-key map "\C-c\C-z" 'ein:process-find-file-callback)
+  (define-key map "\C-c\C-o" 'ein:process-find-file-callback)
   (easy-menu-define ein:ipynb-menu map "EIN IPyNB Mode Menu"
     `("EIN IPyNB File"
       ,@(ein:generate-menu
-         '(("Open notebook" ein:notebooklist-open-notebook-by-file-name))))))
+         '(("Open notebook" ein:process-find-file-callback))))))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '(".*\\.ipynb\\'" . ein:ipynb-mode))

@@ -831,7 +831,8 @@ See also:
                          ;; noninteractive for testing only
                          (multiple-value-bind (url-or-port token) (ein:jupyter-server-conn-info)
                            token)
-                         (read-passwd "Password: "))))
+                         (read-passwd "Password: "))
+                     nil))
   (if (not (null password))
       (ein:query-singleton-ajax
        (list 'notebooklist-login url-or-port)
