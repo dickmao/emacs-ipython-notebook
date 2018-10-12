@@ -32,6 +32,7 @@
 
 (require 'ein-core)
 (require 'ein-notebook)
+(require 'ein-junk)
 (require 'ein-connect)
 (require 'ein-file)
 (require 'ein-contents-api)
