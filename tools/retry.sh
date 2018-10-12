@@ -9,7 +9,7 @@ ANSI_CLEAR="\033[0K"
 travis_retry() {
   local result=0
   local count=1
-  while [ $count -le 3 ]; do
+  while [ $count -le 1 ]; do
     [ $result -ne 0 ] && {
       echo -e "\n${ANSI_RED}The command \"$@\" failed. Retrying, $count of 3.${ANSI_RESET}\n" >&2
     }
