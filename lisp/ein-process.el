@@ -70,7 +70,7 @@
   "Returns notebook-ip of PID"
   (if (string-match "\\bip\\(=\\|\\s-+\\)\\(\\S-+\\)" args)
       (match-string 2 args)
-    "localhost"))
+    ein:url-localhost))
 
 (defstruct ein:$process
   "Hold process variables.
@@ -138,7 +138,7 @@
 
 (defsubst ein:process-url-or-port (proc)
   "Naively construct url-or-port from ein:process PROC's port and ip fields"
-  (format "http://%s:%s" (ein:$process-ip proc) (ein:$process-port proc)))
+  (ein:url (format "http://%s:%s" (ein:$process-ip proc) (ein:$process-port proc))))
 
 (defsubst ein:process-path (proc filename)
   "Construct path by eliding PROC's dir from filename"
@@ -183,6 +183,7 @@
 
 (defun ein:process-find-file-callback ()
   "A callback function for `find-file-hook' to open notebook."
+  (interactive)
   (ein:and-let* ((filename buffer-file-name)
                  ((string-match-p "\\.ipynb$" filename)))
     (ein:process-open-notebook filename #'kill-buffer-if-not-modified)))
