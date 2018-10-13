@@ -110,20 +110,6 @@ via a call to `ein:notebooklist-open'."
       (ein:notebooklist-login url-or-port password
                               (apply-partially #'ein:notebooklist-open url-or-port nil no-popup nil callback)))))
 
-(defsubst ein:jupyter-server--block-on-process ()
-  "Return nil if process orphaned."
-  (let ((buf (get-buffer ein:jupyter-server-buffer-name)))
-    (when (buffer-live-p buf)
-      (loop repeat 20
-            until (null (get-buffer-process buf))
-            do (sleep-for 0 500))
-      (ein:aif (get-buffer-process buf)
-               (progn
-                 (princ (format "Process %s with pid %s orphaned\n" it
-                                (process-id it)))
-                 nil)
-               t))))
-
 (defun ein:jupyter-server-start--arguments (&optional nbdir)
   (let* ((default-command (or *ein:last-jupyter-command*
                               ein:jupyter-default-server-command))

@@ -168,6 +168,10 @@ To suppress popup, you can pass `ignore' as CALLBACK."
                          ((>= version 3) "api/contents"))))
     (ein:url url-or-port base-path path)))
 
+(defun ein:notebooklist-register-proc (proc)
+    "If not already registered, start sentinel for ein:$process PROC and initiate the ein:notebooklist-login-and-open sequence on PROC's port."
+
+)
 (defun ein:notebooklist-get-buffer (url-or-port)
   (get-buffer-create
    (format ein:notebooklist-buffer-name-template url-or-port)))

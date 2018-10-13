@@ -153,22 +153,21 @@
       (remhash (ein:$process-dir proc) ein:%processes%)
       (setq proc nil))
     (if proc
-        (let ((url-or-port (ein:process-url-or-port proc))
-              (path (ein:process-path proc filename)))
-          (if (not (ein:notebooklist-list-get url-or-port))
-            (ein:notebook-open url-or-port path
-                               nil callback)
-            (let* ((nbdir (read-directory-name "Notebook directory: " 
-                                               (ein:process-suitable-notebook-dir filename)))
-                   (path (subseq filename (length (file-name-as-directory nbdir))))
-                   (callback0 (apply-partially (lambda (path* callback*)
-                                                 (ein:notebook-open
-                                                  (car (ein:jupyter-server-conn-info))
-                                                  path* nil callback*))
-                                               path callback)))
-              (apply #'ein:jupyter-server-start
-                     (append (ein:jupyter-server-start--arguments nbdir)
-                             (list nil t callback0))))))))
+        (progn
+          (ein:notebooklist-register-proc proc)
+          (ein:notebook-open (ein:process-url-or-port proc) (ein:process-path proc filename)
+                             nil callback))
+      (let* ((nbdir (read-directory-name "Notebook directory: " 
+                                         (ein:process-suitable-notebook-dir filename)))
+             (path (subseq filename (length (file-name-as-directory nbdir))))
+             (callback0 (apply-partially (lambda (path* callback*)
+                                           (ein:notebook-open
+                                            (car (ein:jupyter-server-conn-info))
+                                            path* nil callback*))
+                                         path callback)))
+        (apply #'ein:jupyter-server-start
+               (append (ein:jupyter-server-start--arguments nbdir)
+                       (list nil t callback0)))))))
 
 (defun ein:process-open-notebook (&optional filename buffer-callback)
   "When FILENAME is unspecified the variable `buffer-file-name'

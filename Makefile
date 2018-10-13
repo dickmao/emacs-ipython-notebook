@@ -26,8 +26,11 @@ quick: test-compile test-unit
 .PHONY: test-no-build
 test-no-build: test-unit test-int autoloads
 
+.PHONY: quick
+quick: test-compile test-unit
+
 .PHONY: test
-test: test-compile test-unit test-int
+test: quick test-int
 
 .PHONY: test-int
 test-int:
