@@ -30,6 +30,7 @@
 (require 'ein-core)
 (require 'ein-jupyter)
 (require 'ein-file)
+(require 'ein-notebooklist)
 (require 'f)
 
 (defcustom ein:process-jupyter-regexp "\\(jupyter\\|ipython\\)\\(-\\|\\s-+\\)note"
@@ -161,8 +162,6 @@
                                            url-or-port path callback)))
           (if (ein:notebooklist-list-get url-or-port)
               (ein:notebook-open url-or-port path nil callback)
-            (add-function :before (process-sentinel proc)
-                          (apply-partially #'ein:notebooklist-proc--sentinel url-or-port))
             (ein:notebooklist-login url-or-port callback1)))
       (let* ((nbdir (read-directory-name "Notebook directory: " 
                                          (ein:process-suitable-notebook-dir filename)))

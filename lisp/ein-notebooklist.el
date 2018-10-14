@@ -173,6 +173,9 @@ To suppress popup, you can pass `ignore' as CALLBACK."
     (ein:url url-or-port base-path path)))
 
 (defun ein:notebooklist-proc--sentinel (url-or-port process event)
+  "TODO Add this to %ein:jupyter-server-session%"
+  ;; (add-function :before (process-sentinel %ein:jupyter-server-session%")
+  ;;               (apply-partially #'ein:notebooklist-proc--sentinel url-or-port))
   (when (not (string= "open" (substring event 0 4)))
     (ein:log 'info "Event %s Process %s url-or-port %s" 
              event (car (process-command process)) url-or-port)
