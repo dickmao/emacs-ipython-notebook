@@ -20,7 +20,7 @@
   (ein:log 'debug "TESTING-GET-NOTEBOOK-BY-NAME start")
   (when path
     (setq notebook-name (format "%s/%s" path notebook-name)))
-  (ein:notebooklist-open url-or-port path)
+  (ein:notebooklist-open* url-or-port path)
   (ein:testing-wait-until (lambda () (and (bufferp (get-buffer (format ein:notebooklist-buffer-name-template url-or-port)))
                                           (ein:notebooklist-get-buffer url-or-port))))
   (with-current-buffer (ein:notebooklist-get-buffer url-or-port)
@@ -57,7 +57,7 @@
 
 (defun ein:testing-delete-notebook (url-or-port notebook &optional path)
   (ein:log 'debug "TESTING-DELETE-NOTEBOOK start")
-  (ein:notebooklist-open url-or-port (ein:$notebook-notebook-path notebook))
+  (ein:notebooklist-open* url-or-port (ein:$notebook-notebook-path notebook))
   (ein:testing-wait-until (lambda ()
                             (bufferp (get-buffer (format ein:notebooklist-buffer-name-template url-or-port)))))
   (with-current-buffer (ein:notebooklist-get-buffer url-or-port)
@@ -79,7 +79,7 @@
 
 (ert-deftest 01-open-notebooklist ()
   (ein:log 'verbose "ERT OPEN-NOTEBOOKLIST start")
-  (ein:notebooklist-open *ein:testing-port* "/" t)
+  (ein:notebooklist-open* *ein:testing-port* "/" t)
   (ein:testing-wait-until
    (lambda ()
      (ein:notebooklist-get-buffer *ein:testing-port*)))
