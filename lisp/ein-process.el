@@ -153,21 +153,27 @@
       (remhash (ein:$process-dir proc) ein:%processes%)
       (setq proc nil))
     (if proc
-        (progn
-          (ein:notebooklist-register-proc proc)
-          (ein:notebook-open (ein:process-url-or-port proc) (ein:process-path proc filename)
-                             nil callback))
+        (let* ((url-or-port (ein:process-url-or-port proc))
+               (path (ein:process-path proc filename))
+               (callback1 (apply-partially (lambda (url-or-port* path* callback* buffer)
+                                             (ein:notebook-open
+                                              url-or-port* path* nil callback*))
+                                           url-or-port path callback)))
+          (if (ein:notebooklist-list-get url-or-port)
+              (ein:notebook-open url-or-port path nil callback)
+            (add-function :before (process-sentinel proc)
+                          (apply-partially #'ein:notebooklist-proc--sentinel url-or-port))
+            (ein:notebooklist-login url-or-port callback1)))
       (let* ((nbdir (read-directory-name "Notebook directory: " 
                                          (ein:process-suitable-notebook-dir filename)))
              (path (subseq filename (length (file-name-as-directory nbdir))))
-             (callback0 (apply-partially (lambda (path* callback*)
+             (callback1 (apply-partially (lambda (path* callback* buffer)
                                            (ein:notebook-open
                                             (car (ein:jupyter-server-conn-info))
                                             path* nil callback*))
                                          path callback)))
         (apply #'ein:jupyter-server-start
-               (append (ein:jupyter-server-start--arguments nbdir)
-                       (list nil t callback0)))))))
+               (list ein:jupyter-default-server-command nbdir nil callback1))))))
 
 (defun ein:process-open-notebook (&optional filename buffer-callback)
   "When FILENAME is unspecified the variable `buffer-file-name'

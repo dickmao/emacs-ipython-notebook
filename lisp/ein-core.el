@@ -136,6 +136,30 @@ the source is in git repository."
 (defvar *ein:kernelspecs* (make-hash-table :test #'equal)
   "url-or-port to kernelspecs")
 
+(defun ein:need-password-required (url-or-port)
+  "Synchronously test whether URL-OR-PORT requires a password."
+  (lexical-let* (answer 
+                 done-p
+                 (callback1 (lambda (ans) (setf answer ans) (setf done-p t))))
+    (ein:query-singleton-ajax
+     (list 'need-password-required url-or-port)
+     (ein:url url-or-port "login")
+     :type "POST"
+     :data (concat "password=" (url-hexify-string ""))
+     :parser #'ignore
+     :complete (apply-partially #'ein:need-password-required--complete url-or-port callback1))
+    (loop repeat 30
+          until done-p
+          do (sleep-for 0 300))
+    answer))
+
+(defun* ein:need-password-required--complete (url-or-port callback &key data response
+                                                          &allow-other-keys 
+                                                          &aux (resp-string (format "STATUS: %s DATA: %s" (request-response-status-code response) data)))
+  (ein:log 'debug "ein:need-password-required--complete %s" resp-string)
+  (when callback
+    (funcall callback (/= 405 (request-response-status-code response)))))
+
 (defun ein:need-kernelspecs (url-or-port)
   "Callers assume ein:query-kernelspecs succeeded.  If not, nil."
   (ein:aif (gethash url-or-port *ein:kernelspecs*) it

@@ -82,11 +82,12 @@ the notebook directory, you can set it here for future calls to
     (set-process-query-on-exit-flag proc nil)
     proc))
 
-(defun ein:jupyter-server-conn-info ()
-  "Return the url and port for the currently running jupyter
-session, along with the login token."
-  (assert (processp %ein:jupyter-server-session%) t "Jupyter server has not started!")
-  (with-current-buffer (process-buffer %ein:jupyter-server-session%)
+(defun ein:jupyter-server-conn-info (&optional buffer)
+  "Return the url-or-port and password for BUFFER."
+  (unless buffer
+    (assert (processp %ein:jupyter-server-session%) t "Jupyter server has not started!")
+    (setq buffer (process-buffer %ein:jupyter-server-session%)))
+  (with-current-buffer buffer
     (save-excursion
       (goto-char (point-max))
       (re-search-backward "otebook [iI]s [rR]unning" nil t)
@@ -96,7 +97,7 @@ session, along with the login token."
         (list (ein:url raw-url) token)))))
 
 ;;;###autoload
-(defun ein:jupyter-server-login-and-open (&optional no-popup callback)
+(defun ein:jupyter-server-login-and-open (&optional callback)
   "Log in and open a notebooklist buffer for a running jupyter notebook server.
 
 Determine if there is a running jupyter server (started via a
@@ -107,8 +108,7 @@ via a call to `ein:notebooklist-open'."
   (interactive)
   (when (buffer-live-p (get-buffer ein:jupyter-server-buffer-name))
     (multiple-value-bind (url-or-port password) (ein:jupyter-server-conn-info)
-      (ein:notebooklist-login url-or-port password
-                              (apply-partially #'ein:notebooklist-open url-or-port nil no-popup nil callback)))))
+      (ein:notebooklist-login url-or-port callback))))
 
 (defun ein:jupyter-server-start--arguments (&optional nbdir)
   (let* ((default-command (or *ein:last-jupyter-command*
@@ -126,8 +126,8 @@ via a call to `ein:notebooklist-open'."
     (list server-cmd-path notebook-directory)))
 
 ;;;###autoload
-(defun ein:jupyter-server-start (server-cmd-path notebook-directory &optional no-login-after-start-p no-popup callback)
-  "Start the jupyter notebook server at the given path.
+(defun ein:jupyter-server-start (server-cmd-path notebook-directory &optional no-login-p login-callback)
+  "Start SERVER-CMD_PATH with `--notebook-dir' NOTEBOOK-DIRECTORY.  Login after connection established unless NO-LOGIN-P is set.  LOGIN-CALLBACK taking single argument, the buffer created by ein:notebooklist-open--finish.
 
 This command opens an asynchronous process running the jupyter
 notebook server and then tries to detect the url and password to
@@ -145,7 +145,18 @@ containing the notebooks the user wants to access.
 The buffer named by `ein:jupyter-server-buffer-name' will contain
 the log of the running jupyter server."
   (interactive
-   (ein:jupyter-server-start--arguments))
+   (let* ((default-command (or *ein:last-jupyter-command*
+                               ein:jupyter-default-server-command))
+          (server-cmd-path
+           (executable-find (if current-prefix-arg
+                                (read-file-name "Server command: " default-directory nil nil
+                                                default-command)
+                              default-command)))
+          (notebook-directory 
+           (read-directory-name "Notebook directory: "
+                                (or *ein:last-jupyter-directory*
+                                    ein:jupyter-default-notebook-directory))))
+     (list server-cmd-path notebook-directory nil #'pop-to-buffer)))
   (assert (and (file-exists-p server-cmd-path)
                (file-executable-p server-cmd-path))
           t "Command %s is not valid!" server-cmd-path)
@@ -156,9 +167,8 @@ the log of the running jupyter server."
   (add-hook 'kill-emacs-hook #'(lambda ()
                                  (ignore-errors (ein:jupyter-server-stop t))))
   (ein:log 'info "Starting notebook server in directory: %s" notebook-directory)
-  (lexical-let ((no-login-after-start-p no-login-after-start-p)
-                (no-popup no-popup)
-                (callback callback)
+  (lexical-let ((no-login-p no-login-p)
+                (login-callback login-callback)
                 (proc (ein:jupyter-server--run ein:jupyter-server-buffer-name
                                                *ein:last-jupyter-command*
                                                *ein:last-jupyter-directory*)))
@@ -172,7 +182,7 @@ the log of the running jupyter server."
             (goto-char (point-min))
             (if (or (search-forward "Notebook is running at:" nil t)
                     (search-forward "Use Control-C" nil t))
-                no-login-after-start-p
+                no-login-p
               (deferred:nextc (deferred:wait (/ ein:jupyter-server-run-timeout 5)) self)))))
       (deferred:nextc it
         (lambda (no-login-p)
@@ -180,8 +190,10 @@ the log of the running jupyter server."
               (progn
                 (ein:log 'warn "Jupyter server failed to start, cancelling operation.")
                 (ein:jupyter-server-stop t))
-            (unless no-login-p
-              (ein:jupyter-server-login-and-open no-popup callback))))))))
+            (if no-login-p
+                (if login-callback 
+                    (ein:log 'warn "ein:jupyter-server-start: no-login-p set so login-callback never runs"))
+              (ein:jupyter-server-login-and-open login-callback))))))))
 
 ;;;###autoload
 (defun ein:jupyter-server-stop (&optional force log)
