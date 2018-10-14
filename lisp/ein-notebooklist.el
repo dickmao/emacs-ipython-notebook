@@ -40,6 +40,7 @@
 (require 'deferred)
 (require 'dash)
 
+(define-obsolete-function-alias ' ein:notebooklist-open 'ein:notebooklist-login)
 
 (defcustom ein:notebooklist-render-order
   '(render-header
@@ -878,7 +879,7 @@ GOT-PASSWORD used for tkf woraround of initial 403 Forbidden red herring."
   (ein:notebooklist-open url-or-port nil nil callback))
 
 (defun ein:notebooklist-login--error-1 (url-or-port)
-  (ein:log 'info "Failed to login to %s" url-or-port))
+  (ein:log 'warn "Login to %s failed" url-or-port))
 
 (defun* ein:notebooklist-login--complete (url-or-port &key data response
                                                       &allow-other-keys 

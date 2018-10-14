@@ -136,20 +136,30 @@ the source is in git repository."
 (defvar *ein:kernelspecs* (make-hash-table :test #'equal)
   "url-or-port to kernelspecs")
 
+(defun* ein:need-password-required--error (url-or-port callback &key symbol-status &allow-other-keys)
+  (funcall callback symbol-status))
+
 (defun ein:need-password-required (url-or-port)
   "Synchronously test whether URL-OR-PORT requires a password."
   (lexical-let* (answer 
                  done-p
-                 (callback1 (lambda (ans) (setf answer ans) (setf done-p t))))
+                 error-p
+                 (callback1 (lambda (ans) (setf answer ans) (setf done-p t)))
+                 (callback-err (lambda (status) (setf error-p status))))
     (ein:query-singleton-ajax
      (list 'need-password-required url-or-port)
      (ein:url url-or-port "login")
+     ;; :error is at the request level, not my level
+     ;; request--safe-apply swallowing errors -- so that's why error-p
+     :error (apply-partially #'ein:need-password-required--error url-or-port callback-err)
      :type "POST"
-     :data (concat "password=" (url-hexify-string ""))
      :parser #'ignore
      :complete (apply-partially #'ein:need-password-required--complete url-or-port callback1))
     (loop repeat 30
           until done-p
+          if error-p
+            do (error "Connection refused: [%s] %s" error-p url-or-port)
+          end
           do (sleep-for 0 300))
     answer))
 
