@@ -334,7 +334,8 @@ automatically be called during calls to `ein:notebooklist-open`."
           (run-hooks 'ein:notebooklist-first-open-hook))
         (when ein:enable-keepalive
           (ein:notebooklist-enable-keepalive (ein:$content-url-or-port content)))
-        (when callback (funcall callback (current-buffer)))
+        (when callback 
+          (funcall callback (current-buffer)))
         (current-buffer)))))
 
 (defun* ein:notebooklist-open-error (url-or-port path
@@ -842,20 +843,50 @@ See also:
 
 ;;; Login
 
+(defun ein:notebooklist-whir (mesg done-p done-callback)
+  "Display MESG with a modest animation until DONE-P returns t."
+  (lexical-let ((mesg mesg)
+                (done-p done-p)
+                (count -1)
+                (done-callback done-callback))
+    ;; kiwanami says "complicated timings of macro expansion of lexical-let, deferred:lambda
+    (deferred:$
+      (deferred:next
+        (deferred:lambda ()
+          (message "%s%s" mesg (make-string (1+ (% (incf count) 3)) ?.) )
+          (if (not (funcall done-p))
+              (deferred:nextc (deferred:wait 300) self))))
+      (deferred:nextc it
+        (lambda (x)
+          (if (and (stringp x) (string= "error" x))
+              (message "%s... failed" mesg)
+            (message "%s... done" mesg))
+          (remove-function command-error-function done-callback))))))
+
 ;;;###autoload
 (defun ein:notebooklist-login (url-or-port callback &optional got-password)
   "Deal with password formalities before main entry of ein:notebooklist-open.
 
 CALLBACK takes one argument, the buffer created by ein:notebooklist-open--success.
 GOT-PASSWORD used for tkf woraround of initial 403 Forbidden red herring."
-  (interactive `(,(ein:notebooklist-ask-url-or-port) nil))
-  (let ((password (or got-password
-                      (if %ein:jupyter-server-session%
-                          (multiple-value-bind (my-url-or-port token) 
-                              (ein:jupyter-server-conn-info)
-                            (if (equal url-or-port my-url-or-port) token
-                              (ein:notebooklist-ask-password url-or-port)))
-                        (ein:notebooklist-ask-password url-or-port)))))
+  (interactive `(,(ein:notebooklist-ask-url-or-port) ,#'pop-to-buffer))
+  (lexical-let* (done-p
+                 (done-callback (lambda (&rest ignore) 
+                                  (setf done-p t)))
+                 (error-callback (lambda (&rest ignore) 
+                                   (setf done-p "error")))
+                 (password (or got-password
+                               (if %ein:jupyter-server-session%
+                                   (multiple-value-bind (my-url-or-port token) 
+                                       (ein:jupyter-server-conn-info)
+                                     (if (equal url-or-port my-url-or-port) token
+                                       (ein:notebooklist-ask-password url-or-port)))
+                                 (ein:notebooklist-ask-password url-or-port)))))
+    (unless callback (setq callback (lambda (buffer))))
+    (when (null got-password)
+      (add-function :after callback done-callback)
+      (add-function :before command-error-function error-callback)
+      (ein:notebooklist-whir "Logging into server" (lambda () done-p) done-callback))
     (if password
         (ein:query-singleton-ajax
          (list 'notebooklist-login url-or-port)
