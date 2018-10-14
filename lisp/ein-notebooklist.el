@@ -849,13 +849,18 @@ See also:
                 (done-p done-p)
                 (count -1)
                 (done-callback done-callback))
-    ;; kiwanami says "complicated timings of macro expansion of lexical-let, deferred:lambda
+    ;; https://github.com/kiwanami/emacs-deferred/issues/28
+    ;; "complicated timings of macro expansion lexical-let, deferred:lambda"
+    ;; using deferred:loop instead
     (deferred:$
-      (deferred:next
-        (deferred:lambda ()
-          (message "%s%s" mesg (make-string (1+ (% (incf count) 3)) ?.) )
-          (if (not (funcall done-p))
-              (deferred:nextc (deferred:wait 300) self))))
+      (deferred:loop (loop for i from 1 below 30 by 1 collect i)
+        (lambda ()
+          (deferred:$
+            (deferred:next
+              (lambda ()
+                (ein:aif (funcall done-p) it
+                  (message "%s%s" mesg (make-string (1+ (% (incf count) 3)) ?.))
+                  (sleep-for 0 375)))))))
       (deferred:nextc it
         (lambda (x)
           (if (and (stringp x) (string= "error" x))
@@ -864,29 +869,36 @@ See also:
           (remove-function command-error-function done-callback))))))
 
 ;;;###autoload
-(defun ein:notebooklist-login (url-or-port callback &optional got-password)
+(defun ein:notebooklist-login-workaround (url-or-port callback errback password)
+  "We need to ask someone about jupyter returning 403 the first time around"
+  (ein:query-singleton-ajax
+   (list 'notebooklist-login url-or-port)
+   (ein:url url-or-port "login")
+   :type "POST"
+   :data (concat "password=" (url-hexify-string password))
+   :parser #'ein:notebooklist-login--parser
+   :complete (apply-partially #'ein:notebooklist-login--complete url-or-port)
+   :error (apply-partially #'ein:notebooklist-login--error url-or-port nil callback errback)
+   :success (apply-partially #'ein:notebooklist-login--success url-or-port callback errback)))
+
+(defun ein:notebooklist-login (url-or-port callback)
   "Deal with password formalities before main entry of ein:notebooklist-open.
 
-CALLBACK takes one argument, the buffer created by ein:notebooklist-open--success.
-GOT-PASSWORD used for tkf woraround of initial 403 Forbidden red herring."
+CALLBACK takes one argument, the buffer created by ein:notebooklist-open--success."
   (interactive `(,(ein:notebooklist-ask-url-or-port) ,#'pop-to-buffer))
   (lexical-let* (done-p
-                 (done-callback (lambda (&rest ignore) 
-                                  (setf done-p t)))
-                 (error-callback (lambda (&rest ignore) 
-                                   (setf done-p "error")))
-                 (password (or got-password
-                               (if %ein:jupyter-server-session%
-                                   (multiple-value-bind (my-url-or-port token) 
-                                       (ein:jupyter-server-conn-info)
-                                     (if (equal url-or-port my-url-or-port) token
-                                       (ein:notebooklist-ask-password url-or-port)))
-                                 (ein:notebooklist-ask-password url-or-port)))))
+                 (done-callback (lambda (&rest ignore) (setf done-p t)))
+                 (errback (lambda (&rest ignore) (setf done-p "error")))
+                 (password (if %ein:jupyter-server-session%
+                               (multiple-value-bind (my-url-or-port token) 
+                                   (ein:jupyter-server-conn-info)
+                                 (if (equal url-or-port my-url-or-port) token
+                                   (ein:notebooklist-ask-password url-or-port)))
+                             (ein:notebooklist-ask-password url-or-port))))
     (unless callback (setq callback (lambda (buffer))))
-    (when (null got-password)
-      (add-function :after callback done-callback)
-      (add-function :before command-error-function error-callback)
-      (ein:notebooklist-whir "Logging into server" (lambda () done-p) done-callback))
+    (add-function :after callback done-callback)
+    (add-function :before command-error-function errback)
+    (ein:notebooklist-whir "Logging into server" (lambda () done-p) done-callback)
     (if password
         (ein:query-singleton-ajax
          (list 'notebooklist-login url-or-port)
@@ -895,8 +907,8 @@ GOT-PASSWORD used for tkf woraround of initial 403 Forbidden red herring."
          :data (concat "password=" (url-hexify-string password))
          :parser #'ein:notebooklist-login--parser
          :complete (apply-partially #'ein:notebooklist-login--complete url-or-port)
-         :error (apply-partially #'ein:notebooklist-login--error url-or-port password callback got-password)
-         :success (apply-partially #'ein:notebooklist-login--success url-or-port callback))
+         :error (apply-partially #'ein:notebooklist-login--error url-or-port password callback errback)
+         :success (apply-partially #'ein:notebooklist-login--success url-or-port callback errback))
       (ein:log 'verbose "Skip password login %s" url-or-port)
       (ein:notebooklist-open* url-or-port nil nil callback))))
 
@@ -908,32 +920,32 @@ GOT-PASSWORD used for tkf woraround of initial 403 Forbidden red herring."
   (ein:log 'info "Login to %s complete." url-or-port)
   (ein:notebooklist-open* url-or-port nil nil callback))
 
-(defun ein:notebooklist-login--error-1 (url-or-port)
-  (ein:log 'warn "Login to %s failed" url-or-port))
+(defun ein:notebooklist-login--error-1 (url-or-port errback)
+  (ein:log 'error "Login to %s failed" url-or-port)
+  (funcall errback))
 
 (defun* ein:notebooklist-login--complete (url-or-port &key data response
                                                       &allow-other-keys 
                                                       &aux (resp-string (format "STATUS: %s DATA: %s" (request-response-status-code response) data)))
   (ein:log 'debug "ein:notebooklist-login--complete %s" resp-string))
 
-(defun* ein:notebooklist-login--success (url-or-port callback 
+(defun* ein:notebooklist-login--success (url-or-port callback errback
                                                      &key data
                                                      &allow-other-keys)
   (if (plist-get data :bad-page)
-      (ein:notebooklist-login--error-1 url-or-port)
+      (ein:notebooklist-login--error-1 url-or-port errback)
     (ein:notebooklist-login--success-1 url-or-port callback)))
 
 (defun* ein:notebooklist-login--error
-    (url-or-port password callback retry-p &key
+    (url-or-port password callback errback &key
                  data
                  symbol-status
                  response
                  &allow-other-keys
                  &aux
                  (response-status (request-response-status-code response)))
-  (cond ((and (eq response-status 403)
-              (not retry-p))
-         (ein:notebooklist-login url-or-port callback password))
+  (cond ((and (eq response-status 403) password)
+         (ein:notebooklist-login-workaround url-or-port callback errback password))
         ((or
            ;; workaround for url-retrieve backend
            (and (eq symbol-status 'timeout)
@@ -944,7 +956,7 @@ GOT-PASSWORD used for tkf woraround of initial 403 Forbidden red herring."
                 (ein:aand (car (request-response-history response))
                           (request-response-header it "set-cookie"))))
          (ein:notebooklist-login--success-1 url-or-port callback))
-        (t (ein:notebooklist-login--error-1 url-or-port))))
+        (t (ein:notebooklist-login--error-1 url-or-port errback))))
 
 ;;;###autoload
 
