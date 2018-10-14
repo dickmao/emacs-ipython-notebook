@@ -121,6 +121,7 @@
         with seen = (mapcar #'ein:$process-pid (ein:hash-vals ein:%processes%))
         if (and (null (member pid seen))
                 (string-match ein:process-jupyter-regexp (alist-get 'comm attrs)))
+          ;; bummer should use output of jupyter notebook list --json
           do (ein:and-let* ((dir (ein:process-divine-dir pid args))
                             (port (ein:process-divine-port pid args))
                             (ip (ein:process-divine-ip pid args)))

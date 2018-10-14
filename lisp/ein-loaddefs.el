@@ -165,12 +165,17 @@ change in its input area.
 ;;;***
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-ipynb-mode" "ein-ipynb-mode.el" (23493
 ;;;;;;  17873 273427 536000))
 =======
 ;;;### (autoloads nil "ein-ipynb-mode" "ein-ipynb-mode.el" (23490
 ;;;;;;  16717 147192 543000))
 >>>>>>> diverging notebooklist-login branch from without-notebooklist
+=======
+;;;### (autoloads nil "ein-ipynb-mode" "ein-ipynb-mode.el" (23491
+;;;;;;  38785 555213 4000))
+>>>>>>> password and token are different notions
 ;;; Generated autoloads from ein-ipynb-mode.el
 
 (autoload 'ein:ipynb-mode "ein-ipynb-mode" "\
@@ -240,9 +245,14 @@ and save it immediately.
 
 ;;;***
 
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23490 38934
 ;;;;;;  421747 512000))
 >>>>>>> diverging notebooklist-login branch from without-notebooklist
+=======
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23491 47562
+;;;;;;  789804 346000))
+>>>>>>> password and token are different notions
 ;;; Generated autoloads from ein-jupyter.el
 
 (autoload 'ein:jupyter-server-login-and-open "ein-jupyter" "\
@@ -347,8 +357,12 @@ Notebook mode with multiple language fontification.
 ;;;;;;  29420 878320 913000))
 =======
 ;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23491
+<<<<<<< HEAD
 ;;;;;;  37913 121990 678000))
 >>>>>>> diverging notebooklist-login branch from without-notebooklist
+=======
+;;;;;;  47226 584671 632000))
+>>>>>>> password and token are different notions
 ;;; Generated autoloads from ein-notebooklist.el
 
 (autoload 'ein:notebooklist-enable-keepalive "ein-notebooklist" "\
@@ -428,7 +442,7 @@ See also:
 (autoload 'ein:notebooklist-login-workaround "ein-notebooklist" "\
 We need to ask someone about jupyter returning 403 the first time around
 
-\(fn URL-OR-PORT CALLBACK ERRBACK PASSWORD)" nil nil)
+\(fn URL-OR-PORT CALLBACK ERRBACK TOKEN)" nil nil)
 
 (autoload 'ein:notebooklist-change-url-port "ein-notebooklist" "\
 Update the ipython/jupyter notebook server URL for all the
@@ -553,8 +567,12 @@ Show full traceback in traceback viewer.
 ;;;;;;  "ein-python.el" "ein-pytools.el" "ein-query.el" "ein-scratchsheet.el"
 ;;;;;;  "ein-skewer.el" "ein-smartrep.el" "ein-subpackages.el" "ein-timestamp.el"
 ;;;;;;  "ein-utils.el" "ein-websocket.el" "ein-worksheet.el" "ein.el"
+<<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23491 36978 72481 625000))
 >>>>>>> diverging notebooklist-login branch from without-notebooklist
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23491 41909 666424 627000))
+>>>>>>> password and token are different notions
 
 ;;;***
 

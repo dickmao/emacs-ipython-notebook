@@ -185,9 +185,27 @@ To suppress popup, you can pass `ignore' as CALLBACK."
   (get-buffer-create
    (format ein:notebooklist-buffer-name-template url-or-port)))
 
-(defun ein:notebooklist-ask-password (url-or-port)
-  (and (ein:need-password-required url-or-port)
-       (read-passwd "Password: ")))
+(defun ein:crib-token (url-or-port)
+  (ein:aif (loop for line in (process-lines ein:jupyter-default-server-command
+                                            "notebook" "list" "--json")
+                 with token0
+                 with password0
+                 when (destructuring-bind 
+                          (&key password url token &allow-other-keys)
+                          (ein:json-read-from-string line)
+                        (prog1 (equal (ein:url url) url-or-port)
+                          (setq password0 password) ;; t or :json-false
+                          (setq token0 token)))
+                 return (list password0 token0))
+      it (list nil nil)))
+
+(defun ein:notebooklist-token-or-password (url-or-port)
+  "Tokens and passwords are distinct notions."
+  (multiple-value-bind (password-p token) (ein:crib-token url-or-port)
+    (cond ((eql password-p t) (read-passwd "Password: "))
+          ((and (stringp token) (eql password-p :json-false)) token)
+          ((ein:need-password-required url-or-port) (read-passwd "Password: "))
+          (t nil))))
 
 (defun ein:notebooklist-ask-url-or-port ()
   (let* ((url-or-port-list (mapcar (lambda (x) (format "%s" x))
@@ -863,7 +881,7 @@ See also:
               (lambda ()
                 (ein:aif (funcall done-p) it
                   (message "%s%s" mesg (make-string (1+ (% (incf count) 3)) ?.))
-                  (sleep-for 0 375)))))))
+                  (sleep-for 0 800)))))))
       (deferred:nextc it
         (lambda (x)
           (if (and (stringp x) (string= "error" x))
@@ -872,47 +890,47 @@ See also:
           (remove-function command-error-function done-callback))))))
 
 ;;;###autoload
-(defun ein:notebooklist-login-workaround (url-or-port callback errback password)
+(defun ein:notebooklist-login-workaround (url-or-port callback errback token)
   "We need to ask someone about jupyter returning 403 the first time around"
   (ein:query-singleton-ajax
    (list 'notebooklist-login url-or-port)
    (ein:url url-or-port "login")
    :type "POST"
-   :data (concat "password=" (url-hexify-string password))
+   :data (concat "password=" (url-hexify-string token))
    :parser #'ein:notebooklist-login--parser
    :complete (apply-partially #'ein:notebooklist-login--complete url-or-port)
    :error (apply-partially #'ein:notebooklist-login--error url-or-port nil callback errback)
    :success (apply-partially #'ein:notebooklist-login--success url-or-port callback errback)))
 
 (defun ein:notebooklist-login (url-or-port callback)
-  "Deal with password formalities before main entry of ein:notebooklist-open.
+  "Deal with token formalities before main entry of ein:notebooklist-open.
 
 CALLBACK takes one argument, the buffer created by ein:notebooklist-open--success."
   (interactive `(,(ein:notebooklist-ask-url-or-port) ,#'pop-to-buffer))
   (lexical-let* (done-p
                  (done-callback (lambda (&rest ignore) (setf done-p t)))
                  (errback (lambda (&rest ignore) (setf done-p "error")))
-                 (password (if %ein:jupyter-server-session%
+                 (token (if %ein:jupyter-server-session%
                                (multiple-value-bind (my-url-or-port token) 
                                    (ein:jupyter-server-conn-info)
                                  (if (equal url-or-port my-url-or-port) token
-                                   (ein:notebooklist-ask-password url-or-port)))
-                             (ein:notebooklist-ask-password url-or-port))))
+                                   (ein:notebooklist-token-or-password url-or-port)))
+                             (ein:notebooklist-token-or-password url-or-port))))
     (unless callback (setq callback (lambda (buffer))))
     (add-function :after callback done-callback)
     (add-function :before command-error-function errback)
     (ein:notebooklist-whir "Logging into server" (lambda () done-p) done-callback)
-    (if password
+    (if token
         (ein:query-singleton-ajax
          (list 'notebooklist-login url-or-port)
          (ein:url url-or-port "login")
          :type "POST"
-         :data (concat "password=" (url-hexify-string password))
+         :data (concat "password=" (url-hexify-string token))
          :parser #'ein:notebooklist-login--parser
          :complete (apply-partially #'ein:notebooklist-login--complete url-or-port)
-         :error (apply-partially #'ein:notebooklist-login--error url-or-port password callback errback)
+         :error (apply-partially #'ein:notebooklist-login--error url-or-port token callback errback)
          :success (apply-partially #'ein:notebooklist-login--success url-or-port callback errback))
-      (ein:log 'verbose "Skip password login %s" url-or-port)
+      (ein:log 'verbose "Skipping passworded login %s" url-or-port)
       (ein:notebooklist-open* url-or-port nil nil callback))))
 
 (defun ein:notebooklist-login--parser ()
@@ -940,15 +958,15 @@ CALLBACK takes one argument, the buffer created by ein:notebooklist-open--succes
     (ein:notebooklist-login--success-1 url-or-port callback)))
 
 (defun* ein:notebooklist-login--error
-    (url-or-port password callback errback &key
+    (url-or-port token callback errback &key
                  data
                  symbol-status
                  response
                  &allow-other-keys
                  &aux
                  (response-status (request-response-status-code response)))
-  (cond ((and (eq response-status 403) password)
-         (ein:notebooklist-login-workaround url-or-port callback errback password))
+  (cond ((and (eq response-status 403) token)
+         (ein:notebooklist-login-workaround url-or-port callback errback token))
         ((or
            ;; workaround for url-retrieve backend
            (and (eq symbol-status 'timeout)
