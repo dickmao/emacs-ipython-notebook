@@ -40,7 +40,6 @@ Scenario: notebooklist-open works interactively (should be same notebooklist as 
   When I clear log expr "ein:log-all-buffer-name"
   And I login if necessary
   And I open notebooklist
-  And I wait for the smoke to clear
   And I switch to log expr "ein:log-all-buffer-name"
   Then I should not see "[warn]"
   And I should not see "[error]"

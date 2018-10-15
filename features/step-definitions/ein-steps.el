@@ -15,7 +15,7 @@
           (sit-for 0.8)
           )))
 
-(When "^I wait \\([.0-9]+\\) seconds$"
+(When "^I wait \\([.0-9]+\\) seconds?$"
       (lambda (seconds)
         (sit-for (string-to-number seconds))))
 
@@ -48,6 +48,12 @@
             (When "I call \"ein:notebooklist-open\"")
             (And "I wait for the smoke to clear")))))
 
+(When "^I login to \\([.0-9]+\\)$"
+      (lambda (port)
+        (with-demoted-errors "demoted: %s"
+          (ein:notebooklist-login (ein:url port) nil)
+          (And "I wait for the smoke to clear"))))
+
 (When "^I login if necessary"
       (lambda ()
         (multiple-value-bind (url-or-port token) (ein:jupyter-server-conn-info)
@@ -58,16 +64,6 @@
                        (lambda (&rest args) token)))
               (When "I call \"ein:notebooklist-login\"")
               (And "I wait for the smoke to clear"))))))
-
-(When "^I wait for the smoke to clear"
-      (lambda ()
-        (ein:testing-flush-queries)))
-
-(When "^I enter the prevailing port"
-      (lambda ()
-        (multiple-value-bind (url-or-port token) (ein:jupyter-server-conn-info)
-          (let ((parsed-url (url-generic-parse-url url-or-port)))
-            (When "I type \"%d\"") (url-port parsed-url)))))
 
 (When "^I wait for the smoke to clear"
       (lambda ()
