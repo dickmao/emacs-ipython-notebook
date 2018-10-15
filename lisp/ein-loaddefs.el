@@ -5,6 +5,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-company" "ein-company.el" (23493 9958
 ;;;;;;  805717 384000))
 =======
@@ -15,6 +16,10 @@
 ;;;### (autoloads nil "ein-company" "ein-company.el" (23492 53560
 ;;;;;;  409171 74000))
 >>>>>>> fix an autoload
+=======
+;;;### (autoloads nil "ein-company" "ein-company.el" (23492 58432
+;;;;;;  954001 938000))
+>>>>>>> fix login test
 ;;; Generated autoloads from ein-company.el
 
 (autoload 'ein:company-backend "ein-company" "\
@@ -24,6 +29,7 @@
 
 ;;;***
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 ;;;### (autoloads nil "ein-connect" "ein-connect.el" (23493 9958
@@ -36,6 +42,10 @@
 ;;;### (autoloads nil "ein-connect" "ein-connect.el" (23492 53560
 ;;;;;;  409171 74000))
 >>>>>>> fix an autoload
+=======
+;;;### (autoloads nil "ein-connect" "ein-connect.el" (23492 58432
+;;;;;;  954001 938000))
+>>>>>>> fix login test
 ;;; Generated autoloads from ein-connect.el
 
 (autoload 'ein:connect-to-notebook-command "ein-connect" "\
@@ -160,6 +170,7 @@ change in its input area.
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-inspector" "ein-inspector.el" (23492 55139
 ;;;;;;  988670 138000))
 =======
@@ -170,6 +181,10 @@ change in its input area.
 ;;;### (autoloads nil "ein-inspector" "ein-inspector.el" (23492 41246
 ;;;;;;  990750 336000))
 >>>>>>> fix an autoload
+=======
+;;;### (autoloads nil "ein-inspector" "ein-inspector.el" (23492 55139
+;;;;;;  988670 138000))
+>>>>>>> fix login test
 ;;; Generated autoloads from ein-inspector.el
 
 (autoload 'ein:inspect-object "ein-inspector" "\
@@ -194,8 +209,12 @@ change in its input area.
 >>>>>>> password and token are different notions
 =======
 ;;;### (autoloads nil "ein-ipynb-mode" "ein-ipynb-mode.el" (23492
+<<<<<<< HEAD
 ;;;;;;  53836 921170 510000))
 >>>>>>> fix an autoload
+=======
+;;;;;;  58540 874734 17000))
+>>>>>>> fix login test
 ;;; Generated autoloads from ein-ipynb-mode.el
 
 (autoload 'ein:ipynb-mode "ein-ipynb-mode" "\
@@ -209,6 +228,7 @@ A simple mode for ipynb file.
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-jedi" "ein-jedi.el" (23492 55139 988670
 ;;;;;;  138000))
 =======
@@ -219,6 +239,10 @@ A simple mode for ipynb file.
 ;;;### (autoloads nil "ein-jedi" "ein-jedi.el" (23492 41246 990750
 ;;;;;;  336000))
 >>>>>>> fix an autoload
+=======
+;;;### (autoloads nil "ein-jedi" "ein-jedi.el" (23492 55139 988670
+;;;;;;  138000))
+>>>>>>> fix login test
 ;;; Generated autoloads from ein-jedi.el
 
 (autoload 'ein:jedi-complete "ein-jedi" "\
@@ -247,6 +271,7 @@ To use EIN and Jedi together, add the following in your Emacs setup before loadi
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23493 17873
 ;;;;;;  273427 536000))
 =======
@@ -256,6 +281,10 @@ To use EIN and Jedi together, add the following in your Emacs setup before loadi
 ;;;### (autoloads nil "ein-junk" "ein-junk.el" (23492 53657 173127
 ;;;;;;  776000))
 >>>>>>> fix an autoload
+=======
+;;;### (autoloads nil "ein-junk" "ein-junk.el" (23492 58460 406188
+;;;;;;  391000))
+>>>>>>> fix login test
 ;;; Generated autoloads from ein-junk.el
 
 (autoload 'ein:junk-new "ein-junk" "\
@@ -277,6 +306,7 @@ and save it immediately.
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23490 38934
 ;;;;;;  421747 512000))
 >>>>>>> diverging notebooklist-login branch from without-notebooklist
@@ -288,6 +318,10 @@ and save it immediately.
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23492 53836
 ;;;;;;  933170 517000))
 >>>>>>> fix an autoload
+=======
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23492 58540
+;;;;;;  886734 98000))
+>>>>>>> fix login test
 ;;; Generated autoloads from ein-jupyter.el
 
 (autoload 'ein:jupyter-server-login-and-open "ein-jupyter" "\
@@ -342,8 +376,12 @@ there is no running server then no action will be taken.
 >>>>>>> diverging notebooklist-login branch from without-notebooklist
 =======
 ;;;### (autoloads nil "ein-jupyterhub" "ein-jupyterhub.el" (23492
+<<<<<<< HEAD
 ;;;;;;  53809 41154 987000))
 >>>>>>> fix an autoload
+=======
+;;;;;;  58521 734604 352000))
+>>>>>>> fix login test
 ;;; Generated autoloads from ein-jupyterhub.el
 
 (autoload 'ein:jupyterhub-connect "ein-jupyterhub" "\
@@ -354,12 +392,17 @@ Log on to a jupyterhub server using PAM authentication. Requires jupyterhub vers
 ;;;***
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-kernel" "ein-kernel.el" (23492 55139 988670
 ;;;;;;  138000))
 =======
 ;;;### (autoloads nil "ein-kernel" "ein-kernel.el" (23492 53560 409171
 ;;;;;;  74000))
 >>>>>>> fix an autoload
+=======
+;;;### (autoloads nil "ein-kernel" "ein-kernel.el" (23492 55139 988670
+;;;;;;  138000))
+>>>>>>> fix login test
 ;;; Generated autoloads from ein-kernel.el
 
 (defalias 'ein:kernel-url-or-port 'ein:$kernel-url-or-port)
@@ -368,6 +411,7 @@ Log on to a jupyterhub server using PAM authentication. Requires jupyterhub vers
 
 ;;;***
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 ;;;### (autoloads nil "ein-multilang" "ein-multilang.el" (23492 55139
@@ -380,6 +424,10 @@ Log on to a jupyterhub server using PAM authentication. Requires jupyterhub vers
 ;;;### (autoloads nil "ein-multilang" "ein-multilang.el" (23492 41246
 ;;;;;;  990750 336000))
 >>>>>>> fix an autoload
+=======
+;;;### (autoloads nil "ein-multilang" "ein-multilang.el" (23492 55139
+;;;;;;  988670 138000))
+>>>>>>> fix login test
 ;;; Generated autoloads from ein-multilang.el
 
 (autoload 'ein:notebook-multilang-mode "ein-multilang" "\
@@ -389,6 +437,7 @@ Notebook mode with multiple language fontification.
 
 ;;;***
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 ;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23493 17873
@@ -401,6 +450,10 @@ Notebook mode with multiple language fontification.
 ;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23492 53657
 ;;;;;;  177127 776000))
 >>>>>>> fix an autoload
+=======
+;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23492 58460
+;;;;;;  406188 391000))
+>>>>>>> fix login test
 ;;; Generated autoloads from ein-notebook.el
 
 (defalias 'ein:notebook-name 'ein:$notebook-notebook-name)
@@ -421,8 +474,12 @@ Notebook mode with multiple language fontification.
 >>>>>>> password and token are different notions
 =======
 ;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23492
+<<<<<<< HEAD
 ;;;;;;  54449 130026 579000))
 >>>>>>> fix an autoload
+=======
+;;;;;;  60403 221237 426000))
+>>>>>>> fix login test
 ;;; Generated autoloads from ein-notebooklist.el
 
 (autoload 'ein:notebooklist-enable-keepalive "ein-notebooklist" "\
@@ -596,6 +653,7 @@ shared output buffer.  You can open the buffer by the command
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-traceback" "ein-traceback.el" (23492 55139
 ;;;;;;  992670 180000))
 =======
@@ -606,6 +664,10 @@ shared output buffer.  You can open the buffer by the command
 ;;;### (autoloads nil "ein-traceback" "ein-traceback.el" (23492 41246
 ;;;;;;  990750 336000))
 >>>>>>> fix an autoload
+=======
+;;;### (autoloads nil "ein-traceback" "ein-traceback.el" (23492 55139
+;;;;;;  992670 180000))
+>>>>>>> fix login test
 ;;; Generated autoloads from ein-traceback.el
 
 (autoload 'ein:tb-show "ein-traceback" "\
@@ -636,6 +698,7 @@ Show full traceback in traceback viewer.
 ;;;;;;  "ein-utils.el" "ein-websocket.el" "ein-worksheet.el" "ein.el"
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23491 36978 72481 625000))
 >>>>>>> diverging notebooklist-login branch from without-notebooklist
 =======
@@ -644,6 +707,9 @@ Show full traceback in traceback viewer.
 =======
 ;;;;;;  "ob-ein.el" "zeroein.el") (23492 53836 933170 517000))
 >>>>>>> fix an autoload
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23492 62890 291367 904000))
+>>>>>>> fix login test
 
 ;;;***
 

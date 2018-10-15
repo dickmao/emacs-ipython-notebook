@@ -863,6 +863,18 @@ See also:
 
 ;;; Login
 
+(defun ein:notebooklist-login-workaround (url-or-port callback errback token)
+  "We need to spend an hour tracing jupyter's returning 403 the first time around"
+  (ein:query-singleton-ajax
+   (list 'notebooklist-login url-or-port)
+   (ein:url url-or-port "login")
+   :type "POST"
+   :data (concat "password=" (url-hexify-string token))
+   :parser #'ein:notebooklist-login--parser
+   :complete (apply-partially #'ein:notebooklist-login--complete url-or-port)
+   :error (apply-partially #'ein:notebooklist-login--error url-or-port nil callback errback)
+   :success (apply-partially #'ein:notebooklist-login--success url-or-port callback errback)))
+
 (defun ein:notebooklist-whir (mesg done-p done-callback)
   "Display MESG with a modest animation until DONE-P returns t."
   (lexical-let ((mesg mesg)
@@ -887,18 +899,6 @@ See also:
               (message "%s... failed" mesg)
             (message "%s... done" mesg))
           (remove-function command-error-function done-callback))))))
-
-(defun ein:notebooklist-login-workaround (url-or-port callback errback token)
-  "We need to spend an hour tracing jupyter's returning 403 the first time around"
-  (ein:query-singleton-ajax
-   (list 'notebooklist-login url-or-port)
-   (ein:url url-or-port "login")
-   :type "POST"
-   :data (concat "password=" (url-hexify-string token))
-   :parser #'ein:notebooklist-login--parser
-   :complete (apply-partially #'ein:notebooklist-login--complete url-or-port)
-   :error (apply-partially #'ein:notebooklist-login--error url-or-port nil callback errback)
-   :success (apply-partially #'ein:notebooklist-login--success url-or-port callback errback)))
 
 ;;;###autoload
 (defun ein:notebooklist-login (url-or-port callback)

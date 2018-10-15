@@ -159,7 +159,8 @@ the source is in git repository."
      :error (apply-partially #'ein:need-password-required--error url-or-port callback-err)
      :type "POST"
      :parser #'ignore
-     :complete (apply-partially #'ein:need-password-required--complete url-or-port callback1))
+     :success (apply-partially #'ein:need-password-required--success url-or-port callback1)
+     :complete (apply-partially #'ein:need-password-required--complete url-or-port))
     (loop repeat 30
           until done-p
           if error-p
@@ -171,12 +172,16 @@ the source is in git repository."
 (defun* ein:need-password-required--error (url-or-port callback &key symbol-status &allow-other-keys)
   (funcall callback symbol-status))
 
-(defun* ein:need-password-required--complete (url-or-port callback &key data response
+(defun* ein:need-password-required--success (url-or-port callback &key data response &allow-other-keys)
+  (when callback
+    (let ((explicitly-dont-need 
+           (ein:aand (request-response-status-code response) (= 405 it))))
+      (funcall callback (not explicitly-dont-need)))))
+
+(defun* ein:need-password-required--complete (url-or-port &key data response
                                                           &allow-other-keys 
                                                           &aux (resp-string (format "STATUS: %s DATA: %s" (request-response-status-code response) data)))
-  (ein:log 'debug "ein:need-password-required--complete %s" resp-string)
-  (when callback
-    (funcall callback (ein:aand (request-response-status-code response) (/= 405 it)))))
+  (ein:log 'debug "ein:need-password-required--complete %s" resp-string))
 
 (defun ein:need-kernelspecs (url-or-port)
   "Callers assume ein:query-kernelspecs succeeded.  If not, nil."
