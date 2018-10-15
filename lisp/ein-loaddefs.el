@@ -3,8 +3,8 @@
 ;;; Code:
 
 
-;;;### (autoloads nil "ein-company" "ein-company.el" (23492 63260
-;;;;;;  559332 457000))
+;;;### (autoloads nil "ein-company" "ein-company.el" (23493 7595
+;;;;;;  864786 496000))
 ;;; Generated autoloads from ein-company.el
 
 (autoload 'ein:company-backend "ein-company" "\
@@ -14,8 +14,8 @@
 
 ;;;***
 
-;;;### (autoloads nil "ein-connect" "ein-connect.el" (23492 63260
-;;;;;;  559332 457000))
+;;;### (autoloads nil "ein-connect" "ein-connect.el" (23493 7595
+;;;;;;  864786 496000))
 ;;; Generated autoloads from ein-connect.el
 
 (autoload 'ein:connect-to-notebook-command "ein-connect" "\
@@ -149,8 +149,8 @@ change in its input area.
 
 ;;;***
 
-;;;### (autoloads nil "ein-ipynb-mode" "ein-ipynb-mode.el" (23492
-;;;;;;  63260 559332 457000))
+;;;### (autoloads nil "ein-ipynb-mode" "ein-ipynb-mode.el" (23493
+;;;;;;  7595 864786 496000))
 ;;; Generated autoloads from ein-ipynb-mode.el
 
 (autoload 'ein:ipynb-mode "ein-ipynb-mode" "\
@@ -190,8 +190,8 @@ To use EIN and Jedi together, add the following in your Emacs setup before loadi
 
 ;;;***
 
-;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23492 63268
-;;;;;;  931411 393000))
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23493 7595
+;;;;;;  864786 496000))
 ;;; Generated autoloads from ein-jupyter.el
 
 (autoload 'ein:jupyter-server-login-and-open "ein-jupyter" "\
@@ -236,8 +236,8 @@ there is no running server then no action will be taken.
 
 ;;;***
 
-;;;### (autoloads nil "ein-jupyterhub" "ein-jupyterhub.el" (23492
-;;;;;;  63260 559332 457000))
+;;;### (autoloads nil "ein-jupyterhub" "ein-jupyterhub.el" (23493
+;;;;;;  7595 864786 496000))
 ;;; Generated autoloads from ein-jupyterhub.el
 
 (autoload 'ein:jupyterhub-connect "ein-jupyterhub" "\
@@ -268,8 +268,8 @@ Notebook mode with multiple language fontification.
 
 ;;;***
 
-;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23492 63260
-;;;;;;  559332 457000))
+;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23493 7595
+;;;;;;  868786 527000))
 ;;; Generated autoloads from ein-notebook.el
 
 (autoload 'ein:junk-new "ein-notebook" "\
@@ -291,8 +291,8 @@ and save it immediately.
 
 ;;;***
 
-;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23492
-;;;;;;  63268 931411 393000))
+;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23493
+;;;;;;  7595 868786 527000))
 ;;; Generated autoloads from ein-notebooklist.el
 
 (autoload 'ein:notebooklist-open "ein-notebooklist" "\
@@ -487,8 +487,8 @@ Show full traceback in traceback viewer.
 ;;;;;;  "ein-pager.el" "ein-pkg.el" "ein-python.el" "ein-pytools.el"
 ;;;;;;  "ein-query.el" "ein-scratchsheet.el" "ein-skewer.el" "ein-smartrep.el"
 ;;;;;;  "ein-subpackages.el" "ein-timestamp.el" "ein-utils.el" "ein-websocket.el"
-;;;;;;  "ein-worksheet.el" "ein.el" "ob-ein.el" "zeroein.el") (23492
-;;;;;;  63260 559332 457000))
+;;;;;;  "ein-worksheet.el" "ein.el" "ob-ein.el" "zeroein.el") (23493
+;;;;;;  7595 868786 527000))
 
 ;;;***
 

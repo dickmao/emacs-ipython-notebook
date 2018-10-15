@@ -1,8 +1,10 @@
 (When "^I clear log expr \"\\(.+\\)\"$"
       (lambda (log-expr)
-        (with-current-buffer (symbol-value (intern log-expr))
-          (let ((inhibit-read-only t))
-            (erase-buffer)))))
+        (let ((buffer (symbol-value (intern log-expr))))
+          (when (buffer-live-p buffer)
+            (with-current-buffer buffer
+              (let ((inhibit-read-only t))
+                (erase-buffer)))))))
 
 (When "^I switch to log expr \"\\(.+\\)\"$"
       (lambda (log-expr)
@@ -49,18 +51,22 @@
             (And "I wait for the smoke to clear")))))
 
 (When "^I start the server configured \"\\(.+\\)\"$"
-      (lambda (port) (config)
+      (lambda (config)
         (cl-letf (((symbol-function 'y-or-n-p) #'ignore))
-          (ein:jupyter-server-stop t)
-          (loop repeat 10
-                        until (null ())
-                        do (sleep-for 0 1000) 
-                           (setq orphans (seq-filter #'orphans-find (list-system-processes)))
-                        finally return orphans)
-          )
-        
-)
-)
+          (ein:jupyter-server-stop t))
+        (loop repeat 10
+              with buffer = (get-buffer ein:jupyter-server-buffer-name)
+              until (null (get-buffer-process buffer))
+              do (sleep-for 1) 
+              finally do (delete-process (get-buffer-process buffer)))
+        (When "I clear log expr \"ein:log-all-buffer-name\"")
+        (When "I clear log expr \"ein:jupyter-server-buffer-name\"")
+        (clrhash ein:notebooklist-map)
+        (with-temp-file ".ecukes-temp-config" config)
+        (setq ein:jupyter-server-args '("--no-browser" "--debug" "--config" ".ecukes-temp-config"))
+        (deferred:sync! (ein:jupyter-server-start (executable-find "jupyter") 
+                                                  ein:testing-jupyter-server-root))
+        (ein:testing-wait-until (lambda () (ein:notebooklist-list)) nil 20000 1000)))
 
 (When "^I login to \\([.0-9]+\\)$"
       (lambda (port)
