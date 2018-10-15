@@ -29,7 +29,6 @@
 (require 'widget)
 (require 'cus-edit)
 
-
 (require 'ein-core)
 (require 'ein-notebook)
 (require 'ein-junk)
@@ -910,12 +909,7 @@ CALLBACK takes one argument, the buffer created by ein:notebooklist-open--succes
   (lexical-let* (done-p
                  (done-callback (lambda (&rest ignore) (setf done-p t)))
                  (errback (lambda (&rest ignore) (setf done-p "error")))
-                 (token (if %ein:jupyter-server-session%
-                               (multiple-value-bind (my-url-or-port token) 
-                                   (ein:jupyter-server-conn-info)
-                                 (if (equal url-or-port my-url-or-port) token
-                                   (ein:notebooklist-token-or-password url-or-port)))
-                             (ein:notebooklist-token-or-password url-or-port))))
+                 (token (ein:notebooklist-token-or-password url-or-port)))
     (unless callback (setq callback (lambda (buffer))))
     (add-function :after callback done-callback)
     (add-function :before command-error-function errback)

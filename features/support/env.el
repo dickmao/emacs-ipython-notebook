@@ -14,7 +14,6 @@
 (require 'ein-testing)
 
 (defvar ein:testing-jupyter-server-root (f-parent (f-dirname load-file-name)))
-(ein:deflocal ein:%testing-port% nil)
 
 (defun ein:testing-after-scenario ()
   (ein:testing-flush-queries)

@@ -79,7 +79,7 @@
 
 (ert-deftest 01-open-notebooklist ()
   (ein:log 'verbose "ERT OPEN-NOTEBOOKLIST start")
-  (ein:notebooklist-open* *ein:testing-port* "/" t)
+  (ein:notebooklist-open* *ein:testing-port*)
   (ein:testing-wait-until
    (lambda ()
      (ein:notebooklist-get-buffer *ein:testing-port*)))
