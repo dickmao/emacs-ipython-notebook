@@ -48,11 +48,29 @@
             (When "I call \"ein:notebooklist-open\"")
             (And "I wait for the smoke to clear")))))
 
+(When "^I start the server configured \"\\(.+\\)\"$"
+      (lambda (port) (config)
+        (cl-letf (((symbol-function 'y-or-n-p) #'ignore))
+          (ein:jupyter-server-stop t)
+          (loop repeat 10
+                        until (null ())
+                        do (sleep-for 0 1000) 
+                           (setq orphans (seq-filter #'orphans-find (list-system-processes)))
+                        finally return orphans)
+          )
+        
+)
+)
+
 (When "^I login to \\([.0-9]+\\)$"
       (lambda (port)
-        (with-demoted-errors "demoted: %s"
-          (ein:notebooklist-login (ein:url port) nil)
-          (And "I wait for the smoke to clear"))))
+        (cl-letf (((symbol-function 'ein:notebooklist-ask-url-or-port)
+                   (lambda (&rest args) (ein:url port)))
+                  ((symbol-function 'read-passwd)
+                   (lambda (&rest args) "foo")))
+          (with-demoted-errors "demoted: %s"
+            (When "I call \"ein:notebooklist-login\"")
+            (And "I wait for the smoke to clear")))))
 
 (When "^I login if necessary"
       (lambda ()

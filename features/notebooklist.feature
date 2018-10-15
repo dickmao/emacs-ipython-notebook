@@ -34,8 +34,9 @@ Scenario: Global notebooks
   And I switch to log expr "ein:log-all-buffer-name"
   Then I should see "Opened notebook"
 
-@foo
-Scenario: notebooklist-open works interactively (should be same notebooklist as server-start)
+@login
+Scenario: notebooklist-open works interactively
+  Given I start the server
   Given I am in buffer "*scratch*"
   When I clear log expr "ein:log-all-buffer-name"
   And I login if necessary
@@ -43,3 +44,23 @@ Scenario: notebooklist-open works interactively (should be same notebooklist as 
   And I switch to log expr "ein:log-all-buffer-name"
   Then I should not see "[warn]"
   And I should not see "[error]"
+
+@login
+Scenario: notebooklist-login works interactively
+  Given I am in buffer "*scratch*"
+  When I clear log expr "ein:log-all-buffer-name"
+  And I login if necessary
+  And I open notebooklist
+  And I switch to log expr "ein:log-all-buffer-name"
+  Then I should not see "[warn]"
+  And I should not see "[error]"
+
+@login
+Scenario: Logging into nowhere
+Given I login to 0
+Then I should see message "demoted: (error Connection refused: [error] http://127.0.0.1:0)"
+
+@login
+Scenario: Opening into nowhere
+Given I open to 0
+Then I should see message "demoted: (error Connection refused: [error] http://127.0.0.1:0)"
