@@ -59,10 +59,14 @@ the notebook directory, you can set it here for future calls to
   :type '(directory))
 
 (defvar *ein:jupyter-server-accept-timeout* 60)
-(defvar %ein:jupyter-server-session% nil)
+(defvar *ein:jupyter-server-process-name* "EIN: Jupyter notebook server")
 
 (defvar *ein:last-jupyter-command* nil)
 (defvar *ein:last-jupyter-directory* nil)
+
+(defsubst ein:jupyter-server-process ()
+  "Return the emacs process object of our session"
+  (get-buffer-process (get-buffer ein:jupyter-server-buffer-name)))
 
 (defun ein:jupyter-server--cmd (path dir)
   (append (list path
@@ -72,29 +76,32 @@ the notebook directory, you can set it here for future calls to
 
 (defun ein:jupyter-server--run (buf cmd dir &optional args)
   (let ((proc (apply #'start-process
-                     "EIN: Jupyter notebook server"
+                     *ein:jupyter-server-process-name*
                      buf
                      cmd
                      "notebook"
                      (format "--notebook-dir=%s" (convert-standard-filename dir))
                      (or args ein:jupyter-server-args))))
-    (setq %ein:jupyter-server-session% proc)
+    (ein:log 'info "Started %s" *ein:jupyter-server-process-name*)
     (set-process-query-on-exit-flag proc nil)
     proc))
 
 (defun ein:jupyter-server-conn-info (&optional buffer)
-  "Return the url-or-port and password for BUFFER."
+  "Return the url-or-port and password for BUFFER or the global session."
   (unless buffer
-    (assert (processp %ein:jupyter-server-session%) t "Jupyter server has not started!")
-    (setq buffer (process-buffer %ein:jupyter-server-session%)))
-  (with-current-buffer buffer
-    (save-excursion
-      (goto-char (point-max))
-      (re-search-backward "otebook [iI]s [rR]unning" nil t)
-      (re-search-forward "\\(https?://[^:]+:[0-9]+\\)\\(?:/\\?token=\\([[:alnum:]]+\\)\\)?" nil t)
-      (let ((raw-url (match-string 1))
-            (token (match-string 2)))
-        (list (ein:url raw-url) token)))))
+    (setq buffer (get-buffer ein:jupyter-server-buffer-name)))
+  (if buffer
+      (with-current-buffer buffer
+        (save-excursion
+          (goto-char (point-max))
+          (re-search-backward (format "%s finished" *ein:jupyter-server-process-name*)
+                              nil "") ;; important if we start-stop-start
+          (re-search-forward "otebook [iI]s [rR]unning" nil t)
+          (re-search-forward "\\(https?://[^:]+:[0-9]+\\)\\(?:/\\?token=\\([[:alnum:]]+\\)\\)?" nil t)
+          (let ((raw-url (match-string 1))
+                (token (match-string 2)))
+            (list (ein:url raw-url) token))))
+    (list nil nil)))
 
 ;;;###autoload
 (defun ein:jupyter-server-login-and-open (&optional callback)
@@ -106,7 +113,7 @@ token authentication is enabled. If a token is found use it to generate a
 call to `ein:notebooklist-login' and once authenticated open the notebooklist buffer
 via a call to `ein:notebooklist-open'."
   (interactive)
-  (when (buffer-live-p (get-buffer ein:jupyter-server-buffer-name))
+  (when (ein:jupyter-server-process)
     (multiple-value-bind (url-or-port password) (ein:jupyter-server-conn-info)
       (ein:notebooklist-login url-or-port callback))))
 
@@ -166,7 +173,6 @@ the log of the running jupyter server."
       (error "Please first M-x ein:jupyter-server-stop"))
   (add-hook 'kill-emacs-hook #'(lambda ()
                                  (ignore-errors (ein:jupyter-server-stop t))))
-  (ein:log 'info "Starting notebook server in directory: %s" notebook-directory)
   (lexical-let ((no-login-p no-login-p)
                 (login-callback login-callback)
                 (proc (ein:jupyter-server--run ein:jupyter-server-buffer-name
@@ -178,21 +184,16 @@ the log of the running jupyter server."
       (deferred:timeout
         ein:jupyter-server-run-timeout 'ein:jupyter-timeout-sentinel
         (deferred:lambda ()
-          (with-current-buffer (process-buffer proc)
-            (goto-char (point-min))
-            (if (or (search-forward "Notebook is running at:" nil t)
-                    (search-forward "Use Control-C" nil t))
-                no-login-p
-              (deferred:nextc (deferred:wait (/ ein:jupyter-server-run-timeout 5)) self)))))
+          (if (car (ein:jupyter-server-conn-info (process-buffer proc)))
+              no-login-p
+            (deferred:nextc (deferred:wait (/ ein:jupyter-server-run-timeout 5)) self))))
       (deferred:nextc it
         (lambda (no-login-p)
           (if (eql no-login-p 'ein:jupyter-timeout-sentinel)
               (progn
                 (ein:log 'warn "Jupyter server failed to start, cancelling operation.")
                 (ein:jupyter-server-stop t))
-            (if no-login-p
-                (if login-callback 
-                    (ein:log 'warn "ein:jupyter-server-start: no-login-p set so login-callback never runs"))
+            (unless no-login-p
               (ein:jupyter-server-login-and-open login-callback))))))))
 
 ;;;###autoload
@@ -203,7 +204,7 @@ Use this command to stop a running jupyter notebook server. If
 there is no running server then no action will be taken.
 "
   (interactive)
-  (when (and %ein:jupyter-server-session%
+  (when (and (ein:jupyter-server-process)
              (or force (y-or-n-p "Kill jupyter server and close all open notebooks?")))
     (let ((unsaved (ein:notebook-opened-notebooks #'ein:notebook-modified-p))
           (check-for-saved (make-hash-table :test #'equal)))
@@ -223,22 +224,15 @@ there is no running server then no action will be taken.
 
     (mapc #'ein:notebook-close (ein:notebook-opened-notebooks))
 
-    ; Both of these unceremoniously killed the notebook server, leaking child kernels
-    ; (quit-process %ein:jupyter-server-session%)
-    ; (delete-process %ein:jupyter-server-session%)
-
-    ; G-d have mercy if we're not POSIX...
-    (with-current-buffer ein:jupyter-server-buffer-name
-      (let ((process (get-buffer-process (current-buffer))))
-        (when process
-          (let ((pid (process-id process)))
-            (ein:log 'verbose "Signaled %s with pid %s" process pid)
-            (ein:log 'info "Stopped Jupyter notebook server.")
-            (signal-process (process-id process) 15)))))
+    ;; Both (quit-process) and (delete-process) leaked child kernels, so signal
+    (ein:aif (ein:jupyter-server-process)
+        (let ((pid (process-id it)))
+          (ein:log 'verbose "Signaled %s with pid %s" it pid)
+          (ein:log 'info "Stopped Jupyter notebook server.")
+          (signal-process (process-id it) 15)))
     (when log
       (with-current-buffer ein:jupyter-server-buffer-name
-        (write-region (point-min) (point-max) log)))
-    (setq %ein:jupyter-server-session% nil)))
+        (write-region (point-min) (point-max) log)))))
 
 
 (defun ein:jupyter-server-list--cmd (&optional args)

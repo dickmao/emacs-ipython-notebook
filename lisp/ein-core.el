@@ -136,9 +136,6 @@ the source is in git repository."
 (defvar *ein:kernelspecs* (make-hash-table :test #'equal)
   "url-or-port to kernelspecs")
 
-(defun* ein:need-password-required--error (url-or-port callback &key symbol-status &allow-other-keys)
-  (funcall callback symbol-status))
-
 (defun ein:need-password-required (url-or-port)
   "Synchronously test whether URL-OR-PORT requires a password."
   (lexical-let* (answer 
@@ -163,12 +160,15 @@ the source is in git repository."
           do (sleep-for 0 300))
     answer))
 
+(defun* ein:need-password-required--error (url-or-port callback &key symbol-status &allow-other-keys)
+  (funcall callback symbol-status))
+
 (defun* ein:need-password-required--complete (url-or-port callback &key data response
                                                           &allow-other-keys 
                                                           &aux (resp-string (format "STATUS: %s DATA: %s" (request-response-status-code response) data)))
   (ein:log 'debug "ein:need-password-required--complete %s" resp-string)
   (when callback
-    (funcall callback (/= 405 (request-response-status-code response)))))
+    (funcall callback (ein:aand (request-response-status-code response) (/= 405 it)))))
 
 (defun ein:need-kernelspecs (url-or-port)
   "Callers assume ein:query-kernelspecs succeeded.  If not, nil."

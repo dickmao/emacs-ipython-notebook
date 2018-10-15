@@ -42,8 +42,7 @@
 
 (Teardown
  (cl-letf (((symbol-function 'y-or-n-p) #'ignore))
-   (ein:jupyter-server-stop t))
- (assert (not (processp %ein:jupyter-server-session%)) t "notebook server orphaned"))
+   (ein:jupyter-server-stop t)))
 
 (Fail
  (if noninteractive

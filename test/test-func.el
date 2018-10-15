@@ -236,12 +236,11 @@ See the definition of `create-image' for how it works."
      (lambda () (ein:aand (ein:$notebook-kernel notebook)
                           (ein:kernel-live-p it))))
     (ein:jupyter-server-stop t ein:testing-dump-file-server)
-    (should-not (processp %ein:jupyter-server-session%))
     (cl-flet ((orphans-find (pid) (search (ein:$kernel-kernel-id (ein:$notebook-kernel notebook)) (alist-get 'args (process-attributes pid)))))
       (should-not (loop repeat 10
                         with orphans = (seq-filter #'orphans-find
                                                    (list-system-processes))
-                        until (null orphans)
+                        until (and (null orphans) (ein:jupyter-server-process))
                         do (sleep-for 0 1000) 
                            (setq orphans (seq-filter #'orphans-find (list-system-processes)))
                         finally return orphans))))

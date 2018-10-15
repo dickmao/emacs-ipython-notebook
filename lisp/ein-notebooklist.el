@@ -202,7 +202,7 @@ To suppress popup, you can pass `ignore' as CALLBACK."
   "Tokens and passwords are distinct notions."
   (multiple-value-bind (password-p token) (ein:crib-token url-or-port)
     (cond ((eql password-p t) (read-passwd "Password: "))
-          ((and (stringp token) (eql password-p :json-false)) token)
+          ((and (stringp token) (eql password-p :json-false)) (if (string= token "") nil token))
           ((ein:need-password-required url-or-port) (read-passwd "Password: "))
           (t nil))))
 
@@ -890,7 +890,7 @@ See also:
 
 ;;;###autoload
 (defun ein:notebooklist-login-workaround (url-or-port callback errback token)
-  "We need to ask someone about jupyter returning 403 the first time around"
+  "We need to spend an hour tracing jupyter's returning 403 the first time around"
   (ein:query-singleton-ajax
    (list 'notebooklist-login url-or-port)
    (ein:url url-or-port "login")
