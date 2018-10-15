@@ -37,14 +37,6 @@
   :group 'ein
   :type 'integer)
 
-(defcustom ein:jupyter-default-server-command "jupyter"
-  "The default command to start a jupyter notebook server.
-
-It is used when the `ein:jupyter-server-start' command is
-interactively called."
-  :group 'ein
-  :type '(file))
-
 (defcustom ein:jupyter-server-args nil
   "Add any additional command line options you wish to include
 with the call to the jupyter notebook."

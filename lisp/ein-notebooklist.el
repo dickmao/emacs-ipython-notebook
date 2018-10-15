@@ -888,7 +888,6 @@ See also:
             (message "%s... done" mesg))
           (remove-function command-error-function done-callback))))))
 
-;;;###autoload
 (defun ein:notebooklist-login-workaround (url-or-port callback errback token)
   "We need to spend an hour tracing jupyter's returning 403 the first time around"
   (ein:query-singleton-ajax
@@ -901,6 +900,7 @@ See also:
    :error (apply-partially #'ein:notebooklist-login--error url-or-port nil callback errback)
    :success (apply-partially #'ein:notebooklist-login--success url-or-port callback errback)))
 
+;;;###autoload
 (defun ein:notebooklist-login (url-or-port callback)
   "Deal with token formalities before main entry of ein:notebooklist-open.
 
