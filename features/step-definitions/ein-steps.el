@@ -1,6 +1,6 @@
 (When "^I clear log expr \"\\(.+\\)\"$"
       (lambda (log-expr)
-        (let ((buffer (symbol-value (intern log-expr))))
+        (let ((buffer (get-buffer (symbol-value (intern log-expr)))))
           (when (buffer-live-p buffer)
             (with-current-buffer buffer
               (let ((inhibit-read-only t))
@@ -76,16 +76,6 @@
                   ((symbol-function 'read-passwd)
                    (lambda (&rest args) "foo")))
           (with-demoted-errors "demoted: %s"
-            (When "I call \"ein:notebooklist-login\"")
-            (And "I wait for the smoke to clear")))))
-
-(When "^I login with password \"\\(.+\\)\"$"
-      (lambda (password)
-        (multiple-value-bind (url-or-port token) (ein:jupyter-server-conn-info)
-          (cl-letf (((symbol-function 'ein:notebooklist-ask-url-or-port)
-                     (lambda (&rest args) url-or-port))
-                    ((symbol-function 'read-passwd)
-                     (lambda (&rest args) password)))
             (When "I call \"ein:notebooklist-login\"")
             (And "I wait for the smoke to clear")))))
 

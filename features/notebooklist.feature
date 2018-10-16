@@ -34,7 +34,7 @@ Scenario: Global notebooks
   And I switch to log expr "ein:log-all-buffer-name"
   Then I should see "Opened notebook"
 
-@notoken
+@login
 Scenario: No token server
   Given I start the server configured "c.NotebookApp.token = u''\n"
   And I open notebooklist
@@ -52,15 +52,6 @@ Scenario: With token server
   And I should not see "[error]"
 
 @login
-Scenario: With password server
-  Given I start the server configured "c.NotebookApp.password = u'foo'\n"
-  And I login with password "foo"
-  And I open notebooklist
-  And I switch to log expr "ein:log-all-buffer-name"
-  Then I should not see "[warn]"
-  And I should not see "[error]"
-
-@login
 Scenario: Logging into nowhere
-Given I login to 0
-Then I should see message "ein: [info] Failed to login to http://127.0.0.1:0"
+  Given I login to 0
+  Then I should see message "ein: [info] Failed to login to http://127.0.0.1:0"
