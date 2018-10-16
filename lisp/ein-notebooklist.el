@@ -914,7 +914,8 @@ FIMXE: document how to use `ein:notebooklist-find-file-callback'
        :error (apply-partially #'ein:notebooklist-login--error url-or-port password callback retry-p)
        :success (apply-partially #'ein:notebooklist-login--success url-or-port callback))
     (ein:log 'verbose "Skipping formal login for lack of token")
-    (funcall callback)))
+    (when callback
+      (funcall callback))))
 
 (defun ein:notebooklist-login--parser ()
   (goto-char (point-min))
