@@ -43,14 +43,6 @@
                 (switch-to-buffer buf-name)
                 (Then "I should be in buffer \"%s\"" buf-name)))))))
 
-(When "^I open notebooklist$"
-      (lambda ()
-        (multiple-value-bind (url-or-port token) (ein:jupyter-server-conn-info)
-          (cl-letf (((symbol-function 'ein:notebooklist-ask-url-or-port)
-                     (lambda (&rest args) url-or-port)))
-            (When "I call \"ein:notebooklist-open\"")
-            (And "I wait for the smoke to clear")))))
-
 (When "^I start \\(and login to \\)?the server configured \"\\(.*\\)\"$"
       (lambda (login config)
         (cl-letf (((symbol-function 'y-or-n-p) #'ignore))

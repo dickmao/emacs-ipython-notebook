@@ -74,7 +74,6 @@ the notebook directory, you can set it here for future calls to
                      "notebook"
                      (format "--notebook-dir=%s" (convert-standard-filename dir))
                      (or args ein:jupyter-server-args))))
-    (ein:log 'info "Started %s" *ein:jupyter-server-process-name*)
     (set-process-query-on-exit-flag proc nil)
     proc))
 
@@ -128,7 +127,7 @@ via a call to `ein:notebooklist-open'."
 (defun ein:jupyter-server-start (server-cmd-path notebook-directory &optional no-login-p login-callback)
   "Start SERVER-CMD_PATH with `--notebook-dir' NOTEBOOK-DIRECTORY.  Login after connection established unless NO-LOGIN-P is set.  LOGIN-CALLBACK taking single argument, the buffer created by ein:notebooklist-open--finish.
 
-This command opens an asynchronous process running the jupyter
+This command opens a synchronous process running the jupyter
 notebook server and then tries to detect the url and password to
 generate automatic calls to `ein:notebooklist-login' and
 `ein:notebooklist-open'.
@@ -165,28 +164,26 @@ the log of the running jupyter server."
       (error "Please first M-x ein:jupyter-server-stop"))
   (add-hook 'kill-emacs-hook #'(lambda ()
                                  (ignore-errors (ein:jupyter-server-stop t))))
-  (lexical-let ((no-login-p no-login-p)
-                (login-callback login-callback)
-                (proc (ein:jupyter-server--run ein:jupyter-server-buffer-name
-                                               *ein:last-jupyter-command*
-                                               *ein:last-jupyter-directory*)))
-    (when (eql system-type 'windows-nt)
-      (accept-process-output proc (/ ein:jupyter-server-run-timeout 1000)))
-    (deferred:$
-      (deferred:timeout
-        ein:jupyter-server-run-timeout 'ein:jupyter-timeout-sentinel
-        (deferred:lambda ()
-          (if (car (ein:jupyter-server-conn-info (process-buffer proc)))
-              no-login-p
-            (deferred:nextc (deferred:wait (/ ein:jupyter-server-run-timeout 5)) self))))
-      (deferred:nextc it
-        (lambda (no-login-p)
-          (if (eql no-login-p 'ein:jupyter-timeout-sentinel)
-              (progn
-                (ein:log 'warn "Jupyter server failed to start, cancelling operation.")
-                (ein:jupyter-server-stop t))
-            (unless no-login-p
-              (ein:jupyter-server-login-and-open login-callback))))))))
+  (lexical-let* (done-p
+                 (proc (ein:jupyter-server--run ein:jupyter-server-buffer-name
+                                                *ein:last-jupyter-command*
+                                                *ein:last-jupyter-directory*))
+                 (buf (process-buffer proc)))
+    (ein:message-whir (format "Starting %s" *ein:jupyter-server-process-name*)
+                      (lambda () done-p)
+       (when (eql system-type 'windows-nt)
+         (accept-process-output proc (/ ein:jupyter-server-run-timeout 1000)))
+       (loop repeat 30
+             until (car (ein:jupyter-server-conn-info buf))
+             do (sleep-for 0 500)
+             finally do 
+             (if (car (ein:jupyter-server-conn-info buf))
+                 (setf done-p t)
+               (setf done-p "error")
+               (ein:log 'warn "Jupyter server failed to start, cancelling operation")
+               (ein:jupyter-server-stop t)))))
+  (unless no-login-p
+    (ein:jupyter-server-login-and-open login-callback)))
 
 ;;;###autoload
 (defun ein:jupyter-server-stop (&optional force log)

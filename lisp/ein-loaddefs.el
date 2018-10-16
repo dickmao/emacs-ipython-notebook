@@ -211,8 +211,8 @@ and save it immediately.
 
 ;;;***
 
-;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23493 62064
-;;;;;;  170456 314000))
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23494 22913
+;;;;;;  586547 257000))
 ;;; Generated autoloads from ein-jupyter.el
 
 (autoload 'ein:jupyter-server-login-and-open "ein-jupyter" "\
@@ -229,7 +229,7 @@ via a call to `ein:notebooklist-open'.
 (autoload 'ein:jupyter-server-start "ein-jupyter" "\
 Start SERVER-CMD_PATH with `--notebook-dir' NOTEBOOK-DIRECTORY.  Login after connection established unless NO-LOGIN-P is set.  LOGIN-CALLBACK taking single argument, the buffer created by ein:notebooklist-open--finish.
 
-This command opens an asynchronous process running the jupyter
+This command opens a synchronous process running the jupyter
 notebook server and then tries to detect the url and password to
 generate automatic calls to `ein:notebooklist-login' and
 `ein:notebooklist-open'.
@@ -297,8 +297,8 @@ Notebook mode with multiple language fontification.
 
 ;;;***
 
-;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23493
-;;;;;;  62038 698319 583000))
+;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23494
+;;;;;;  22780 483953 196000))
 ;;; Generated autoloads from ein-notebooklist.el
 
 (autoload 'ein:notebooklist-enable-keepalive "ein-notebooklist" "\
@@ -376,7 +376,7 @@ See also:
 \(fn &optional URL-OR-PORT)" nil nil)
 
 (autoload 'ein:notebooklist-login "ein-notebooklist" "\
-Deal with token formalities before main entry of ein:notebooklist-open.
+Deal with security before main entry of ein:notebooklist-open.
 
 CALLBACK takes one argument, the buffer created by ein:notebooklist-open--success.
 
@@ -490,7 +490,7 @@ Show full traceback in traceback viewer.
 ;;;;;;  "ein-python.el" "ein-pytools.el" "ein-query.el" "ein-scratchsheet.el"
 ;;;;;;  "ein-skewer.el" "ein-smartrep.el" "ein-subpackages.el" "ein-timestamp.el"
 ;;;;;;  "ein-utils.el" "ein-websocket.el" "ein-worksheet.el" "ein.el"
-;;;;;;  "ob-ein.el" "zeroein.el") (23493 62038 698319 583000))
+;;;;;;  "ob-ein.el" "zeroein.el") (23494 22708 336699 457000))
 
 ;;;***
 

@@ -39,8 +39,6 @@
 (require 'deferred)
 (require 'dash)
 
-(define-obsolete-function-alias ' ein:notebooklist-open 'ein:notebooklist-login)
-
 (defcustom ein:notebooklist-render-order
   '(render-header
     render-opened-notebooks
@@ -355,6 +353,7 @@ automatically be called during calls to `ein:notebooklist-open`."
         (when ein:enable-keepalive
           (ein:notebooklist-enable-keepalive (ein:$content-url-or-port content)))
         (when callback 
+          (message "calling back %s" callback)
           (funcall callback (current-buffer)))
         (current-buffer)))))
 
@@ -864,7 +863,7 @@ See also:
 ;;; Login
 
 (defun ein:notebooklist-login-workaround (url-or-port callback errback token)
-  "We need to spend an hour tracing jupyter's returning 403 the first time around"
+  "At some point need to trace jupyter's returning 403 the first time around"
   (ein:query-singleton-ajax
    (list 'notebooklist-login url-or-port)
    (ein:url url-or-port "login")
@@ -875,45 +874,23 @@ See also:
    :error (apply-partially #'ein:notebooklist-login--error url-or-port nil callback errback)
    :success (apply-partially #'ein:notebooklist-login--success url-or-port callback errback)))
 
-(defun ein:notebooklist-whir (mesg done-p done-callback)
-  "Display MESG with a modest animation until DONE-P returns t."
-  (lexical-let ((mesg mesg)
-                (done-p done-p)
-                (count -1)
-                (done-callback done-callback))
-    ;; https://github.com/kiwanami/emacs-deferred/issues/28
-    ;; "complicated timings of macro expansion lexical-let, deferred:lambda"
-    ;; using deferred:loop instead
-    (deferred:$
-      (deferred:loop (loop for i from 1 below 30 by 1 collect i)
-        (lambda ()
-          (deferred:$
-            (deferred:next
-              (lambda ()
-                (ein:aif (funcall done-p) it
-                  (message "%s%s" mesg (make-string (1+ (% (incf count) 3)) ?.))
-                  (sleep-for 0 800)))))))
-      (deferred:nextc it
-        (lambda (x)
-          (if (and (stringp x) (string= "error" x))
-              (message "%s... failed" mesg)
-            (message "%s... done" mesg))
-          (remove-function command-error-function done-callback))))))
+(define-obsolete-function-alias 'ein:notebooklist-open 'ein:notebooklist-login)
+(defalias 'ein:login 'ein:notebooklist-login)
+(defalias 'ein-login 'ein:notebooklist-login)
 
 ;;;###autoload
 (defun ein:notebooklist-login (url-or-port callback)
-  "Deal with token formalities before main entry of ein:notebooklist-open.
+  "Deal with security before main entry of ein:notebooklist-open.
 
 CALLBACK takes one argument, the buffer created by ein:notebooklist-open--success."
   (interactive `(,(ein:notebooklist-ask-url-or-port) ,#'pop-to-buffer))
+  (unless callback (setq callback (lambda (buffer))))
   (lexical-let* (done-p
                  (done-callback (lambda (&rest ignore) (setf done-p t)))
                  (errback (lambda (&rest ignore) (setf done-p "error")))
                  (token (ein:notebooklist-token-or-password url-or-port)))
-    (unless callback (setq callback (lambda (buffer))))
     (add-function :after callback done-callback)
-    (add-function :before command-error-function errback)
-    (ein:notebooklist-whir "Logging into server" (lambda () done-p) done-callback)
+    (ein:message-whir "Logging into server" (lambda () done-p))
     (if token
         (ein:query-singleton-ajax
          (list 'notebooklist-login url-or-port)
@@ -924,7 +901,7 @@ CALLBACK takes one argument, the buffer created by ein:notebooklist-open--succes
          :complete (apply-partially #'ein:notebooklist-login--complete url-or-port)
          :error (apply-partially #'ein:notebooklist-login--error url-or-port token callback errback)
          :success (apply-partially #'ein:notebooklist-login--success url-or-port callback errback))
-      (ein:log 'verbose "Skipping passworded login %s" url-or-port)
+      (ein:log 'verbose "Skipping login %s" url-or-port)
       (ein:notebooklist-open* url-or-port nil nil callback))))
 
 (defun ein:notebooklist-login--parser ()
