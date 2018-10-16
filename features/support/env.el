@@ -35,8 +35,7 @@
  (setq ein:testing-dump-file-messages (concat default-directory "log/ecukes.messages"))
  (setq ein:testing-dump-file-server  (concat default-directory  "log/ecukes.server"))
  (setq ein:testing-dump-file-request  (concat default-directory "log/ecukes.request"))
- (setq ein:jupyter-server-args '("--no-browser" "--debug"))
- (Given "I start the server configured \"\"")
+ (Given "I start and login to the server configured \"\\n\"")
 )
 
 (After

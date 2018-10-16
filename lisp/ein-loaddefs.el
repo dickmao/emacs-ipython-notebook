@@ -3,8 +3,8 @@
 ;;; Code:
 
 
-;;;### (autoloads nil "ein-company" "ein-company.el" (23493 7595
-;;;;;;  864786 496000))
+;;;### (autoloads nil "ein-company" "ein-company.el" (23493 9958
+;;;;;;  805717 384000))
 ;;; Generated autoloads from ein-company.el
 
 (autoload 'ein:company-backend "ein-company" "\
@@ -14,8 +14,8 @@
 
 ;;;***
 
-;;;### (autoloads nil "ein-connect" "ein-connect.el" (23493 7595
-;;;;;;  864786 496000))
+;;;### (autoloads nil "ein-connect" "ein-connect.el" (23493 9958
+;;;;;;  805717 384000))
 ;;; Generated autoloads from ein-connect.el
 
 (autoload 'ein:connect-to-notebook-command "ein-connect" "\
@@ -268,8 +268,8 @@ Notebook mode with multiple language fontification.
 
 ;;;***
 
-;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23493 7595
-;;;;;;  868786 527000))
+;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23493 9958
+;;;;;;  805717 384000))
 ;;; Generated autoloads from ein-notebook.el
 
 (autoload 'ein:junk-new "ein-notebook" "\
@@ -292,7 +292,7 @@ and save it immediately.
 ;;;***
 
 ;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23493
-;;;;;;  7595 868786 527000))
+;;;;;;  9958 845717 835000))
 ;;; Generated autoloads from ein-notebooklist.el
 
 (autoload 'ein:notebooklist-open "ein-notebooklist" "\
@@ -488,7 +488,7 @@ Show full traceback in traceback viewer.
 ;;;;;;  "ein-query.el" "ein-scratchsheet.el" "ein-skewer.el" "ein-smartrep.el"
 ;;;;;;  "ein-subpackages.el" "ein-timestamp.el" "ein-utils.el" "ein-websocket.el"
 ;;;;;;  "ein-worksheet.el" "ein.el" "ob-ein.el" "zeroein.el") (23493
-;;;;;;  7595 868786 527000))
+;;;;;;  9958 805717 384000))
 
 ;;;***
 

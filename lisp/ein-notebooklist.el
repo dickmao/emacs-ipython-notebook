@@ -901,8 +901,8 @@ FIMXE: document how to use `ein:notebooklist-find-file-callback'
 (defun ein:notebooklist-login (url-or-port password callback &optional retry-p)
   "Login to URL-OR-PORT with PASSWORD with notebooklist-open CALLBACK of arity 0."
   (interactive (list (ein:notebooklist-ask-url-or-port)
-                     (read-passwd "Password: "))
-               nil)
+                     (read-passwd "Password: ")
+                     nil))
   (if password
       (ein:query-singleton-ajax
        (list 'notebooklist-login url-or-port)

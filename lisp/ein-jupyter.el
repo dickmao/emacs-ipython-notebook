@@ -163,9 +163,8 @@ the log of the running jupyter server."
           t "Command %s is not valid!" server-cmd-path)
   (setf *ein:last-jupyter-command* server-cmd-path
         *ein:last-jupyter-directory* notebook-directory)
-  (if (buffer-live-p (get-buffer ein:jupyter-server-buffer-name))
-      (ein:log 'info "Notebook session is already running, check the contents of %s"
-               ein:jupyter-server-buffer-name))
+  (if (get-buffer-process (get-buffer ein:jupyter-server-buffer-name))
+      (error "Please first M-x ein:jupyter-server-stop"))
   (add-hook 'kill-emacs-hook #'(lambda ()
                                  (ignore-errors (ein:jupyter-server-stop t))))
   (ein:log 'info "Starting notebook server in directory: %s" notebook-directory)

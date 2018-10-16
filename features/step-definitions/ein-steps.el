@@ -42,7 +42,7 @@
               (switch-to-buffer buf-name)
               (Then "I should be in buffer \"%s\"" buf-name))))))
 
-(When "^I open notebooklist"
+(When "^I open notebooklist$"
       (lambda ()
         (multiple-value-bind (url-or-port token) (ein:jupyter-server-conn-info)
           (cl-letf (((symbol-function 'ein:notebooklist-ask-url-or-port)
@@ -50,23 +50,24 @@
             (When "I call \"ein:notebooklist-open\"")
             (And "I wait for the smoke to clear")))))
 
-(When "^I start the server configured \"\\(.+\\)\"$"
-      (lambda (config)
+(When "^I start \\(and login to \\)?the server configured \"\\(.*\\)\"$"
+      (lambda (login config)
         (cl-letf (((symbol-function 'y-or-n-p) #'ignore))
           (ein:jupyter-server-stop t))
         (loop repeat 10
               with buffer = (get-buffer ein:jupyter-server-buffer-name)
               until (null (get-buffer-process buffer))
               do (sleep-for 1) 
-              finally do (delete-process (get-buffer-process buffer)))
+              finally do (ein:aif (get-buffer-process buffer) (delete-process it)))
         (When "I clear log expr \"ein:log-all-buffer-name\"")
         (When "I clear log expr \"ein:jupyter-server-buffer-name\"")
         (clrhash ein:notebooklist-map)
-        (with-temp-file ".ecukes-temp-config" config)
-        (setq ein:jupyter-server-args '("--no-browser" "--debug" "--config" ".ecukes-temp-config"))
+        (with-temp-file ".ecukes-temp-config.py" (insert (s-replace "\\n" "\n" config)))
+        (setq ein:jupyter-server-args '("--no-browser" "--debug" "--config=.ecukes-temp-config.py"))
         (deferred:sync! (ein:jupyter-server-start (executable-find "jupyter") 
-                                                  ein:testing-jupyter-server-root))
-        (ein:testing-wait-until (lambda () (ein:notebooklist-list)) nil 20000 1000)))
+                                                  ein:testing-jupyter-server-root (not login)))
+        (if login
+            (ein:testing-wait-until (lambda () (ein:notebooklist-list)) nil 20000 1000))))
 
 (When "^I login to \\([.0-9]+\\)$"
       (lambda (port)
@@ -78,7 +79,17 @@
             (When "I call \"ein:notebooklist-login\"")
             (And "I wait for the smoke to clear")))))
 
-(When "^I login if necessary"
+(When "^I login with password \"\\(.+\\)\"$"
+      (lambda (password)
+        (multiple-value-bind (url-or-port token) (ein:jupyter-server-conn-info)
+          (cl-letf (((symbol-function 'ein:notebooklist-ask-url-or-port)
+                     (lambda (&rest args) url-or-port))
+                    ((symbol-function 'read-passwd)
+                     (lambda (&rest args) password)))
+            (When "I call \"ein:notebooklist-login\"")
+            (And "I wait for the smoke to clear")))))
+
+(When "^I login if necessary$"
       (lambda ()
         (multiple-value-bind (url-or-port token) (ein:jupyter-server-conn-info)
           (when token

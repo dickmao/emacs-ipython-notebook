@@ -34,11 +34,17 @@ Scenario: Global notebooks
   And I switch to log expr "ein:log-all-buffer-name"
   Then I should see "Opened notebook"
 
+@notoken
+Scenario: No token server
+  Given I start the server configured "c.NotebookApp.token = u''\n"
+  And I open notebooklist
+  And I switch to log expr "ein:log-all-buffer-name"
+  Then I should not see "[warn]"
+  And I should not see "[error]"
+
 @login
-Scenario: notebooklist-open works interactively
-  Given I start the server
-  Given I am in buffer "*scratch*"
-  When I clear log expr "ein:log-all-buffer-name"
+Scenario: With token server
+  Given I start the server configured "\n"
   And I login if necessary
   And I open notebooklist
   And I switch to log expr "ein:log-all-buffer-name"
@@ -46,10 +52,9 @@ Scenario: notebooklist-open works interactively
   And I should not see "[error]"
 
 @login
-Scenario: notebooklist-login works interactively
-  Given I am in buffer "*scratch*"
-  When I clear log expr "ein:log-all-buffer-name"
-  And I login if necessary
+Scenario: With password server
+  Given I start the server configured "c.NotebookApp.password = u'foo'\n"
+  And I login with password "foo"
   And I open notebooklist
   And I switch to log expr "ein:log-all-buffer-name"
   Then I should not see "[warn]"
@@ -58,9 +63,4 @@ Scenario: notebooklist-login works interactively
 @login
 Scenario: Logging into nowhere
 Given I login to 0
-Then I should see message "demoted: (error Connection refused: [error] http://127.0.0.1:0)"
-
-@login
-Scenario: Opening into nowhere
-Given I open to 0
-Then I should see message "demoted: (error Connection refused: [error] http://127.0.0.1:0)"
+Then I should see message "ein: [info] Failed to login to http://127.0.0.1:0"
