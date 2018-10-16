@@ -90,6 +90,16 @@
               (When "I call \"ein:notebooklist-login\"")
               (And "I wait for the smoke to clear"))))))
 
+(When "^I login with password \"\\(.+\\)\"$"
+      (lambda (password)
+        (multiple-value-bind (url-or-port token) (ein:jupyter-server-conn-info)
+          (cl-letf (((symbol-function 'ein:notebooklist-ask-url-or-port)
+                     (lambda (&rest args) url-or-port))
+                    ((symbol-function 'read-passwd)
+                     (lambda (&rest args) password)))
+            (When "I call \"ein:notebooklist-login\"")
+            (And "I wait for the smoke to clear")))))
+
 (When "^I wait for the smoke to clear"
       (lambda ()
         (ein:testing-flush-queries)))
