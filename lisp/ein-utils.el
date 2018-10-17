@@ -603,9 +603,6 @@ DONEBACK returns t or 'error when calling process is done, and nil if not done."
                  (mesg mesg)
                  (doneback doneback)
                  (count -1))
-    ;; https://github.com/kiwanami/emacs-deferred/issues/28
-    ;; "complicated timings of macro expansion lexical-let, deferred:lambda"
-    ;; using deferred:loop instead
     (message "%s%s" mesg (make-string (1+ (% (incf count) 3)) ?.))    
     (deferred:$
       (deferred:timeout
