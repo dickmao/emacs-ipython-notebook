@@ -197,7 +197,7 @@ To suppress popup, you can pass `ignore' as CALLBACK."
       it (list nil nil)))
 
 (defun ein:notebooklist-token-or-password (url-or-port)
-  "Tokens and passwords are distinct notions."
+  "Return token or password (I believe jupyter requires one or the other but not both) for URL-OR-PORT.  If all authentication disabled, return nil."
   (multiple-value-bind (password-p token) (ein:crib-token url-or-port)
     (cond ((eql password-p t) (read-passwd "Password: "))
           ((and (stringp token) (eql password-p :json-false)) (if (string= token "") nil token))
@@ -353,7 +353,6 @@ automatically be called during calls to `ein:notebooklist-open`."
         (when ein:enable-keepalive
           (ein:notebooklist-enable-keepalive (ein:$content-url-or-port content)))
         (when callback 
-          (message "calling back %s" callback)
           (funcall callback (current-buffer)))
         (current-buffer)))))
 
@@ -887,10 +886,10 @@ CALLBACK takes one argument, the buffer created by ein:notebooklist-open--succes
   (unless callback (setq callback (lambda (buffer))))
   (lexical-let* (done-p
                  (done-callback (lambda (&rest ignore) (setf done-p t)))
-                 (errback (lambda (&rest ignore) (setf done-p "error")))
+                 (errback (lambda (&rest ignore) (setf done-p 'error)))
                  (token (ein:notebooklist-token-or-password url-or-port)))
-    (add-function :after callback done-callback)
-    (ein:message-whir "Logging into server" (lambda () done-p))
+    (add-function :before callback done-callback)
+    (ein:message-whir "Establishing session" (lambda () done-p))
     (if token
         (ein:query-singleton-ajax
          (list 'notebooklist-login url-or-port)

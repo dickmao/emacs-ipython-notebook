@@ -71,8 +71,8 @@ It should be possible to support python-mode.el.  Patches are welcome!
 
 ;;;***
 
-;;;### (autoloads nil "ein-dev" "ein-dev.el" (23482 53531 657872
-;;;;;;  977000))
+;;;### (autoloads nil "ein-dev" "ein-dev.el" (23495 24876 329973
+;;;;;;  468000))
 ;;; Generated autoloads from ein-dev.el
 
 (autoload 'ein:dev-insert-mode-map "ein-dev" "\
@@ -211,8 +211,8 @@ and save it immediately.
 
 ;;;***
 
-;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23494 22913
-;;;;;;  586547 257000))
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23495 24892
+;;;;;;  110066 820000))
 ;;; Generated autoloads from ein-jupyter.el
 
 (autoload 'ein:jupyter-server-login-and-open "ein-jupyter" "\
@@ -297,8 +297,8 @@ Notebook mode with multiple language fontification.
 
 ;;;***
 
-;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23494
-;;;;;;  22780 483953 196000))
+;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23495
+;;;;;;  22056 749567 706000))
 ;;; Generated autoloads from ein-notebooklist.el
 
 (autoload 'ein:notebooklist-enable-keepalive "ein-notebooklist" "\
@@ -490,7 +490,7 @@ Show full traceback in traceback viewer.
 ;;;;;;  "ein-python.el" "ein-pytools.el" "ein-query.el" "ein-scratchsheet.el"
 ;;;;;;  "ein-skewer.el" "ein-smartrep.el" "ein-subpackages.el" "ein-timestamp.el"
 ;;;;;;  "ein-utils.el" "ein-websocket.el" "ein-worksheet.el" "ein.el"
-;;;;;;  "ob-ein.el" "zeroein.el") (23494 22708 336699 457000))
+;;;;;;  "ob-ein.el" "zeroein.el") (23495 23843 591926 249000))
 
 ;;;***
 

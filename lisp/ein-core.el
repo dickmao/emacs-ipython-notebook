@@ -154,7 +154,6 @@ the source is in git repository."
     (ein:query-singleton-ajax
      (list 'need-password-required url-or-port)
      (ein:url url-or-port "login")
-     ;; :error is at the request level, not my level
      ;; request--safe-apply swallowing errors -- so that's why error-p
      :error (apply-partially #'ein:need-password-required--error url-or-port callback-err)
      :type "POST"

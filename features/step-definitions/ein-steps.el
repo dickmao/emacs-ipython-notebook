@@ -57,8 +57,8 @@
         (clrhash ein:notebooklist-map)
         (with-temp-file ".ecukes-temp-config.py" (insert (s-replace "\\n" "\n" config)))
         (setq ein:jupyter-server-args '("--no-browser" "--debug" "--config=.ecukes-temp-config.py"))
-        (deferred:sync! (ein:jupyter-server-start (executable-find "jupyter") 
-                                                  ein:testing-jupyter-server-root (not login)))
+        (ein:jupyter-server-start (executable-find "jupyter") 
+                                  ein:testing-jupyter-server-root (not login))
         (if login
             (ein:testing-wait-until (lambda () (ein:notebooklist-list)) nil 20000 1000))))
 

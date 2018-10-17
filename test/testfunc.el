@@ -27,7 +27,7 @@
 (setq ein:jupyter-server-args '("--no-browser" "--debug"))
 
 (ein:dev-start-debug)
-(deferred:sync! (ein:jupyter-server-start *ein:testing-jupyter-server-command* *ein:testing-jupyter-server-directory*))
+(ein:jupyter-server-start *ein:testing-jupyter-server-command* *ein:testing-jupyter-server-directory*)
 (ein:testing-wait-until (lambda () (ein:notebooklist-list)) nil 15000 1000)
 (defvar *ein:testing-port* (car (ein:jupyter-server-conn-info)))
 (fset 'y-or-n-p (lambda (prompt) nil))

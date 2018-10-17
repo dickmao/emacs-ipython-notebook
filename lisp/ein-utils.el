@@ -595,34 +595,30 @@ otherwise it should be a function, which is called on `time'."
 
 ;;; Emacs utilities
 
-(defmacro ein:message-whir (mesg doneback)
+(defun ein:message-whir (mesg doneback)
   "Display MESG with a modest animation until done-p returns t.  
 
-DONEBACK returns t or string \"error\" when calling process is done, and nil if not done."
-  `(let (message-log-max 1)
-     (lexical-let* (error-p
-                    (mesg ,mesg)
-                    (doneback ,doneback)
-                    (count -1)
-                    (errback (lambda (&rest ignore) (setf error-p "error"))))
-       (add-function :before command-error-function errback)
-       ;; https://github.com/kiwanami/emacs-deferred/issues/28
-       ;; "complicated timings of macro expansion lexical-let, deferred:lambda"
-       ;; using deferred:loop instead
-       (deferred:$
-         (deferred:loop (loop for i from 1 below 30 by 1 collect i)
-           (lambda ()
-             (deferred:$
-               (deferred:next
-                 (lambda ()
-                   (ein:aif (or (funcall doneback) error-p) it
-                     (message "%s%s" mesg (make-string (1+ (% (incf count) 3)) ?.))
-                     (sleep-for 0 800)))))))
-         (deferred:nextc it
-           (lambda (status)
-             (message "%s... %s" mesg (if (string= status "error") "failed" "done"))
-             (remove-function command-error-function errback)))))
-     ,@body))
+DONEBACK returns t or 'error when calling process is done, and nil if not done."
+  (lexical-let* (error-p
+                 (mesg mesg)
+                 (doneback doneback)
+                 (count -1))
+    ;; https://github.com/kiwanami/emacs-deferred/issues/28
+    ;; "complicated timings of macro expansion lexical-let, deferred:lambda"
+    ;; using deferred:loop instead
+    (message "%s%s" mesg (make-string (1+ (% (incf count) 3)) ?.))    
+    (deferred:$
+      (deferred:loop (loop for i from 1 below 30 by 1 collect i)
+        (lambda ()
+          (deferred:$
+            (deferred:next
+              (lambda ()
+                (ein:aif (or (funcall doneback) error-p) it
+                  (message "%s%s" mesg (make-string (1+ (% (incf count) 3)) ?.))
+                  (sleep-for 0 800)))))))
+      (deferred:nextc it
+        (lambda (status)
+          (message "%s... %s" mesg (if (eq status 'error) "failed" "done")))))))
 
 (defun ein:display-warning (message &optional level)
   "Simple wrapper around `display-warning'.
