@@ -891,11 +891,7 @@ See also:
 
 ;;;###autoload
 (defun ein:notebooklist-login (url-or-port callback)
-<<<<<<< HEAD
-  "Deal with security before main entry of ein:notebooklist-open.
-=======
   "Deal with security before main entry of ein:notebooklist-open*.
->>>>>>> login-staging
 
 CALLBACK takes one argument, the buffer created by ein:notebooklist-open--success."
   (interactive `(,(ein:notebooklist-ask-url-or-port) ,#'pop-to-buffer))
@@ -907,19 +903,7 @@ CALLBACK takes one argument, the buffer created by ein:notebooklist-open--succes
     (add-function :before callback done-callback)
     (ein:message-whir "Establishing session" (lambda () done-p))
     (if token
-<<<<<<< HEAD
-        (ein:query-singleton-ajax
-         (list 'notebooklist-login url-or-port)
-         (ein:url url-or-port "login")
-         :type "POST"
-         :data (concat "password=" (url-hexify-string token))
-         :parser #'ein:notebooklist-login--parser
-         :complete (apply-partially #'ein:notebooklist-login--complete url-or-port)
-         :error (apply-partially #'ein:notebooklist-login--error url-or-port token callback errback)
-         :success (apply-partially #'ein:notebooklist-login--success url-or-port callback errback))
-=======
         (ein:notebooklist-login--strike url-or-port callback errback token 0 nil)
->>>>>>> login-staging
       (ein:log 'verbose "Skipping login %s" url-or-port)
       (ein:notebooklist-open* url-or-port nil nil callback))))
 
@@ -948,36 +932,18 @@ CALLBACK takes one argument, the buffer created by ein:notebooklist-open--succes
     (ein:notebooklist-login--success-1 url-or-port callback)))
 
 (defun* ein:notebooklist-login--error
-<<<<<<< HEAD
-    (url-or-port token callback errback &key
-=======
     (url-or-port token callback errback strike &key
->>>>>>> login-staging
                  data
                  symbol-status
                  response
                  &allow-other-keys
                  &aux
                  (response-status (request-response-status-code response)))
-<<<<<<< HEAD
-  (cond ((and (or (eq response-status 403) (eq response-status 405)) token)
-         (ein:notebooklist-login-workaround url-or-port callback errback token response-status))
-        ((or
-           ;; workaround for url-retrieve backend
-           (and (eq symbol-status 'timeout)
-                (eq response-status 302)
-                (request-response-header response "set-cookie"))
-           ;; workaround for curl backend
-           (and (eq response-status 405)
-                (ein:aand (car (request-response-history response))
-                          (request-response-header it "set-cookie"))))
-=======
   (cond ((and (or (eq response-status 403)) (< strike 3))
          (ein:notebooklist-login--strike url-or-port callback errback token (1+ strike) response-status))
         ((and (eq symbol-status 'timeout) ;; workaround for url-retrieve backend
               (eq response-status 302)
               (request-response-header response "set-cookie"))
->>>>>>> login-staging
          (ein:notebooklist-login--success-1 url-or-port callback))
         (t (ein:notebooklist-login--error-1 url-or-port errback))))
 
