@@ -158,8 +158,6 @@ the log of the running jupyter server."
                                                 *ein:last-jupyter-command*
                                                 *ein:last-jupyter-directory*))
                  (buf (process-buffer proc)))
-    (ein:message-whir (format "Starting %s" *ein:jupyter-server-process-name*)
-                      (lambda () done-p))
     (when (eql system-type 'windows-nt)
       (accept-process-output proc (/ ein:jupyter-server-run-timeout 1000)))
     (if ein:dev-prefer-deferred

@@ -608,14 +608,12 @@ DONEBACK returns t or 'error when calling process is done, and nil if not done."
     ;; using deferred:loop instead
     (message "%s%s" mesg (make-string (1+ (% (incf count) 3)) ?.))    
     (deferred:$
-      (deferred:loop (loop for i from 1 below 30 by 1 collect i)
-        (lambda ()
-          (deferred:$
-            (deferred:next
-              (lambda ()
-                (ein:aif (or (funcall doneback) error-p) it
-                  (message "%s%s" mesg (make-string (1+ (% (incf count) 3)) ?.))
-                  (sleep-for 0 800)))))))
+      (deferred:timeout
+        10000 'timeout
+        (deferred:lambda ()
+          (ein:aif (or (funcall doneback) error-p) it
+            (message "%s%s" mesg (make-string (1+ (% (incf count) 3)) ?.))
+            (deferred:nextc (deferred:wait 425) self))))
       (deferred:nextc it
         (lambda (status)
           (message "%s... %s" mesg (if (eq status 'error) "failed" "done")))))))
