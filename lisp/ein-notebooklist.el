@@ -861,8 +861,9 @@ See also:
 
 ;;; Login
 
-(defun ein:notebooklist-login-workaround (url-or-port callback errback token)
-  "At some point need to trace jupyter's returning 403 the first time around"
+(defun ein:notebooklist-login-workaround (url-or-port callback errback token response-status)
+  "At some point need to trace jupyter's returning 403 (or 405?) the first time around"
+  (ein:log 'debug "Login workaround %s in response to %s" url-or-port response-status)
   (ein:query-singleton-ajax
    (list 'notebooklist-login url-or-port)
    (ein:url url-or-port "login")
@@ -874,7 +875,11 @@ See also:
    :success (apply-partially #'ein:notebooklist-login--success url-or-port callback errback)))
 
 (define-obsolete-function-alias 'ein:notebooklist-open 'ein:notebooklist-login)
+
+;;;###autoload
 (defalias 'ein:login 'ein:notebooklist-login)
+
+;;;###autoload
 (defalias 'ein-login 'ein:notebooklist-login)
 
 ;;;###autoload
@@ -935,8 +940,8 @@ CALLBACK takes one argument, the buffer created by ein:notebooklist-open--succes
                  &allow-other-keys
                  &aux
                  (response-status (request-response-status-code response)))
-  (cond ((and (eq response-status 403) token)
-         (ein:notebooklist-login-workaround url-or-port callback errback token))
+  (cond ((and (or (eq response-status 403) (eq response-status 405)) token)
+         (ein:notebooklist-login-workaround url-or-port callback errback token response-status))
         ((or
            ;; workaround for url-retrieve backend
            (and (eq symbol-status 'timeout)

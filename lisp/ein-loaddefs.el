@@ -71,8 +71,8 @@ It should be possible to support python-mode.el.  Patches are welcome!
 
 ;;;***
 
-;;;### (autoloads nil "ein-dev" "ein-dev.el" (23495 24876 329973
-;;;;;;  468000))
+;;;### (autoloads nil "ein-dev" "ein-dev.el" (23495 30384 720586
+;;;;;;  181000))
 ;;; Generated autoloads from ein-dev.el
 
 (autoload 'ein:dev-insert-mode-map "ein-dev" "\
@@ -149,8 +149,8 @@ change in its input area.
 
 ;;;***
 
-;;;### (autoloads nil "ein-ipynb-mode" "ein-ipynb-mode.el" (23493
-;;;;;;  61946 81822 442000))
+;;;### (autoloads nil "ein-ipynb-mode" "ein-ipynb-mode.el" (23495
+;;;;;;  30384 720586 181000))
 ;;; Generated autoloads from ein-ipynb-mode.el
 
 (autoload 'ein:ipynb-mode "ein-ipynb-mode" "\
@@ -190,8 +190,8 @@ To use EIN and Jedi together, add the following in your Emacs setup before loadi
 
 ;;;***
 
-;;;### (autoloads nil "ein-junk" "ein-junk.el" (23493 61812 401104
-;;;;;;  942000))
+;;;### (autoloads nil "ein-junk" "ein-junk.el" (23495 30384 720586
+;;;;;;  181000))
 ;;; Generated autoloads from ein-junk.el
 
 (autoload 'ein:junk-new "ein-junk" "\
@@ -211,8 +211,8 @@ and save it immediately.
 
 ;;;***
 
-;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23495 26221
-;;;;;;  885875 375000))
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23495 30384
+;;;;;;  724586 204000))
 ;;; Generated autoloads from ein-jupyter.el
 
 (autoload 'ein:jupyter-server-login-and-open "ein-jupyter" "\
@@ -229,7 +229,7 @@ via a call to `ein:notebooklist-open'.
 (autoload 'ein:jupyter-server-start "ein-jupyter" "\
 Start SERVER-CMD_PATH with `--notebook-dir' NOTEBOOK-DIRECTORY.  Login after connection established unless NO-LOGIN-P is set.  LOGIN-CALLBACK taking single argument, the buffer created by ein:notebooklist-open--finish.
 
-This command opens a synchronous process running the jupyter
+This command opens an asynchronous process running the jupyter
 notebook server and then tries to detect the url and password to
 generate automatic calls to `ein:notebooklist-login' and
 `ein:notebooklist-open'.
@@ -257,8 +257,8 @@ there is no running server then no action will be taken.
 
 ;;;***
 
-;;;### (autoloads nil "ein-jupyterhub" "ein-jupyterhub.el" (23493
-;;;;;;  61918 673675 329000))
+;;;### (autoloads nil "ein-jupyterhub" "ein-jupyterhub.el" (23495
+;;;;;;  30384 724586 204000))
 ;;; Generated autoloads from ein-jupyterhub.el
 
 (autoload 'ein:jupyterhub-connect "ein-jupyterhub" "\
@@ -289,8 +289,8 @@ Notebook mode with multiple language fontification.
 
 ;;;***
 
-;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23493 61812
-;;;;;;  401104 942000))
+;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23495 30384
+;;;;;;  724586 204000))
 ;;; Generated autoloads from ein-notebook.el
 
 (defalias 'ein:notebook-name 'ein:$notebook-notebook-name)
@@ -298,7 +298,7 @@ Notebook mode with multiple language fontification.
 ;;;***
 
 ;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23495
-;;;;;;  25314 188554 381000))
+;;;;;;  39319 328691 982000))
 ;;; Generated autoloads from ein-notebooklist.el
 
 (autoload 'ein:notebooklist-enable-keepalive "ein-notebooklist" "\
@@ -374,6 +374,10 @@ See also:
 `ein:connect-to-default-notebook', `ein:connect-default-notebook'.
 
 \(fn &optional URL-OR-PORT)" nil nil)
+
+(defalias 'ein:login 'ein:notebooklist-login)
+
+(defalias 'ein-login 'ein:notebooklist-login)
 
 (autoload 'ein:notebooklist-login "ein-notebooklist" "\
 Deal with security before main entry of ein:notebooklist-open.
@@ -490,7 +494,7 @@ Show full traceback in traceback viewer.
 ;;;;;;  "ein-python.el" "ein-pytools.el" "ein-query.el" "ein-scratchsheet.el"
 ;;;;;;  "ein-skewer.el" "ein-smartrep.el" "ein-subpackages.el" "ein-timestamp.el"
 ;;;;;;  "ein-utils.el" "ein-websocket.el" "ein-worksheet.el" "ein.el"
-;;;;;;  "ob-ein.el" "zeroein.el") (23495 26098 1150 145000))
+;;;;;;  "ob-ein.el" "zeroein.el") (23495 30384 724586 204000))
 
 ;;;***
 
