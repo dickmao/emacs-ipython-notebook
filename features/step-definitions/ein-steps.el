@@ -39,6 +39,8 @@
                                   nil 10000 2000)
           notebook)
       (error (message "ein:testing-new-notebook: %s" (error-message-string err))
+             (when notebook
+               (ein:notebook-close notebook))
              nil))))
 
 (When "^new \\(.+\\) notebook$"
