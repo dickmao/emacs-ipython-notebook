@@ -25,18 +25,30 @@
       (lambda ()
         (switch-to-buffer ein:log-all-buffer-name)))
 
+(defun ein:testing-new-notebook (url-or-port ks)
+  (lexical-let (notebook)
+    (condition-case err
+        (progn
+          (ein:notebooklist-new-notebook url-or-port ks nil
+                                         (lambda (nb created &rest ignore)
+                                           (setq notebook nb)))
+          (ein:testing-wait-until (lambda () 
+                                    (and notebook
+                                         (ein:aand (ein:$notebook-kernel notebook)
+                                                   (ein:kernel-live-p it))))
+                                  nil 10000 2000)
+          notebook)
+      (error (message "ein:testing-new-notebook: %s" (error-message-string err))
+             nil))))
+
 (When "^new \\(.+\\) notebook$"
       (lambda (kernel)
         (multiple-value-bind (url-or-port token) (ein:jupyter-server-conn-info)
           (with-current-buffer (ein:notebooklist-get-buffer url-or-port)
             (lexical-let ((ks (ein:get-kernelspec url-or-port kernel)) notebook)
-              (ein:notebooklist-new-notebook url-or-port ks nil
-                                             (lambda (nb created &rest ignore)
-                                               (setq notebook nb)))
-              (ein:testing-wait-until (lambda () (and notebook
-                                                      (ein:aand (ein:$notebook-kernel notebook)
-                                                                (ein:kernel-live-p it))))
-                                      nil 10000 2000)
+              (loop repeat 3
+                    until notebook
+                    do (setq notebook (ein:testing-new-notebook url-or-port ks)))
               (let ((buf-name (format ein:notebook-buffer-name-template
                                       (ein:$notebook-url-or-port notebook)
                                       (ein:$notebook-notebook-name notebook))))
