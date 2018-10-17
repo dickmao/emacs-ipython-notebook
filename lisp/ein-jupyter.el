@@ -114,7 +114,7 @@ via a call to `ein:notebooklist-open'."
 (defun ein:jupyter-server-start (server-cmd-path notebook-directory &optional no-login-p login-callback)
   "Start SERVER-CMD_PATH with `--notebook-dir' NOTEBOOK-DIRECTORY.  Login after connection established unless NO-LOGIN-P is set.  LOGIN-CALLBACK taking single argument, the buffer created by ein:notebooklist-open--finish.
 
-This command opens a synchronous process running the jupyter
+This command opens an asynchronous process running the jupyter
 notebook server and then tries to detect the url and password to
 generate automatic calls to `ein:notebooklist-login' and
 `ein:notebooklist-open'.
