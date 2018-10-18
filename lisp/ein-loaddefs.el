@@ -211,8 +211,13 @@ and save it immediately.
 
 ;;;***
 
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23499 50600
 ;;;;;;  8727 966000))
+=======
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23496 59791
+;;;;;;  332973 588000))
+>>>>>>> retry kernelspecs 403
 ;;; Generated autoloads from ein-jupyter.el
 
 (autoload 'ein:jupyter-server-login-and-open "ein-jupyter" "\
@@ -316,6 +321,7 @@ Notebook mode with multiple language fontification.
 =======
 ;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23496
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;;;;  52644 315107 912000))
 >>>>>>> Got to the bottom of the 405
 <<<<<<< HEAD
@@ -324,7 +330,13 @@ Notebook mode with multiple language fontification.
 =======
 ;;;;;;  59100 65072 808000))
 >>>>>>> Logging in tests in light of removing 405 workaround
+<<<<<<< HEAD
 >>>>>>> Logging in tests in light of removing 405 workaround
+=======
+=======
+;;;;;;  64779 642002 162000))
+>>>>>>> retry kernelspecs 403
+>>>>>>> retry kernelspecs 403
 ;;; Generated autoloads from ein-notebooklist.el
 
 (autoload 'ein:notebooklist-enable-keepalive "ein-notebooklist" "\
@@ -527,10 +539,13 @@ Show full traceback in traceback viewer.
 ;;;;;;  "ein-utils.el" "ein-websocket.el" "ein-worksheet.el" "ein.el"
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23499 54796 72693 801000))
 =======
 =======
 >>>>>>> Got to the bottom of the 405
+=======
+>>>>>>> retry kernelspecs 403
 <<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23495 44399 897023 299000))
 =======
@@ -542,7 +557,13 @@ Show full traceback in traceback viewer.
 =======
 ;;;;;;  "ob-ein.el" "zeroein.el") (23496 52336 462090 584000))
 >>>>>>> Got to the bottom of the 405
+<<<<<<< HEAD
 >>>>>>> Got to the bottom of the 405
+=======
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23497 3801 932754 929000))
+>>>>>>> retry kernelspecs 403
+>>>>>>> retry kernelspecs 403
 
 ;;;***
 
