@@ -315,9 +315,16 @@ Notebook mode with multiple language fontification.
 =======
 =======
 ;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23496
+<<<<<<< HEAD
 ;;;;;;  52644 315107 912000))
 >>>>>>> Got to the bottom of the 405
+<<<<<<< HEAD
 >>>>>>> Got to the bottom of the 405
+=======
+=======
+;;;;;;  59100 65072 808000))
+>>>>>>> Logging in tests in light of removing 405 workaround
+>>>>>>> Logging in tests in light of removing 405 workaround
 ;;; Generated autoloads from ein-notebooklist.el
 
 (autoload 'ein:notebooklist-enable-keepalive "ein-notebooklist" "\
