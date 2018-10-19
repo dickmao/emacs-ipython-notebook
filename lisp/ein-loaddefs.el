@@ -301,9 +301,16 @@ change in its input area.
 =======
 =======
 ;;;### (autoloads nil "ein-ipynb-mode" "ein-ipynb-mode.el" (23497
+<<<<<<< HEAD
 ;;;;;;  5224 327452 197000))
 >>>>>>> optional error-buffer for ein-divine
+<<<<<<< HEAD
 >>>>>>> optional error-buffer for ein-divine
+=======
+=======
+;;;;;;  14826 75540 793000))
+>>>>>>> fix compile errors
+>>>>>>> fix compile errors
 ;;; Generated autoloads from ein-ipynb-mode.el
 
 (autoload 'ein:ipynb-mode "ein-ipynb-mode" "\
@@ -372,6 +379,7 @@ and save it immediately.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23499 50600
 ;;;;;;  8727 966000))
 =======
@@ -393,6 +401,8 @@ and save it immediately.
 >>>>>>> protect against 403 forbidden sessions
 =======
 >>>>>>> optional error-buffer for ein-divine
+=======
+>>>>>>> fix compile errors
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23497 5993
 ;;;;;;  487545 694000))
 =======
@@ -434,7 +444,14 @@ and save it immediately.
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23497 5993
 ;;;;;;  487545 694000))
 >>>>>>> optional error-buffer for ein-divine
+<<<<<<< HEAD
 >>>>>>> optional error-buffer for ein-divine
+=======
+=======
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23497 17045
+;;;;;;  191985 743000))
+>>>>>>> fix compile errors
+>>>>>>> fix compile errors
 ;;; Generated autoloads from ein-jupyter.el
 
 (autoload 'ein:jupyter-server-login-and-open "ein-jupyter" "\
@@ -584,6 +601,7 @@ Notebook mode with multiple language fontification.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23499 16469
 ;;;;;;  728162 481000))
 =======
@@ -597,6 +615,8 @@ Notebook mode with multiple language fontification.
 >>>>>>> appveyor for msys2
 =======
 >>>>>>> optional error-buffer for ein-divine
+=======
+>>>>>>> fix compile errors
 ;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23497 9216
 ;;;;;;  46575 206000))
 =======
@@ -624,7 +644,14 @@ Notebook mode with multiple language fontification.
 ;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23497 5552
 ;;;;;;  933192 15000))
 >>>>>>> optional error-buffer for ein-divine
+<<<<<<< HEAD
 >>>>>>> optional error-buffer for ein-divine
+=======
+=======
+;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23497 12260
+;;;;;;  379910 759000))
+>>>>>>> fix compile errors
+>>>>>>> fix compile errors
 ;;; Generated autoloads from ein-notebook.el
 
 (defalias 'ein:notebook-name 'ein:$notebook-notebook-name)
@@ -720,9 +747,16 @@ Notebook mode with multiple language fontification.
 =======
 =======
 ;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23497
+<<<<<<< HEAD
 ;;;;;;  5786 870439 807000))
 >>>>>>> optional error-buffer for ein-divine
+<<<<<<< HEAD
 >>>>>>> optional error-buffer for ein-divine
+=======
+=======
+;;;;;;  16228 257714 328000))
+>>>>>>> fix compile errors
+>>>>>>> fix compile errors
 ;;; Generated autoloads from ein-notebooklist.el
 
 (autoload 'ein:notebooklist-enable-keepalive "ein-notebooklist" "\
@@ -936,6 +970,7 @@ Show full traceback in traceback viewer.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23499 54796 72693 801000))
 =======
 =======
@@ -962,6 +997,8 @@ Show full traceback in traceback viewer.
 >>>>>>> loaddefs
 =======
 >>>>>>> optional error-buffer for ein-divine
+=======
+>>>>>>> fix compile errors
 <<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23495 44399 897023 299000))
 =======
@@ -1039,7 +1076,13 @@ Show full traceback in traceback viewer.
 =======
 ;;;;;;  "ob-ein.el" "zeroein.el") (23497 6220 892765 522000))
 >>>>>>> optional error-buffer for ein-divine
+<<<<<<< HEAD
 >>>>>>> optional error-buffer for ein-divine
+=======
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23497 17192 605013 413000))
+>>>>>>> fix compile errors
+>>>>>>> fix compile errors
 
 ;;;***
 

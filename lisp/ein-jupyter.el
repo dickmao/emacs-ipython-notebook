@@ -76,8 +76,6 @@ the notebook directory, you can set it here for future calls to
                      (format "--notebook-dir=%s" (convert-standard-filename dir))
                      (or args ein:jupyter-server-args))))
     (set-process-query-on-exit-flag proc nil)
-    (add-function :before (process-sentinel proc)
-                  (apply-partially #'ein:notebooklist-proc--sentinel url-or-port))    
     proc))
 
 (defun ein:jupyter-server-conn-info (&optional buffer)
@@ -167,9 +165,12 @@ the log of the running jupyter server."
           (deferred:timeout
             ein:jupyter-server-run-timeout 'timeout
             (deferred:lambda ()
-              (if (car (ein:jupyter-server-conn-info))
-                  no-login-p
-                (deferred:nextc (deferred:wait (/ ein:jupyter-server-run-timeout 5)) self))))
+              (ein:aif (car (ein:jupyter-server-conn-info))
+                       (progn 
+                         (add-function :before (process-sentinel proc)
+                                       (apply-partially #'ein:notebooklist-proc--sentinel it))
+                         no-login-p)
+                       (deferred:nextc (deferred:wait (/ ein:jupyter-server-run-timeout 5)) self))))
           (deferred:nextc it
             (lambda (no-login-p)
               (if (eq no-login-p 'timeout)
@@ -177,6 +178,7 @@ the log of the running jupyter server."
                     (setf done-p 'error)
                     (ein:log 'warn "Jupyter server failed to start, cancelling operation.")
                     (ein:jupyter-server-stop t))
+                
                 (setf done-p t)
                 (unless no-login-p
                   (ein:jupyter-server-login-and-open login-callback))))))
@@ -184,8 +186,11 @@ the log of the running jupyter server."
             until (car (ein:jupyter-server-conn-info buf))
             do (sleep-for 0 500)
             finally do 
-            (if (car (ein:jupyter-server-conn-info buf))
-                (setf done-p t)
+            (ein:aif (car (ein:jupyter-server-conn-info buf))
+                     (progn
+                       (add-function :before (process-sentinel proc)
+                                     (apply-partially #'ein:notebooklist-proc--sentinel it))
+                       (setf done-p t))
               (setf done-p "error")
               (ein:log 'warn "Jupyter server failed to start, cancelling operation")
               (ein:jupyter-server-stop t)))
