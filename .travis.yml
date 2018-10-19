@@ -29,6 +29,7 @@ matrix:
 install:
   - pip install jupyter ipython\<=$IPYTHON
   - jupyter kernelspec list
+  - ipython --version
 
 before_script:
   - sh tools/install-evm.sh
