@@ -220,18 +220,6 @@ To suppress popup, you can pass `ignore' as CALLBACK."
                            default)))
     (ein:url url-or-port)))
 
-(defcustom ein:populate-hierarchy-on-notebooklist-open nil
-  "Prepopulate the content hierarchy cache after calling `ein:notebooklist-open'.
-
-If T, will recursively walk through the notebook hierarchy and
-generate a cache of all the entries. Only a couple of
-infrequently (`ein:notebooklist-open-notebook-global' being the
-only one that comes to mind, actually) used commands depend on
-this cache, so for most users this setting can be left at its
-default value."
-  :group 'ein
-  :type 'boolean)
-
 (defun ein:notebooklist-open* (url-or-port &optional path resync callback)
   "The main entry to server at URL-OR-PORT.  Users should not directly call this, but instead `ein:notebooklist-login'.
 
@@ -255,14 +243,6 @@ PATH is specifying directory from file navigation.  PATH is empty on login.  RES
               (ein:query-kernelspecs url-or-port (lambda ()
                                                    (deferred:callback-post d)))
               d))
-          (deferred:nextc it
-            (lambda (&rest ignore)
-              (lexical-let ((d (deferred:new #'identity)))
-                (if ein:populate-hierarchy-on-notebooklist-open
-                    (ein:content-query-hierarchy url-or-port (lambda (tree)
-                                                               (deferred:callback-post d)))
-                  (deferred:callback-post d))
-                d)))
           (deferred:nextc it
             (lambda (&rest ignore)
               (ein:content-query-contents url-or-port path success))))
