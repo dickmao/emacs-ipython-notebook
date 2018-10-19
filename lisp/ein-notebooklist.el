@@ -170,10 +170,12 @@ To suppress popup, you can pass `ignore' as CALLBACK."
     (ein:url url-or-port base-path path)))
 
 (defun ein:notebooklist-proc--sentinel (url-or-port process event)
-  "Added to `ein:jupyter-server--run'"
+  "Remove URL-OR-PORT from ein:notebooklist-map when PROCESS dies"
   (when (not (string= "open" (substring event 0 4)))
-    (ein:log 'info "Event %s Process %s url-or-port %s" 
-             event (car (process-command process)) url-or-port)
+    (ein:log 'info "Process %s %s %s" 
+             (car (process-command process))
+             (replace-regexp-in-string "\n$" "" event)
+             url-or-port)
     (ein:notebooklist-list-remove url-or-port)))
 
 (defun ein:notebooklist-get-buffer (url-or-port)
