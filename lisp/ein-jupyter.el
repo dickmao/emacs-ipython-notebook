@@ -166,9 +166,8 @@ the log of the running jupyter server."
             ein:jupyter-server-run-timeout 'timeout
             (deferred:lambda ()
               (ein:aif (car (ein:jupyter-server-conn-info))
-                       (progn 
-                         (add-function :before (process-sentinel proc)
-                                       (apply-partially #'ein:notebooklist-proc--sentinel it))
+                       (progn
+                         (set-process-sentinel proc (apply-partially #'ein:notebooklist-proc--sentinel it))
                          no-login-p)
                        (deferred:nextc (deferred:wait (/ ein:jupyter-server-run-timeout 5)) self))))
           (deferred:nextc it
@@ -188,14 +187,13 @@ the log of the running jupyter server."
             finally do 
             (ein:aif (car (ein:jupyter-server-conn-info buf))
                      (progn
-                       (add-function :before (process-sentinel proc)
-                                     (apply-partially #'ein:notebooklist-proc--sentinel it))
+                       (set-process-sentinel proc (apply-partially #'ein:notebooklist-proc--sentinel it))
                        (setf done-p t))
-              (setf done-p "error")
-              (ein:log 'warn "Jupyter server failed to start, cancelling operation")
-              (ein:jupyter-server-stop t)))
-      (unless no-login-p
-        (ein:jupyter-server-login-and-open login-callback)))))
+                     (setf done-p "error")
+                     (ein:log 'warn "Jupyter server failed to start, cancelling operation")
+                     (ein:jupyter-server-stop t)))
+      (if (and (not no-login-p) (ein:jupyter-server-process))
+          (ein:jupyter-server-login-and-open login-callback)))))
 
 ;;;###autoload
 (defun ein:jupyter-server-stop (&optional force log)

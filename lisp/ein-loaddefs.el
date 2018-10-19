@@ -407,6 +407,7 @@ and save it immediately.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23499 50600
 ;;;;;;  8727 966000))
 =======
@@ -430,6 +431,8 @@ and save it immediately.
 >>>>>>> optional error-buffer for ein-divine
 =======
 >>>>>>> fix compile errors
+=======
+>>>>>>> i wasn't crazy when i wrote that
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23497 5993
 ;;;;;;  487545 694000))
 =======
@@ -484,8 +487,18 @@ and save it immediately.
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23497 17045
 ;;;;;;  191985 743000))
 >>>>>>> fix compile errors
+<<<<<<< HEAD
 >>>>>>> fix compile errors
+<<<<<<< HEAD
 >>>>>>> fix compile errors
+=======
+=======
+=======
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23497 24338
+;;;;;;  909924 352000))
+>>>>>>> i wasn't crazy when i wrote that
+>>>>>>> i wasn't crazy when i wrote that
+>>>>>>> i wasn't crazy when i wrote that
 ;;; Generated autoloads from ein-jupyter.el
 
 (autoload 'ein:jupyter-server-login-and-open "ein-jupyter" "\
@@ -1034,6 +1047,7 @@ Show full traceback in traceback viewer.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23499 54796 72693 801000))
 =======
 =======
@@ -1062,6 +1076,8 @@ Show full traceback in traceback viewer.
 >>>>>>> optional error-buffer for ein-divine
 =======
 >>>>>>> fix compile errors
+=======
+>>>>>>> i wasn't crazy when i wrote that
 <<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23495 44399 897023 299000))
 =======
@@ -1154,8 +1170,17 @@ Show full traceback in traceback viewer.
 =======
 ;;;;;;  "ob-ein.el" "zeroein.el") (23497 17192 605013 413000))
 >>>>>>> fix compile errors
+<<<<<<< HEAD
 >>>>>>> fix compile errors
+<<<<<<< HEAD
 >>>>>>> fix compile errors
+=======
+=======
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23497 18726 636945 998000))
+>>>>>>> i wasn't crazy when i wrote that
+>>>>>>> i wasn't crazy when i wrote that
+>>>>>>> i wasn't crazy when i wrote that
 
 ;;;***
 

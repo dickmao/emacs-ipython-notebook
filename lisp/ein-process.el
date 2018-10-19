@@ -175,8 +175,7 @@
                             (port (ein:process-divine-port pid args))
                             (ip (ein:process-divine-ip pid args)))
                (puthash dir (make-ein:$process :pid pid
-                                               :port port
-                                               :ip ip
+                                               :url (ein:url (format "http://%s:%s" ip port))
                                                :dir dir)
                         ein:%processes%))
         end))
@@ -214,12 +213,12 @@
                                          (ein:process-suitable-notebook-dir filename)))
              (path (subseq filename (length (file-name-as-directory nbdir))))
              (callback1 (apply-partially (lambda (path* callback* buffer)
+                                           (pop-to-buffer buffer)
                                            (ein:notebook-open
-                                            (car (ein:jupyter-server-conn-info buffer))
+                                            (car (ein:jupyter-server-conn-info))
                                             path* nil callback*))
                                          path callback)))
-        (apply #'ein:jupyter-server-start
-               (list ein:jupyter-default-server-command nbdir nil callback1))))))
+        (ein:jupyter-server-start (executable-find ein:jupyter-default-server-command) nbdir nil callback1)))))
 
 (defun ein:process-open-notebook (&optional filename buffer-callback)
   "When FILENAME is unspecified the variable `buffer-file-name'
