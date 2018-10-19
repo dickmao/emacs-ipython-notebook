@@ -154,13 +154,28 @@
           finally return suitable)))
 
 (defun ein:process-refresh-processes ()
+  "Use `jupyter notebook list --json` to populate ein:%processes%"
+  (ein:aif (loop for line in (process-lines ein:jupyter-default-server-command
+                                            "notebook" "list" "--json")
+                 with token0
+                 with password0
+                 when (destructuring-bind 
+                          (&key password url token &allow-other-keys)
+                          (ein:json-read-from-string line)
+                        (prog1 (equal (ein:url url) url-or-port)
+                          (setq password0 password) ;; t or :json-false
+                          (setq token0 token)))
+                 return (list password0 token0))
+           it (list nil nil)))
+
+(defun ein:process-ps-refresh-processes ()
+  "Can delete this.  It guesses around with unix ps when it's far better to use `jupyter notebook list'"
   (loop for pid in (list-system-processes)
         for attrs = (process-attributes pid)
         for args = (alist-get 'args attrs)
         with seen = (mapcar #'ein:$process-pid (ein:hash-vals ein:%processes%))
         if (and (null (member pid seen))
                 (string-match ein:process-jupyter-regexp (alist-get 'comm attrs)))
-          ;; bummer should use output of jupyter notebook list --json
           do (ein:and-let* ((dir (ein:process-divine-dir pid args))
                             (port (ein:process-divine-port pid args))
                             (ip (ein:process-divine-ip pid args)))
@@ -187,7 +202,9 @@
 
 (defun ein:process-open-notebook* (filename callback)
   "Open FILENAME as a notebook and start a notebook server if necessary.  CALLBACK with arity 2 (passed into ein:notebook-open--callback)."
-  (ein:process-refresh-processes)
+
+  ;; (ein:process-refresh-processes)
+
   (let* ((proc (ein:process-dir-match filename)))
     (when (and proc (not (ein:process-alive-p proc)))
       (ein:log 'warn "Server pid=%s dir=%s no longer running" (ein:$process-pid proc) (ein:$process-dir proc))
