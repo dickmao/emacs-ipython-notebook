@@ -12,36 +12,15 @@
 
 (When "^I am in notebooklist buffer$"
       (lambda ()
-        (multiple-value-bind (url-or-port token) (ein:jupyter-server-conn-info)
-          (switch-to-buffer (ein:notebooklist-get-buffer url-or-port))
-          (sit-for 0.8)
-          )))
+        (switch-to-buffer (ein:notebooklist-get-buffer (car (ein:jupyter-server-conn-info))))))
 
 (When "^I wait \\([.0-9]+\\) seconds?$"
       (lambda (seconds)
-        (sit-for (string-to-number seconds))))
+        (sleep-for (string-to-number seconds))))
 
 (When "^I am in log buffer$"
       (lambda ()
         (switch-to-buffer ein:log-all-buffer-name)))
-
-(defun ein:testing-new-notebook (url-or-port ks)
-  (lexical-let (notebook)
-    (condition-case err
-        (progn
-          (ein:notebooklist-new-notebook url-or-port ks nil
-                                         (lambda (nb created &rest ignore)
-                                           (setq notebook nb)))
-          (ein:testing-wait-until (lambda () 
-                                    (and notebook
-                                         (ein:aand (ein:$notebook-kernel notebook)
-                                                   (ein:kernel-live-p it))))
-                                  nil 10000 2000)
-          notebook)
-      (error (message "ein:testing-new-notebook: %s" (error-message-string err))
-             (when notebook
-               (ein:notebook-close notebook))
-             nil))))
 
 (When "^new \\(.+\\) notebook$"
       (lambda (kernel)
@@ -147,10 +126,10 @@
 
 (When "^old notebook \"\\(.+\\)\"$"
       (lambda (path)
-        (multiple-value-bind (url-or-port token) (ein:jupyter-server-conn-info)
+        (let ((url-or-port (car (ein:jupyter-server-conn-info))))
           (with-current-buffer (ein:notebooklist-get-buffer url-or-port)
             (lexical-let (notebook)
-              (ein:notebooklist-open-notebook ein:%notebooklist% path
+              (ein:notebooklist-open-notebook path nil
                                               (lambda (nb created &rest -ignore-)
                                                 (setq notebook nb)))
               (ein:testing-wait-until (lambda () (and (not (null notebook))

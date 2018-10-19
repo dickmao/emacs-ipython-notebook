@@ -232,12 +232,13 @@ jupyter kernels.
                   (ein:notebook-open url-or-port
                                      path
                                      kernelspec
-                                     (lambda (_nb _param session kernelspec)
-                                       (org-babel-ein-initiate-session session kernelspec))
-                                     (list session kernelspec)))))
+                                     (apply-partially 
+                                      (lambda (session* kernelspec* notebook created)
+                                        (org-babel-ein-initiate-session session* kernelspec*))
+                                      session kernelspec)))))
       (loop repeat 4
-            until (ein:kernel-live-p (ein:$notebook-kernel nb))
-            do (sit-for 1.0))
+            do (sit-for 1.0)
+            until (ein:kernel-live-p (ein:$notebook-kernel nb)))
       nb)))
 
 (defun org-babel-edit-prep:ein (babel-info)

@@ -53,6 +53,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-connect" "ein-connect.el" (23499 16469
 ;;;;;;  728162 481000))
 =======
@@ -66,6 +67,8 @@
 >>>>>>> appveyor for msys2
 =======
 >>>>>>> optional error-buffer for ein-divine
+=======
+>>>>>>> need to revert a commit
 ;;;### (autoloads nil "ein-connect" "ein-connect.el" (23497 5224
 ;;;;;;  327452 197000))
 =======
@@ -93,7 +96,14 @@
 ;;;### (autoloads nil "ein-connect" "ein-connect.el" (23497 5224
 ;;;;;;  327452 197000))
 >>>>>>> optional error-buffer for ein-divine
+<<<<<<< HEAD
 >>>>>>> optional error-buffer for ein-divine
+=======
+=======
+;;;### (autoloads nil "ein-connect" "ein-connect.el" (23498 8550
+;;;;;;  445866 623000))
+>>>>>>> need to revert a commit
+>>>>>>> need to revert a commit
 ;;; Generated autoloads from ein-connect.el
 
 (autoload 'ein:connect-to-notebook-command "ein-connect" "\
@@ -622,6 +632,7 @@ Notebook mode with multiple language fontification.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23499 16469
 ;;;;;;  728162 481000))
 =======
@@ -637,6 +648,8 @@ Notebook mode with multiple language fontification.
 >>>>>>> optional error-buffer for ein-divine
 =======
 >>>>>>> fix compile errors
+=======
+>>>>>>> need to revert a commit
 ;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23497 9216
 ;;;;;;  46575 206000))
 =======
@@ -671,13 +684,36 @@ Notebook mode with multiple language fontification.
 ;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23497 12260
 ;;;;;;  379910 759000))
 >>>>>>> fix compile errors
+<<<<<<< HEAD
 >>>>>>> fix compile errors
+=======
+=======
+;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23498 10965
+;;;;;;  922427 880000))
+>>>>>>> need to revert a commit
+>>>>>>> need to revert a commit
 ;;; Generated autoloads from ein-notebook.el
 
 (defalias 'ein:notebook-name 'ein:$notebook-notebook-name)
 
+(autoload 'ein:notebook-open "ein-notebook" "\
+Returns notebook at URL-OR-PORT/PATH.
+Note that notebook sends for its contents and won't have them right away.
+
+After the notebook is opened, CALLBACK is called as::
+
+  (funcall CALLBACK notebook created)
+
+where `created' indicates a new notebook or an existing one.
+
+TODO - This function should not be used to switch to an existing 
+notebook buffer.  Let's warn for now to see who is doing this.
+
+\(fn URL-OR-PORT PATH &optional KERNELSPEC CALLBACK)" t nil)
+
 ;;;***
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -700,6 +736,8 @@ Notebook mode with multiple language fontification.
 >>>>>>> appveyor for msys2
 =======
 >>>>>>> optional error-buffer for ein-divine
+=======
+>>>>>>> need to revert a commit
 ;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23495
 <<<<<<< HEAD
 ;;;;;;  50360 466489 162000))
@@ -783,7 +821,14 @@ Notebook mode with multiple language fontification.
 =======
 ;;;;;;  60400 465452 123000))
 >>>>>>> get the sentinel right
+<<<<<<< HEAD
 >>>>>>> get the sentinel right
+=======
+=======
+;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23498
+;;;;;;  12020 816289 426000))
+>>>>>>> need to revert a commit
+>>>>>>> need to revert a commit
 ;;; Generated autoloads from ein-notebooklist.el
 
 (autoload 'ein:notebooklist-enable-keepalive "ein-notebooklist" "\
@@ -805,7 +850,7 @@ Disable the notebooklist keepalive calls to the jupyter notebook server.
 (autoload 'ein:notebooklist-reload "ein-notebooklist" "\
 Reload current Notebook list.
 
-\(fn NOTEBOOKLIST &optional RESYNC)" t nil)
+\(fn &optional NBLIST RESYNC)" t nil)
 
 (autoload 'ein:notebooklist-upload-file "ein-notebooklist" "\
 
@@ -817,27 +862,17 @@ Ask server to create a new notebook and open it in a new buffer.
 
 TODO - New and open should be separate, and we should flag an exception if we try to new an existing.
 
-\(fn &optional URL-OR-PORT KERNELSPEC PATH CALLBACK CBARGS)" t nil)
+\(fn &optional URL-OR-PORT KERNELSPEC PATH CALLBACK)" t nil)
 
 (autoload 'ein:notebooklist-new-notebook-with-name "ein-notebooklist" "\
 Open new notebook and rename the notebook.
 
 \(fn NAME KERNELSPEC URL-OR-PORT &optional PATH)" t nil)
 
-(autoload 'ein:notebooklist-list-notebooks "ein-notebooklist" "\
-Return a list of notebook path (NBPATH).  Each element NBPATH
-is a string of the format \"URL-OR-PORT/PATH\".
+(autoload 'ein:notebooklist-nbpaths "ein-notebooklist" "\
+Return list of .ipynb files located at URL-OR-PORT
 
 \(fn)" nil nil)
-
-(autoload 'ein:notebooklist-open-notebook-global "ein-notebooklist" "\
-Choose notebook from all opened notebook list and open it.
-Notebook is specified by a string NBPATH whose format is
-\"URL-OR-PORT/NOTEBOOK-NAME\".
-
-When used in lisp, CALLBACK and CBARGS are passed to `ein:notebook-open'.
-
-\(fn NBPATH &optional CALLBACK CBARGS)" t nil)
 
 (autoload 'ein:notebooklist-load "ein-notebooklist" "\
 Load notebook list but do not pop-up the notebook list buffer.
@@ -1000,6 +1035,7 @@ Show full traceback in traceback viewer.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23499 54796 72693 801000))
 =======
 =======
@@ -1032,6 +1068,8 @@ Show full traceback in traceback viewer.
 >>>>>>> i wasn't crazy when i wrote that
 =======
 >>>>>>> get the sentinel right
+=======
+>>>>>>> need to revert a commit
 <<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23495 44399 897023 299000))
 =======
@@ -1127,7 +1165,13 @@ Show full traceback in traceback viewer.
 =======
 ;;;;;;  "ob-ein.el" "zeroein.el") (23497 25814 458670 841000))
 >>>>>>> get the sentinel right
+<<<<<<< HEAD
 >>>>>>> get the sentinel right
+=======
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23498 13243 83197 678000))
+>>>>>>> need to revert a commit
+>>>>>>> need to revert a commit
 
 ;;;***
 

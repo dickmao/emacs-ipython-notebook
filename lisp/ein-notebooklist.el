@@ -57,7 +57,7 @@ is opened at first time.::
 
   (add-hook
    'ein:notebooklist-first-open-hook
-   (lambda () (ein:notebooklist-open-notebook-by-name \"_scratch_\")))
+   (lambda () (ein:notebooklist-open-notebook \"main.ipynb\")))
 
 "
   :type 'hook
@@ -110,9 +110,7 @@ is opened at first time.::
     'menu-choice :tag ,tag
     :value ,custom-var
     :notify (lambda (widget &rest ignore)
-              (run-at-time 1 nil
-                           #'ein:notebooklist-reload
-                           ein:%notebooklist%)
+              (run-at-time 1 nil #'ein:notebooklist-reload)
               (setq ,custom-var (widget-value widget)))
     ,@(mapcar (lambda (const)
                 `'(item :tag ,(third const) :value ,(fourth const)))
@@ -143,26 +141,6 @@ This function adds NBLIST to `ein:notebooklist-map'."
 (defun ein:notebooklist-list-get (url-or-port)
   "Get an instance of `ein:$notebooklist' by URL-OR-PORT as a key."
   (gethash url-or-port ein:notebooklist-map))
-
-;; TODO: FIXME. Use content API.
-(defun ein:notebooklist-open-notebook-by-name (name &optional url-or-port
-                                                    callback cbargs)
-  "Open notebook named NAME in the server URL-OR-PORT.
-If URL-OR-PORT is not given or `nil', and the current buffer is
-the notebook list buffer, the notebook is searched in the
-notebook list of the current buffer.
-
-When used in lisp, CALLBACK and CBARGS are passed to `ein:notebook-open'.
-To suppress popup, you can pass `ignore' as CALLBACK."
-  (loop with nblist = (if url-or-port
-                          (ein:notebooklist-list-get url-or-port)
-                        ein:%notebooklist%)
-        for note in (ein:$notebooklist-data nblist)
-        for notebook-name = (plist-get note :name)
-        for notebook-path = (plist-get note :path)
-        when (equal notebook-name name)
-        return (ein:notebook-open (ein:$notebooklist-url-or-port nblist)
-                                  notebook-path nil callback cbargs)))
 
 (defun ein:notebooklist-url (url-or-port version &optional path)
   (let ((base-path (cond ((= version 2) "api/notebooks")
@@ -248,20 +226,6 @@ PATH is specifying directory from file navigation.  PATH is empty on login.  RES
               (ein:content-query-contents url-or-port path success))))
       (ein:content-query-contents url-or-port path success))))
 
-;; point of order (poo): ein:notebooklist-refresh-kernelspecs requeries the kernelspecs and calls ein:notebooklist-reload.  ein:notebooklist-reload already requeries the kernelspecs in one of its callbacks, so this function seems redundant.
-
-;; (defun ein:notebooklist-refresh-kernelspecs (&optional url-or-port)
-;;   (interactive (list (or (and ein:%notebooklist% (ein:$notebooklist-url-or-port ein:%notebooklist%))
-;;                          (ein:notebooklist-ask-url-or-port))))
-;;   (unless url-or-port
-;;     (if ein:%notebooklist%
-;;         (setq url-or-port (ein:$notebooklist-url-or-port ein:%notebooklist%))
-;;       (setq url-or-port (ein:default-url-or-port))))
-;;   (ein:query-kernelspecs url-or-port)
-;;   (when ein:%notebooklist%
-;;     (ein:notebooklist-reload ein:%notebooklist%))
-;; )
-
 (defcustom ein:notebooklist-keepalive-refresh-time 1
   "When the notebook keepalive is enabled, the frequency, IN
 HOURS, with which to make calls to the jupyter content API to
@@ -328,7 +292,7 @@ automatically be called during calls to `ein:notebooklist-open`."
         (ein:notebooklist-list-add ein:%notebooklist%)
         (ein:notebooklist-render ipy-version)
         (goto-char orig-point)
-        (ein:log 'verbose "Opened notebooklist at %s" (concat (file-name-as-directory url-or-port) path))
+        (ein:log 'verbose "Opened notebooklist at %s" (ein:url url-or-port path))
         (unless already-opened-p
           (run-hooks 'ein:notebooklist-first-open-hook))
         (when ein:enable-keepalive
@@ -344,12 +308,14 @@ automatically be called during calls to `ein:notebooklist-open`."
     "ein:notebooklist-open-error %s: ERROR %s DATA %s" (concat (file-name-as-directory url-or-port) path) (car error-thrown) (cdr error-thrown)))
 
 ;;;###autoload
-(defun ein:notebooklist-reload (notebooklist &optional resync)
+(defun ein:notebooklist-reload (&optional nblist resync)
   "Reload current Notebook list."
-  (interactive (list ein:%notebooklist%))
-  (when notebooklist
-    (ein:notebooklist-open* (ein:$notebooklist-url-or-port notebooklist)
-                            (ein:$notebooklist-path notebooklist) resync)))
+  (interactive)
+  (unless nblist
+    (setq nblist ein:%notebooklist%))
+  (when nblist
+    (ein:notebooklist-open* (ein:$notebooklist-url-or-port nblist)
+                            (ein:$notebooklist-path nblist) resync)))
 
 (defun ein:notebooklist-refresh-related ()
   "Reload notebook list in which current notebook locates.
@@ -359,12 +325,9 @@ This function is called via `ein:notebook-after-rename-hook'."
 
 (add-hook 'ein:notebook-after-rename-hook 'ein:notebooklist-refresh-related)
 
-(defun ein:notebooklist-open-notebook (nblist path &optional callback cbargs)
-  (ein:notebook-open (ein:$notebooklist-url-or-port nblist)
-                     path
-                     nil
-                     callback
-                     cbargs))
+(defun ein:notebooklist-open-notebook (path &optional nblist callback)
+  (unless nblist (setq nblist ein:%notebooklist%))
+  (ein:notebook-open (ein:$notebooklist-url-or-port nblist) path nil callback))
 
 (defun ein:notebooklist-open-file (url-or-port path)
   (ein:file-open url-or-port path))
@@ -378,7 +341,7 @@ This function is called via `ein:notebook-after-rename-hook'."
     (ein:content-upload nb-path upload-path)))
 
 ;;;###autoload
-(defun ein:notebooklist-new-notebook (&optional url-or-port kernelspec path callback cbargs)
+(defun ein:notebooklist-new-notebook (&optional url-or-port kernelspec path callback)
   "Ask server to create a new notebook and open it in a new buffer.
 
 TODO - New and open should be separate, and we should flag an exception if we try to new an existing.
@@ -408,15 +371,14 @@ TODO - New and open should be separate, and we should flag an exception if we tr
        ;; (lambda ()
        ;;   (ein:html-get-data-in-body-tag "data-notebook-id"))
        :error (apply-partially #'ein:notebooklist-new-notebook-error
-                               url-or-port path callback cbargs)
+                               url-or-port path callback)
        :success (apply-partially #'ein:notebooklist-new-notebook-callback
-                                 url-or-port kernelspec path callback cbargs)))))
+                                 url-or-port kernelspec path callback)))))
 
 (defun* ein:notebooklist-new-notebook-callback (url-or-port
                                                 kernelspec
                                                 path
                                                 callback
-                                                cbargs
                                                 &key
                                                 data
                                                 &allow-other-keys)
@@ -426,11 +388,11 @@ TODO - New and open should be separate, and we should flag an exception if we tr
       (if (string= nbpath "")
           (setq nbpath nbname)
         (setq nbpath (format "%s/%s" nbpath nbname))))
-    (ein:notebook-open url-or-port nbpath kernelspec callback cbargs)
+    (ein:notebook-open url-or-port nbpath kernelspec callback)
     (ein:notebooklist-open* url-or-port path)))
 
 (defun* ein:notebooklist-new-notebook-error
-    (url-or-port callback cbargs
+    (url-or-port callback
                  &key response &allow-other-keys
                  &aux
                  (error (request-response-error-thrown response))
@@ -462,14 +424,15 @@ You may find the new one in the notebook list." error)
      url-or-port
      kernelspec
      path
-     (lambda (notebook created name)
-       (assert created)
-       (with-current-buffer (ein:notebook-buffer notebook)
-         (ein:notebook-rename-command name)
-         ;; As `ein:notebook-open' does not call `pop-to-buffer' when
-         ;; callback is specified, `pop-to-buffer' must be called here:
-         (pop-to-buffer (current-buffer))))
-     (list name))))
+     (apply-partially
+      (lambda (name* notebook created)
+        (assert created)
+        (with-current-buffer (ein:notebook-buffer notebook)
+          (ein:notebook-rename-command name*)
+          ;; As `ein:notebook-open' does not call `pop-to-buffer' when
+          ;; callback is specified, `pop-to-buffer' must be called here:
+          (pop-to-buffer (current-buffer))))
+      name))))
 
 (defun ein:notebooklist-delete-notebook-ask (path)
   (when (y-or-n-p (format "Delete notebook %s?" path))
@@ -562,7 +525,7 @@ You may find the new one in the notebook list." error)
   (widget-insert " ")
   (widget-create
    'link
-   :notify (lambda (&rest ignore) (ein:notebooklist-reload ein:%notebooklist% t))
+   :notify (lambda (&rest ignore) (ein:notebooklist-reload nil t))
    "Reload List")
   (widget-insert " ")
   (widget-create
@@ -607,7 +570,7 @@ You may find the new one in the notebook list." error)
       (widget-insert " ")
       (widget-create
        'link
-       :notify (lambda (&rest ignore) (ein:notebooklist-reload ein:%notebooklist% t))
+       :notify (lambda (&rest ignore) (ein:notebooklist-reload nil t))
        "Resync")
       (widget-insert " ")
       (widget-create
@@ -645,7 +608,7 @@ You may find the new one in the notebook list." error)
                                      (switch-to-buffer buffer)
                                    (error
                                     (message "%S" err)
-                                    (ein:notebooklist-reload ein:%notebooklist%)))))
+                                    (ein:notebooklist-reload)))))
                      "Open")
                     (widget-create
                      'link
@@ -653,9 +616,7 @@ You may find the new one in the notebook list." error)
                                (lambda (&rest ignore)
                                  (if (buffer-live-p buffer)
                                      (kill-buffer buffer))
-                                 (run-at-time 1 nil
-                                              #'ein:notebooklist-reload
-                                              ein:%notebooklist%)))
+                                 (run-at-time 1 nil #'ein:notebooklist-reload)))
                      "Close")
                     (widget-insert " : " (buffer-name buffer))
                     (widget-insert "\n")))))
@@ -719,10 +680,8 @@ You may find the new one in the notebook list." error)
                      :notify (lexical-let ((name name)
                                            (path path))
                                (lambda (&rest ignore)
-                                 (run-at-time 3 nil
-                                              #'ein:notebooklist-reload ein:%notebooklist%) ;; TODO using deferred better?
-                                 (ein:notebooklist-open-notebook
-                                  ein:%notebooklist% path)))
+                                 (run-at-time 3 nil #'ein:notebooklist-reload) ;; TODO using deferred better?
+                                 (ein:notebooklist-open-notebook path)))
                      "Open")
                     (widget-insert " ")
                     (if (gethash path sessions)
@@ -731,9 +690,7 @@ You may find the new one in the notebook list." error)
                          :notify (lexical-let ((session (car (gethash path sessions)))
                                                (nblist ein:%notebooklist%))
                                    (lambda (&rest ignore)
-                                     (run-at-time 1 nil
-                                                  #'ein:notebooklist-reload
-                                                  ein:%notebooklist%)
+                                     (run-at-time 1 nil #'ein:notebooklist-reload)
                                      (ein:kernel-kill (make-ein:$kernel :url-or-port (ein:$notebooklist-url-or-port nblist)
                                                                         :session-id session))))
                          "Stop")
@@ -775,48 +732,19 @@ Notebook list data is passed via the buffer local variable
 
 ;;;###autoload
 
-(defun ein:notebooklist-list-notebooks ()
-  "Return a list of notebook path (NBPATH).  Each element NBPATH
-is a string of the format \"URL-OR-PORT/PATH\"."
+(defun ein:notebooklist-nbpaths ()
+  "Return list of .ipynb files for all sessions"
   (apply #'append
          (loop for nblist in (ein:notebooklist-list)
                for url-or-port = (ein:$notebooklist-url-or-port nblist)
                collect
                (loop for content in (ein:content-need-hierarchy url-or-port)
                      when (string= (ein:$content-type content) "notebook")
-                     collect (format "%s/%s" url-or-port
-                                     (ein:$content-path content)))
-               ;; (if (= api-version 3)
-               ;;     (loop for note in (ein:content-need-hierarchy url-or-port)
-               ;;           collect (format "%s/%s" url-or-port
-               ;;                           (ein:$content-path note)
-               ;;                           ))
-               ;;   (loop for note in (ein:$notebooklist-data nblist)
-               ;;         collect (format "%s/%s"
-               ;;                         url-or-port
-               ;;                         (plist-get note :name))))
-               )))
+                     collect (ein:url url-or-port (ein:$content-path content))))))
 
-;;FIXME: Code below assumes notebook is in root directory - need to do a better
-;;       job listing notebooks in subdirectories and parsing out the path.
-;;;###autoload
-
-(defun ein:notebooklist-open-notebook-global (nbpath &optional callback cbargs)
-  "Choose notebook from all opened notebook list and open it.
-Notebook is specified by a string NBPATH whose format is
-\"URL-OR-PORT/NOTEBOOK-NAME\".
-
-When used in lisp, CALLBACK and CBARGS are passed to `ein:notebook-open'."
-  (interactive
-   (list (if noninteractive
-             (car (ein:notebooklist-list-notebooks))
-           (completing-read
-            "Open notebook [URL-OR-PORT/NAME]: "
-            (ein:notebooklist-list-notebooks)))))
-  (let* ((parsed (url-generic-parse-url nbpath))
-         (path (url-filename parsed)))
-    (ein:notebook-open (substring nbpath 0 (- (length nbpath) (length path)))
-                       (substring path 1) nil callback cbargs)))
+(defsubst ein:notebooklist-ask-nbpath ()
+  (completing-read
+   "Open notebook: " (ein:notebooklist-nbpaths)))
 
 ;;;###autoload
 
@@ -1030,7 +958,7 @@ on all the notebooks opened from the current notebooklist."
          ("New Junk Notebook" ein:junk-new)))))
 
 (defun ein:notebooklist-revert-wrapper (&optional ignore-auto noconfirm preserve-modes)
-  (ein:notebooklist-reload ein:%notebooklist%))
+  (ein:notebooklist-reload))
 
 (define-derived-mode ein:notebooklist-mode special-mode "ein:notebooklist"
   "IPython notebook list mode.
