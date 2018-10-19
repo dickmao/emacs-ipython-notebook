@@ -4,12 +4,21 @@
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-company" "ein-company.el" (23498 20366
 ;;;;;;  916508 25000))
 =======
 ;;;### (autoloads nil "ein-company" "ein-company.el" (23497 5224
 ;;;;;;  327452 197000))
 >>>>>>> rename ipython-version to notebook-version, which is what it is
+=======
+;;;### (autoloads nil "ein-company" "ein-company.el" (23497 5224
+;;;;;;  327452 197000))
+=======
+;;;### (autoloads nil "ein-company" "ein-company.el" (23498 20366
+;;;;;;  916508 25000))
+>>>>>>> add osx
+>>>>>>> add osx
 ;;; Generated autoloads from ein-company.el
 
 (autoload 'ein:company-backend "ein-company" "\
@@ -20,12 +29,21 @@
 ;;;***
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-connect" "ein-connect.el" (23499 16469
 ;;;;;;  728162 481000))
 =======
 ;;;### (autoloads nil "ein-connect" "ein-connect.el" (23497 5224
 ;;;;;;  327452 197000))
 >>>>>>> rename ipython-version to notebook-version, which is what it is
+=======
+;;;### (autoloads nil "ein-connect" "ein-connect.el" (23497 5224
+;;;;;;  327452 197000))
+=======
+;;;### (autoloads nil "ein-connect" "ein-connect.el" (23498 20366
+;;;;;;  916508 25000))
+>>>>>>> add osx
+>>>>>>> add osx
 ;;; Generated autoloads from ein-connect.el
 
 (autoload 'ein:connect-to-notebook-command "ein-connect" "\
@@ -82,11 +100,19 @@ It should be possible to support python-mode.el.  Patches are welcome!
 ;;;***
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-dev" "ein-dev.el" (23498 20366 920508
 ;;;;;;  56000))
 =======
 ;;;### (autoloads nil "ein-dev" "ein-dev.el" (23497 5224 327452 197000))
 >>>>>>> rename ipython-version to notebook-version, which is what it is
+=======
+;;;### (autoloads nil "ein-dev" "ein-dev.el" (23497 5224 327452 197000))
+=======
+;;;### (autoloads nil "ein-dev" "ein-dev.el" (23498 20366 920508
+;;;;;;  56000))
+>>>>>>> add osx
+>>>>>>> add osx
 ;;; Generated autoloads from ein-dev.el
 
 (autoload 'ein:dev-insert-mode-map "ein-dev" "\
@@ -164,12 +190,21 @@ change in its input area.
 ;;;***
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-ipynb-mode" "ein-ipynb-mode.el" (23499
 ;;;;;;  16469 728162 481000))
 =======
 ;;;### (autoloads nil "ein-ipynb-mode" "ein-ipynb-mode.el" (23497
 ;;;;;;  5224 327452 197000))
 >>>>>>> rename ipython-version to notebook-version, which is what it is
+=======
+;;;### (autoloads nil "ein-ipynb-mode" "ein-ipynb-mode.el" (23497
+;;;;;;  5224 327452 197000))
+=======
+;;;### (autoloads nil "ein-ipynb-mode" "ein-ipynb-mode.el" (23498
+;;;;;;  20366 920508 56000))
+>>>>>>> add osx
+>>>>>>> add osx
 ;;; Generated autoloads from ein-ipynb-mode.el
 
 (autoload 'ein:ipynb-mode "ein-ipynb-mode" "\
@@ -232,6 +267,7 @@ and save it immediately.
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23499 50600
 ;;;;;;  8727 966000))
 =======
@@ -242,6 +278,14 @@ and save it immediately.
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23497 5993
 ;;;;;;  487545 694000))
 >>>>>>> rename ipython-version to notebook-version, which is what it is
+=======
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23497 5993
+;;;;;;  487545 694000))
+=======
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23498 20366
+;;;;;;  920508 56000))
+>>>>>>> add osx
+>>>>>>> add osx
 ;;; Generated autoloads from ein-jupyter.el
 
 (autoload 'ein:jupyter-server-login-and-open "ein-jupyter" "\
@@ -287,12 +331,21 @@ there is no running server then no action will be taken.
 ;;;***
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-jupyterhub" "ein-jupyterhub.el" (23498
 ;;;;;;  20366 920508 56000))
 =======
 ;;;### (autoloads nil "ein-jupyterhub" "ein-jupyterhub.el" (23497
 ;;;;;;  5668 493807 700000))
 >>>>>>> rename ipython-version to notebook-version, which is what it is
+=======
+;;;### (autoloads nil "ein-jupyterhub" "ein-jupyterhub.el" (23497
+;;;;;;  5668 493807 700000))
+=======
+;;;### (autoloads nil "ein-jupyterhub" "ein-jupyterhub.el" (23498
+;;;;;;  20366 920508 56000))
+>>>>>>> add osx
+>>>>>>> add osx
 ;;; Generated autoloads from ein-jupyterhub.el
 
 (autoload 'ein:jupyterhub-connect "ein-jupyterhub" "\
@@ -303,12 +356,21 @@ Log on to a jupyterhub server using PAM authentication. Requires jupyterhub vers
 ;;;***
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-kernel" "ein-kernel.el" (23498 20366 920508
 ;;;;;;  56000))
 =======
 ;;;### (autoloads nil "ein-kernel" "ein-kernel.el" (23497 5224 327452
 ;;;;;;  197000))
 >>>>>>> rename ipython-version to notebook-version, which is what it is
+=======
+;;;### (autoloads nil "ein-kernel" "ein-kernel.el" (23497 5224 327452
+;;;;;;  197000))
+=======
+;;;### (autoloads nil "ein-kernel" "ein-kernel.el" (23498 20366 920508
+;;;;;;  56000))
+>>>>>>> add osx
+>>>>>>> add osx
 ;;; Generated autoloads from ein-kernel.el
 
 (defalias 'ein:kernel-url-or-port 'ein:$kernel-url-or-port)
@@ -329,18 +391,28 @@ Notebook mode with multiple language fontification.
 ;;;***
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23499 16469
 ;;;;;;  728162 481000))
 =======
 ;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23497 9216
 ;;;;;;  46575 206000))
 >>>>>>> rename ipython-version to notebook-version, which is what it is
+=======
+;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23497 9216
+;;;;;;  46575 206000))
+=======
+;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23498 20366
+;;;;;;  920508 56000))
+>>>>>>> add osx
+>>>>>>> add osx
 ;;; Generated autoloads from ein-notebook.el
 
 (defalias 'ein:notebook-name 'ein:$notebook-notebook-name)
 
 ;;;***
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -351,6 +423,8 @@ Notebook mode with multiple language fontification.
 >>>>>>> Got to the bottom of the 405
 =======
 >>>>>>> rename ipython-version to notebook-version, which is what it is
+=======
+>>>>>>> add osx
 ;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23495
 <<<<<<< HEAD
 ;;;;;;  50360 466489 162000))
@@ -385,7 +459,14 @@ Notebook mode with multiple language fontification.
 ;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23497
 ;;;;;;  9237 810701 444000))
 >>>>>>> rename ipython-version to notebook-version, which is what it is
+<<<<<<< HEAD
 >>>>>>> rename ipython-version to notebook-version, which is what it is
+=======
+=======
+;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23498
+;;;;;;  20366 920508 56000))
+>>>>>>> add osx
+>>>>>>> add osx
 ;;; Generated autoloads from ein-notebooklist.el
 
 (autoload 'ein:notebooklist-enable-keepalive "ein-notebooklist" "\
@@ -592,6 +673,7 @@ Show full traceback in traceback viewer.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23499 54796 72693 801000))
 =======
 =======
@@ -604,6 +686,8 @@ Show full traceback in traceback viewer.
 >>>>>>> rename ipython-version to notebook-version, which is what it is
 =======
 >>>>>>> finish the task of previous commit
+=======
+>>>>>>> add osx
 <<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23495 44399 897023 299000))
 =======
@@ -639,7 +723,13 @@ Show full traceback in traceback viewer.
 =======
 ;;;;;;  "ob-ein.el" "zeroein.el") (23497 10876 427906 877000))
 >>>>>>> finish the task of previous commit
+<<<<<<< HEAD
 >>>>>>> finish the task of previous commit
+=======
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23498 20366 920508 56000))
+>>>>>>> add osx
+>>>>>>> add osx
 
 ;;;***
 
