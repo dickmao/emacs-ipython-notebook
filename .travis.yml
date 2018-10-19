@@ -1,5 +1,5 @@
 sudo: false
-language: python
+language: emacs-lisp
 
 addons:
   apt:
@@ -7,13 +7,13 @@ addons:
     - gnutls-bin
     - sharutils
 
+os:
+  - linux
+  - osx
+
 cache:
   directories:
   - $HOME/local
-
-python:
-  - "2.7"
-  - "3.6"
 
 env:
   global:
