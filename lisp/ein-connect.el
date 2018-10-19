@@ -37,7 +37,6 @@
 
 (autoload 'company-mode "company")
 
-(declare-function ein:notebooklist-list-notebooks "ein-notebooklist")
 (declare-function ein:notebooklist-open-notebook-global "ein-notebooklist")
 
 
@@ -177,9 +176,7 @@ notebooks."
   "Connect any buffer to notebook and its kernel."
   (interactive
    (list
-    (completing-read
-     "Notebook to connect [URL-OR-PORT/NAME]: "
-     (ein:notebooklist-list-notebooks))))
+    (ein:notebooklist-ask-nbpath)))
   (ein:notebooklist-open-notebook-global
    nbpath
    (lambda (notebook created buffer no-reconnection)

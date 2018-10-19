@@ -195,7 +195,7 @@
   (subseq filename (length (file-name-as-directory (ein:$process-dir proc)))))
 
 (defun ein:process-open-notebook* (filename callback)
-  "Open FILENAME as a notebook and start a notebook server if necessary.  CALLBACK with arity 2 (passed into ein:notebook-open--callback)."
+  "Open FILENAME as a notebook and start a notebook server if necessary.  CALLBACK with arity 2 (passed into `ein:notebook-open--callback')."
 
   (ein:process-refresh-processes)
   (let* ((proc (ein:process-dir-match filename)))

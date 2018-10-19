@@ -75,6 +75,24 @@ callbacks.  This is what I need."
                 continue)
       (error "Timeout: %s" predicate))))
 
+(defun ein:testing-new-notebook (url-or-port ks)
+  (lexical-let (notebook)
+    (condition-case err
+        (progn
+          (ein:notebooklist-new-notebook url-or-port ks nil
+                                         (lambda (nb created &rest ignore)
+                                           (setq notebook nb)))
+          (ein:testing-wait-until (lambda () 
+                                    (and notebook
+                                         (ein:aand (ein:$notebook-kernel notebook)
+                                                   (ein:kernel-live-p it))))
+                                  nil 10000 2000)
+          notebook)
+      (error (message "ein:testing-new-notebook: %s" (error-message-string err))
+             (when notebook
+               (ein:notebook-close notebook))
+             nil))))
+
 (defadvice ert-run-tests-batch (after ein:testing-dump-logs-hook activate)
   "Hook `ein:testing-dump-logs-hook' because `kill-emacs-hook'
 is not run in batch mode before Emacs 24.1."

@@ -188,6 +188,15 @@ at point, i.e. any word before then \"(\", if it is present."
 ;;; URL utils
 
 (defvar ein:url-localhost "127.0.0.1")
+
+(defsubst ein:glom-paths (&rest paths)
+  (loop with result = ""
+        for p in paths
+        if (not (zerop (length p)))
+          do (setq result (concat result (ein:trim-left (directory-file-name p) "/") "/"))
+        end
+        finally return (directory-file-name result)))
+
 (defun ein:url (url-or-port &rest paths)
   (if (null url-or-port) 
       nil
@@ -197,10 +206,8 @@ at point, i.e. any word before then \"(\", if it is present."
     (let ((parsed-url (url-generic-parse-url url-or-port)))
       (if (or (null (url-host parsed-url)) (string= (url-host parsed-url) "localhost"))
           (setf (url-host parsed-url) ein:url-localhost))
-      (loop with url = (url-recreate-url parsed-url)
-            for p in paths
-            do (setq url (concat (file-name-as-directory url) (ein:trim-left (directory-file-name p) "/")))
-            finally return (directory-file-name url)))))
+      (directory-file-name (concat (file-name-as-directory (url-recreate-url parsed-url))
+                                   (apply #'ein:glom-paths paths))))))
 
 (defun ein:url-no-cache (url)
   "Imitate `cache=false' of `jQuery.ajax'.
