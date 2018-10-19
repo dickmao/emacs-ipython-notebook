@@ -903,10 +903,20 @@ notebook buffer.  Let's warn for now to see who is doing this.
 =======
 =======
 ;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23498
+<<<<<<< HEAD
 ;;;;;;  12020 816289 426000))
 >>>>>>> need to revert a commit
+<<<<<<< HEAD
 >>>>>>> need to revert a commit
+<<<<<<< HEAD
 >>>>>>> need to revert a commit
+=======
+=======
+=======
+;;;;;;  18434 376476 945000))
+>>>>>>> loaddefs
+>>>>>>> loaddefs
+>>>>>>> loaddefs
 ;;; Generated autoloads from ein-notebooklist.el
 
 (autoload 'ein:notebooklist-enable-keepalive "ein-notebooklist" "\
@@ -948,7 +958,7 @@ Open new notebook and rename the notebook.
 \(fn NAME KERNELSPEC URL-OR-PORT &optional PATH)" t nil)
 
 (autoload 'ein:notebooklist-nbpaths "ein-notebooklist" "\
-Return list of .ipynb files located at URL-OR-PORT
+Return list of .ipynb files for all sessions
 
 \(fn)" nil nil)
 
@@ -1117,6 +1127,7 @@ Show full traceback in traceback viewer.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23499 54796 72693 801000))
 =======
 =======
@@ -1151,6 +1162,8 @@ Show full traceback in traceback viewer.
 >>>>>>> get the sentinel right
 =======
 >>>>>>> need to revert a commit
+=======
+>>>>>>> loaddefs
 <<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23495 44399 897023 299000))
 =======
@@ -1270,8 +1283,17 @@ Show full traceback in traceback viewer.
 =======
 ;;;;;;  "ob-ein.el" "zeroein.el") (23498 13243 83197 678000))
 >>>>>>> need to revert a commit
+<<<<<<< HEAD
 >>>>>>> need to revert a commit
+<<<<<<< HEAD
 >>>>>>> need to revert a commit
+=======
+=======
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23498 18227 115434 69000))
+>>>>>>> loaddefs
+>>>>>>> loaddefs
+>>>>>>> loaddefs
 
 ;;;***
 
