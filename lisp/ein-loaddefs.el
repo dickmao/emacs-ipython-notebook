@@ -3,8 +3,13 @@
 ;;; Code:
 
 
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-company" "ein-company.el" (23498 20366
 ;;;;;;  916508 25000))
+=======
+;;;### (autoloads nil "ein-company" "ein-company.el" (23497 5224
+;;;;;;  327452 197000))
+>>>>>>> rename ipython-version to notebook-version, which is what it is
 ;;; Generated autoloads from ein-company.el
 
 (autoload 'ein:company-backend "ein-company" "\
@@ -14,8 +19,13 @@
 
 ;;;***
 
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-connect" "ein-connect.el" (23499 16469
 ;;;;;;  728162 481000))
+=======
+;;;### (autoloads nil "ein-connect" "ein-connect.el" (23497 5224
+;;;;;;  327452 197000))
+>>>>>>> rename ipython-version to notebook-version, which is what it is
 ;;; Generated autoloads from ein-connect.el
 
 (autoload 'ein:connect-to-notebook-command "ein-connect" "\
@@ -71,8 +81,12 @@ It should be possible to support python-mode.el.  Patches are welcome!
 
 ;;;***
 
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-dev" "ein-dev.el" (23498 20366 920508
 ;;;;;;  56000))
+=======
+;;;### (autoloads nil "ein-dev" "ein-dev.el" (23497 5224 327452 197000))
+>>>>>>> rename ipython-version to notebook-version, which is what it is
 ;;; Generated autoloads from ein-dev.el
 
 (autoload 'ein:dev-insert-mode-map "ein-dev" "\
@@ -149,8 +163,13 @@ change in its input area.
 
 ;;;***
 
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-ipynb-mode" "ein-ipynb-mode.el" (23499
 ;;;;;;  16469 728162 481000))
+=======
+;;;### (autoloads nil "ein-ipynb-mode" "ein-ipynb-mode.el" (23497
+;;;;;;  5224 327452 197000))
+>>>>>>> rename ipython-version to notebook-version, which is what it is
 ;;; Generated autoloads from ein-ipynb-mode.el
 
 (autoload 'ein:ipynb-mode "ein-ipynb-mode" "\
@@ -212,12 +231,17 @@ and save it immediately.
 ;;;***
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23499 50600
 ;;;;;;  8727 966000))
 =======
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23496 59791
 ;;;;;;  332973 588000))
 >>>>>>> retry kernelspecs 403
+=======
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23497 5993
+;;;;;;  487545 694000))
+>>>>>>> rename ipython-version to notebook-version, which is what it is
 ;;; Generated autoloads from ein-jupyter.el
 
 (autoload 'ein:jupyter-server-login-and-open "ein-jupyter" "\
@@ -262,8 +286,13 @@ there is no running server then no action will be taken.
 
 ;;;***
 
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-jupyterhub" "ein-jupyterhub.el" (23498
 ;;;;;;  20366 920508 56000))
+=======
+;;;### (autoloads nil "ein-jupyterhub" "ein-jupyterhub.el" (23497
+;;;;;;  5668 493807 700000))
+>>>>>>> rename ipython-version to notebook-version, which is what it is
 ;;; Generated autoloads from ein-jupyterhub.el
 
 (autoload 'ein:jupyterhub-connect "ein-jupyterhub" "\
@@ -273,8 +302,13 @@ Log on to a jupyterhub server using PAM authentication. Requires jupyterhub vers
 
 ;;;***
 
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-kernel" "ein-kernel.el" (23498 20366 920508
 ;;;;;;  56000))
+=======
+;;;### (autoloads nil "ein-kernel" "ein-kernel.el" (23497 5224 327452
+;;;;;;  197000))
+>>>>>>> rename ipython-version to notebook-version, which is what it is
 ;;; Generated autoloads from ein-kernel.el
 
 (defalias 'ein:kernel-url-or-port 'ein:$kernel-url-or-port)
@@ -294,8 +328,13 @@ Notebook mode with multiple language fontification.
 
 ;;;***
 
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23499 16469
 ;;;;;;  728162 481000))
+=======
+;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23497 9216
+;;;;;;  46575 206000))
+>>>>>>> rename ipython-version to notebook-version, which is what it is
 ;;; Generated autoloads from ein-notebook.el
 
 (defalias 'ein:notebook-name 'ein:$notebook-notebook-name)
@@ -304,11 +343,14 @@ Notebook mode with multiple language fontification.
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23499
 ;;;;;;  16469 728162 481000))
 =======
 =======
 >>>>>>> Got to the bottom of the 405
+=======
+>>>>>>> rename ipython-version to notebook-version, which is what it is
 ;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23495
 <<<<<<< HEAD
 ;;;;;;  50360 466489 162000))
@@ -336,7 +378,14 @@ Notebook mode with multiple language fontification.
 =======
 ;;;;;;  64779 642002 162000))
 >>>>>>> retry kernelspecs 403
+<<<<<<< HEAD
 >>>>>>> retry kernelspecs 403
+=======
+=======
+;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23497
+;;;;;;  9237 810701 444000))
+>>>>>>> rename ipython-version to notebook-version, which is what it is
+>>>>>>> rename ipython-version to notebook-version, which is what it is
 ;;; Generated autoloads from ein-notebooklist.el
 
 (autoload 'ein:notebooklist-enable-keepalive "ein-notebooklist" "\
@@ -541,6 +590,7 @@ Show full traceback in traceback viewer.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23499 54796 72693 801000))
 =======
 =======
@@ -549,6 +599,8 @@ Show full traceback in traceback viewer.
 >>>>>>> retry kernelspecs 403
 =======
 >>>>>>> loaddefs
+=======
+>>>>>>> rename ipython-version to notebook-version, which is what it is
 <<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23495 44399 897023 299000))
 =======
@@ -572,7 +624,13 @@ Show full traceback in traceback viewer.
 =======
 ;;;;;;  "ob-ein.el" "zeroein.el") (23497 4102 225915 892000))
 >>>>>>> loaddefs
+<<<<<<< HEAD
 >>>>>>> loaddefs
+=======
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23497 9201 198489 45000))
+>>>>>>> rename ipython-version to notebook-version, which is what it is
+>>>>>>> rename ipython-version to notebook-version, which is what it is
 
 ;;;***
 
