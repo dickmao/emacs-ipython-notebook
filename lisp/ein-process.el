@@ -124,8 +124,7 @@
 `ein:$process-dir' : string
   Arg of --notebook-dir or 'readlink -e /proc/<pid>/cwd'."
   pid
-  port
-  ip
+  url
   dir
 )
 
@@ -155,13 +154,14 @@
   (clrhash ein:%processes%)
   (loop for line in (process-lines ein:jupyter-default-server-command
                                    "notebook" "list" "--json")
-        (destructuring-bind 
-            (&key pid url notebook_dir &allow-other-keys)
-            (ein:json-read-from-string line)
-          (puthash dir (make-ein:$process :pid pid 
-                                          :url (ein:url url) 
-                                          :dir (directory-file-name dir))
-                   ein:%processes%))))
+        do (destructuring-bind 
+               (&key pid url notebook_dir &allow-other-keys)
+               (ein:json-read-from-string line)
+             (puthash (directory-file-name notebook_dir) 
+                      (make-ein:$process :pid pid 
+                                         :url (ein:url url) 
+                                         :dir (directory-file-name notebook_dir))
+                      ein:%processes%))))
 
 (defun ein:process-ps-refresh-processes ()
   "Can delete this.  It pokes around unix ps when it's far better to use `jupyter notebook list'"
