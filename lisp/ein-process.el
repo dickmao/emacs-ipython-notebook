@@ -118,11 +118,8 @@
 `ein:$process-pid' : integer
   PID.
 
-`ein:$process-port': integer
-  Arg of --port or .
-
-`ein:$process-ip' : string
-  Arg of --notebook-ip or 'localhost'.
+`ein:$process-url': string
+  URL
 
 `ein:$process-dir' : string
   Arg of --notebook-dir or 'readlink -e /proc/<pid>/cwd'."
@@ -155,21 +152,19 @@
 
 (defun ein:process-refresh-processes ()
   "Use `jupyter notebook list --json` to populate ein:%processes%"
-  (ein:aif (loop for line in (process-lines ein:jupyter-default-server-command
-                                            "notebook" "list" "--json")
-                 with token0
-                 with password0
-                 when (destructuring-bind 
-                          (&key password url token &allow-other-keys)
-                          (ein:json-read-from-string line)
-                        (prog1 (equal (ein:url url) url-or-port)
-                          (setq password0 password) ;; t or :json-false
-                          (setq token0 token)))
-                 return (list password0 token0))
-           it (list nil nil)))
+  (clrhash ein:%processes%)
+  (loop for line in (process-lines ein:jupyter-default-server-command
+                                   "notebook" "list" "--json")
+        (destructuring-bind 
+            (&key pid url notebook_dir &allow-other-keys)
+            (ein:json-read-from-string line)
+          (puthash dir (make-ein:$process :pid pid 
+                                          :url (ein:url url) 
+                                          :dir (directory-file-name dir))
+                   ein:%processes%))))
 
 (defun ein:process-ps-refresh-processes ()
-  "Can delete this.  It guesses around with unix ps when it's far better to use `jupyter notebook list'"
+  "Can delete this.  It pokes around unix ps when it's far better to use `jupyter notebook list'"
   (loop for pid in (list-system-processes)
         for attrs = (process-attributes pid)
         for args = (alist-get 'args attrs)
@@ -194,7 +189,7 @@
 
 (defsubst ein:process-url-or-port (proc)
   "Naively construct url-or-port from ein:process PROC's port and ip fields"
-  (ein:url (format "http://%s:%s" (ein:$process-ip proc) (ein:$process-port proc))))
+  (ein:$process-url proc))
 
 (defsubst ein:process-path (proc filename)
   "Construct path by eliding PROC's dir from filename"
@@ -203,13 +198,8 @@
 (defun ein:process-open-notebook* (filename callback)
   "Open FILENAME as a notebook and start a notebook server if necessary.  CALLBACK with arity 2 (passed into ein:notebook-open--callback)."
 
-  ;; (ein:process-refresh-processes)
-
+  (ein:process-refresh-processes)
   (let* ((proc (ein:process-dir-match filename)))
-    (when (and proc (not (ein:process-alive-p proc)))
-      (ein:log 'warn "Server pid=%s dir=%s no longer running" (ein:$process-pid proc) (ein:$process-dir proc))
-      (remhash (ein:$process-dir proc) ein:%processes%)
-      (setq proc nil))
     (if proc
         (let* ((url-or-port (ein:process-url-or-port proc))
                (path (ein:process-path proc filename))
@@ -225,7 +215,7 @@
              (path (subseq filename (length (file-name-as-directory nbdir))))
              (callback1 (apply-partially (lambda (path* callback* buffer)
                                            (ein:notebook-open
-                                            (car (ein:jupyter-server-conn-info))
+                                            (car (ein:jupyter-server-conn-info buffer))
                                             path* nil callback*))
                                          path callback)))
         (apply #'ein:jupyter-server-start
