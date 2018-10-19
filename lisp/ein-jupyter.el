@@ -76,6 +76,8 @@ the notebook directory, you can set it here for future calls to
                      (format "--notebook-dir=%s" (convert-standard-filename dir))
                      (or args ein:jupyter-server-args))))
     (set-process-query-on-exit-flag proc nil)
+    (add-function :before (process-sentinel proc)
+                  (apply-partially #'ein:notebooklist-proc--sentinel url-or-port))    
     proc))
 
 (defun ein:jupyter-server-conn-info (&optional buffer)
