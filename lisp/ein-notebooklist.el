@@ -220,11 +220,13 @@ PATH is specifying directory from file navigation.  PATH is empty on login.  RES
             (lexical-let ((d (deferred:new #'identity)))
               (ein:query-kernelspecs url-or-port (lambda ()
                                                    (deferred:callback-post d)))
-              d)
-            (lexical-let ((d (deferred:new #'identity)))
-              (ein:content-query-hierarchy url-or-port (lambda (tree)
-                                                         (deferred:callback-post d)))
               d))
+          (deferred:nextc it
+            (lambda (&rest ignore)
+              (lexical-let ((d (deferred:new #'identity)))
+                (ein:content-query-hierarchy url-or-port (lambda (tree)
+                                                           (deferred:callback-post d)))
+                d)))
           (deferred:nextc it
             (lambda (&rest ignore)
               (ein:content-query-contents url-or-port path success))))
