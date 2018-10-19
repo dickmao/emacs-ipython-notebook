@@ -84,7 +84,7 @@
   :type 'string
   :group 'ein)
 
-(defun ein:process-divine-dir (pid args)
+(defun ein:process-divine-dir (pid args &optional error-buffer)
   (if (string-match "\\bnotebook-dir\\(=\\|\\s-+\\)\\(\\S-+\\)" args)
       (directory-file-name (match-string 2 args))
     (if (executable-find ein:process-lsof)

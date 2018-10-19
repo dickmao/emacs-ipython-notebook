@@ -19,15 +19,15 @@ env:
   global:
     - PATH=$HOME/local/bin:$HOME/local/evm/bin:$HOME/local/cask/bin:$PATH
   matrix:
-    - EVM_EMACS=emacs-25.2-travis EL_REQUEST_BACKEND=curl
-    - EVM_EMACS=emacs-26.1-travis EL_REQUEST_BACKEND=curl
+    - EVM_EMACS=emacs-25.2-travis IPYTHON=6.2.1
+    - EVM_EMACS=emacs-26.1-travis IPYTHON=7.0.1
 
 matrix:
   allow_failures:
     - env: EVM_EMACS=emacs-snapshot
 
 install:
-  - pip install jupyter ipython\<=6.4.0
+  - pip install jupyter ipython\<=$IPYTHON
   - jupyter kernelspec list
 
 before_script:
