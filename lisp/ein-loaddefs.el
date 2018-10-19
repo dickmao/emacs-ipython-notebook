@@ -591,6 +591,7 @@ Show full traceback in traceback viewer.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23499 54796 72693 801000))
 =======
 =======
@@ -601,6 +602,8 @@ Show full traceback in traceback viewer.
 >>>>>>> loaddefs
 =======
 >>>>>>> rename ipython-version to notebook-version, which is what it is
+=======
+>>>>>>> finish the task of previous commit
 <<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23495 44399 897023 299000))
 =======
@@ -630,7 +633,13 @@ Show full traceback in traceback viewer.
 =======
 ;;;;;;  "ob-ein.el" "zeroein.el") (23497 9201 198489 45000))
 >>>>>>> rename ipython-version to notebook-version, which is what it is
+<<<<<<< HEAD
 >>>>>>> rename ipython-version to notebook-version, which is what it is
+=======
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23497 10876 427906 877000))
+>>>>>>> finish the task of previous commit
+>>>>>>> finish the task of previous commit
 
 ;;;***
 
