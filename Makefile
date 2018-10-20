@@ -22,9 +22,6 @@ test-compile: clean autoloads
 	! ( cask build 2>&1 | awk '{if (/^ /) { gsub(/^ +/, " ", $$0); printf "%s", $$0 } else { printf "\n%s", $$0 }}' | egrep "not known|Error|free variable" )
 	cask clean-elc
 
-.PHONY: quick
-quick: test-compile test-unit
-
 .PHONY: test-no-build
 test-no-build: test-unit test-int autoloads
 

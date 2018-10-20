@@ -309,6 +309,7 @@ and save it immediately.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23499 50600
 ;;;;;;  8727 966000))
 =======
@@ -322,6 +323,8 @@ and save it immediately.
 =======
 =======
 >>>>>>> install-virtualenv.sh
+=======
+>>>>>>> attempt to deal with windows-nt
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23497 5993
 ;;;;;;  487545 694000))
 =======
@@ -335,7 +338,14 @@ and save it immediately.
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23498 20366
 ;;;;;;  920508 56000))
 >>>>>>> install-virtualenv.sh
+<<<<<<< HEAD
 >>>>>>> install-virtualenv.sh
+=======
+=======
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23498 39427
+;;;;;;  612878 724000))
+>>>>>>> attempt to deal with windows-nt
+>>>>>>> attempt to deal with windows-nt
 ;;; Generated autoloads from ein-jupyter.el
 
 (autoload 'ein:jupyter-server-login-and-open "ein-jupyter" "\
@@ -554,9 +564,16 @@ Notebook mode with multiple language fontification.
 =======
 =======
 ;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23498
+<<<<<<< HEAD
 ;;;;;;  25143 74907 629000))
 >>>>>>> install-virtualenv.sh
+<<<<<<< HEAD
 >>>>>>> install-virtualenv.sh
+=======
+=======
+;;;;;;  41115 291323 237000))
+>>>>>>> attempt to deal with windows-nt
+>>>>>>> attempt to deal with windows-nt
 ;;; Generated autoloads from ein-notebooklist.el
 
 (autoload 'ein:notebooklist-enable-keepalive "ein-notebooklist" "\
@@ -765,6 +782,7 @@ Show full traceback in traceback viewer.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23499 54796 72693 801000))
 =======
 =======
@@ -781,6 +799,8 @@ Show full traceback in traceback viewer.
 >>>>>>> add osx
 =======
 >>>>>>> install-virtualenv.sh
+=======
+>>>>>>> attempt to deal with windows-nt
 <<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23495 44399 897023 299000))
 =======
@@ -828,7 +848,13 @@ Show full traceback in traceback viewer.
 =======
 ;;;;;;  "ob-ein.el" "zeroein.el") (23498 25143 74907 629000))
 >>>>>>> install-virtualenv.sh
+<<<<<<< HEAD
 >>>>>>> install-virtualenv.sh
+=======
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23498 41443 397057 449000))
+>>>>>>> attempt to deal with windows-nt
+>>>>>>> attempt to deal with windows-nt
 
 ;;;***
 
