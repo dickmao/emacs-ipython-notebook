@@ -1,15 +1,11 @@
 sudo: false
-language: emacs-lisp
+language: python
 
 addons:
   apt:
     packages:
     - gnutls-bin
     - sharutils
-
-os:
-  - linux
-  - osx
 
 cache:
   directories:
@@ -18,15 +14,22 @@ cache:
 env:
   global:
     - PATH=$HOME/local/bin:$HOME/local/evm/bin:$HOME/local/cask/bin:$PATH
-  matrix:
-    - EVM_EMACS=emacs-25.2-travis IPYTHON=6.2.1
-    - EVM_EMACS=emacs-26.1-travis IPYTHON=7.0.1
 
 matrix:
+  include:
+    - os: osx
+      language: generic
+      env: EVM_EMACS=emacs-25.2-travis IPYTHON=5.8.0 TOXENV=py27
+    - os: osx
+      language: generic
+      env: EVM_EMACS=emacs-26.1-travis IPYTHON=6.2.1 TOXENV=py35
+
   allow_failures:
     - env: EVM_EMACS=emacs-snapshot
 
 install:
+  - sh tools/install-virtualenv.sh
+  - if [ "x$TRAVIS_OS_NAME" = "xosx" ]; then . $HOME/local/$TOXENV/bin/activate ; fi
   - pip install jupyter ipython\<=$IPYTHON
   - jupyter kernelspec list
   - ipython --version
