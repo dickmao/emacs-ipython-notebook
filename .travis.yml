@@ -20,9 +20,6 @@ matrix:
     - os: osx
       language: generic
       env: EVM_EMACS=emacs-25.2 IPYTHON=5.8.0 TOXENV=py27
-    - os: osx
-      language: generic
-      env: EVM_EMACS=emacs-26.1 IPYTHON=6.2.1 TOXENV=py35
 
   allow_failures:
     - env: EVM_EMACS=emacs-snapshot
