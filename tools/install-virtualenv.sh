@@ -14,13 +14,14 @@ if [ "x$TRAVIS_OS_NAME" = "xosx" ]; then
     brew list python &>/dev/null || brew install python
     brew list python3 &>/dev/null || brew install python3
     brew install pyenv-virtualenv
+    pyenv version
 
     case "${TOXENV}" in
         py27)
-            virtualenv -p python $WORKDIR/py27
+            pyenv virtualenv 2.7 py27
             ;;
         py35)
-            virtualenv -p python3 $WORKDIR/py35
+            pyenv virtualenv 3.5 py35
             ;;
     esac
 fi

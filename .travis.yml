@@ -29,7 +29,7 @@ matrix:
 
 install:
   - sh tools/install-virtualenv.sh
-  - if [ "x$TRAVIS_OS_NAME" = "xosx" ]; then . $HOME/local/$TOXENV/bin/activate ; fi
+  - if [ "x$TRAVIS_OS_NAME" = "xosx" ]; then pyenv activate $TOXENV ; fi
   - pip install jupyter ipython\<=$IPYTHON
   - jupyter kernelspec list
   - ipython --version
