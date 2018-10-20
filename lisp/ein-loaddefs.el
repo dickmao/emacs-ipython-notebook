@@ -11,6 +11,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-company" "ein-company.el" (23498 20366
 ;;;;;;  916508 25000))
 =======
@@ -22,6 +23,8 @@
 >>>>>>> install-virtualenv.sh
 =======
 >>>>>>> optional error-buffer for ein-divine
+=======
+>>>>>>> loaddefs
 ;;;### (autoloads nil "ein-company" "ein-company.el" (23497 5224
 ;;;;;;  327452 197000))
 =======
@@ -42,8 +45,18 @@
 ;;;### (autoloads nil "ein-company" "ein-company.el" (23497 5224
 ;;;;;;  327452 197000))
 >>>>>>> optional error-buffer for ein-divine
+<<<<<<< HEAD
 >>>>>>> optional error-buffer for ein-divine
+<<<<<<< HEAD
 >>>>>>> optional error-buffer for ein-divine
+=======
+=======
+=======
+;;;### (autoloads nil "ein-company" "ein-company.el" (23498 20366
+;;;;;;  916508 25000))
+>>>>>>> loaddefs
+>>>>>>> loaddefs
+>>>>>>> loaddefs
 ;;; Generated autoloads from ein-company.el
 
 (autoload 'ein:company-backend "ein-company" "\
@@ -57,6 +70,7 @@
 ;;;### (autoloads nil "ein-connect" "ein-connect.el" (23499 16469
 ;;;;;;  728162 481000))
 =======
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -78,6 +92,8 @@
 >>>>>>> optional error-buffer for ein-divine
 =======
 >>>>>>> need to revert a commit
+=======
+>>>>>>> loaddefs
 ;;;### (autoloads nil "ein-connect" "ein-connect.el" (23497 5224
 ;;;;;;  327452 197000))
 =======
@@ -115,8 +131,18 @@
 ;;;### (autoloads nil "ein-connect" "ein-connect.el" (23498 8550
 ;;;;;;  445866 623000))
 >>>>>>> need to revert a commit
+<<<<<<< HEAD
 >>>>>>> need to revert a commit
+<<<<<<< HEAD
 >>>>>>> need to revert a commit
+=======
+=======
+=======
+;;;### (autoloads nil "ein-connect" "ein-connect.el" (23499 15704
+;;;;;;  28156 789000))
+>>>>>>> loaddefs
+>>>>>>> loaddefs
+>>>>>>> loaddefs
 ;;; Generated autoloads from ein-connect.el
 
 (autoload 'ein:connect-to-notebook-command "ein-connect" "\
@@ -180,6 +206,7 @@ It should be possible to support python-mode.el.  Patches are welcome!
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-dev" "ein-dev.el" (23498 20366 920508
 ;;;;;;  56000))
 =======
@@ -190,6 +217,8 @@ It should be possible to support python-mode.el.  Patches are welcome!
 >>>>>>> install-virtualenv.sh
 =======
 >>>>>>> optional error-buffer for ein-divine
+=======
+>>>>>>> loaddefs
 ;;;### (autoloads nil "ein-dev" "ein-dev.el" (23497 5224 327452 197000))
 =======
 ;;;### (autoloads nil "ein-dev" "ein-dev.el" (23498 20366 920508
@@ -208,8 +237,18 @@ It should be possible to support python-mode.el.  Patches are welcome!
 =======
 ;;;### (autoloads nil "ein-dev" "ein-dev.el" (23497 5224 327452 197000))
 >>>>>>> optional error-buffer for ein-divine
+<<<<<<< HEAD
 >>>>>>> optional error-buffer for ein-divine
+<<<<<<< HEAD
 >>>>>>> optional error-buffer for ein-divine
+=======
+=======
+=======
+;;;### (autoloads nil "ein-dev" "ein-dev.el" (23498 20366 920508
+;;;;;;  56000))
+>>>>>>> loaddefs
+>>>>>>> loaddefs
+>>>>>>> loaddefs
 ;;; Generated autoloads from ein-dev.el
 
 (autoload 'ein:dev-insert-mode-map "ein-dev" "\
@@ -295,6 +334,7 @@ change in its input area.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-ipynb-mode" "ein-ipynb-mode.el" (23499
 ;;;;;;  16469 728162 481000))
 =======
@@ -308,6 +348,8 @@ change in its input area.
 >>>>>>> appveyor for msys2
 =======
 >>>>>>> optional error-buffer for ein-divine
+=======
+>>>>>>> loaddefs
 ;;;### (autoloads nil "ein-ipynb-mode" "ein-ipynb-mode.el" (23497
 ;;;;;;  5224 327452 197000))
 =======
@@ -345,8 +387,18 @@ change in its input area.
 =======
 ;;;;;;  14826 75540 793000))
 >>>>>>> fix compile errors
+<<<<<<< HEAD
 >>>>>>> fix compile errors
+<<<<<<< HEAD
 >>>>>>> fix compile errors
+=======
+=======
+=======
+;;;### (autoloads nil "ein-ipynb-mode" "ein-ipynb-mode.el" (23499
+;;;;;;  15704 32156 809000))
+>>>>>>> loaddefs
+>>>>>>> loaddefs
+>>>>>>> loaddefs
 ;;; Generated autoloads from ein-ipynb-mode.el
 
 (autoload 'ein:ipynb-mode "ein-ipynb-mode" "\
@@ -386,8 +438,8 @@ To use EIN and Jedi together, add the following in your Emacs setup before loadi
 
 ;;;***
 
-;;;### (autoloads nil "ein-junk" "ein-junk.el" (23495 42536 291042
-;;;;;;  635000))
+;;;### (autoloads nil "ein-junk" "ein-junk.el" (23498 20366 920508
+;;;;;;  56000))
 ;;; Generated autoloads from ein-junk.el
 
 (autoload 'ein:junk-new "ein-junk" "\
@@ -411,6 +463,7 @@ and save it immediately.
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23499 50600
 ;;;;;;  8727 966000))
 =======
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -449,6 +502,8 @@ and save it immediately.
 >>>>>>> i wasn't crazy when i wrote that
 =======
 >>>>>>> get the sentinel right
+=======
+>>>>>>> loaddefs
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23497 5993
 ;;;;;;  487545 694000))
 =======
@@ -523,8 +578,18 @@ and save it immediately.
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23497 61288
 ;;;;;;  493757 700000))
 >>>>>>> get the sentinel right
+<<<<<<< HEAD
 >>>>>>> get the sentinel right
+<<<<<<< HEAD
 >>>>>>> get the sentinel right
+=======
+=======
+=======
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23499 15724
+;;;;;;  784262 40000))
+>>>>>>> loaddefs
+>>>>>>> loaddefs
+>>>>>>> loaddefs
 ;;; Generated autoloads from ein-jupyter.el
 
 (autoload 'ein:jupyter-server-login-and-open "ein-jupyter" "\
@@ -577,6 +642,7 @@ there is no running server then no action will be taken.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-jupyterhub" "ein-jupyterhub.el" (23498
 ;;;;;;  20366 920508 56000))
 =======
@@ -588,6 +654,8 @@ there is no running server then no action will be taken.
 >>>>>>> install-virtualenv.sh
 =======
 >>>>>>> optional error-buffer for ein-divine
+=======
+>>>>>>> loaddefs
 ;;;### (autoloads nil "ein-jupyterhub" "ein-jupyterhub.el" (23497
 ;;;;;;  5668 493807 700000))
 =======
@@ -608,8 +676,18 @@ there is no running server then no action will be taken.
 ;;;### (autoloads nil "ein-jupyterhub" "ein-jupyterhub.el" (23497
 ;;;;;;  5668 493807 700000))
 >>>>>>> optional error-buffer for ein-divine
+<<<<<<< HEAD
 >>>>>>> optional error-buffer for ein-divine
+<<<<<<< HEAD
 >>>>>>> optional error-buffer for ein-divine
+=======
+=======
+=======
+;;;### (autoloads nil "ein-jupyterhub" "ein-jupyterhub.el" (23498
+;;;;;;  20366 920508 56000))
+>>>>>>> loaddefs
+>>>>>>> loaddefs
+>>>>>>> loaddefs
 ;;; Generated autoloads from ein-jupyterhub.el
 
 (autoload 'ein:jupyterhub-connect "ein-jupyterhub" "\
@@ -627,6 +705,7 @@ Log on to a jupyterhub server using PAM authentication. Requires jupyterhub vers
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-kernel" "ein-kernel.el" (23498 20366 920508
 ;;;;;;  56000))
 =======
@@ -638,6 +717,8 @@ Log on to a jupyterhub server using PAM authentication. Requires jupyterhub vers
 >>>>>>> install-virtualenv.sh
 =======
 >>>>>>> optional error-buffer for ein-divine
+=======
+>>>>>>> loaddefs
 ;;;### (autoloads nil "ein-kernel" "ein-kernel.el" (23497 5224 327452
 ;;;;;;  197000))
 =======
@@ -658,8 +739,18 @@ Log on to a jupyterhub server using PAM authentication. Requires jupyterhub vers
 ;;;### (autoloads nil "ein-kernel" "ein-kernel.el" (23497 5224 327452
 ;;;;;;  197000))
 >>>>>>> optional error-buffer for ein-divine
+<<<<<<< HEAD
 >>>>>>> optional error-buffer for ein-divine
+<<<<<<< HEAD
 >>>>>>> optional error-buffer for ein-divine
+=======
+=======
+=======
+;;;### (autoloads nil "ein-kernel" "ein-kernel.el" (23498 20366 920508
+;;;;;;  56000))
+>>>>>>> loaddefs
+>>>>>>> loaddefs
+>>>>>>> loaddefs
 ;;; Generated autoloads from ein-kernel.el
 
 (defalias 'ein:kernel-url-or-port 'ein:$kernel-url-or-port)
@@ -690,6 +781,7 @@ Notebook mode with multiple language fontification.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23499 16469
 ;;;;;;  728162 481000))
 =======
@@ -707,6 +799,8 @@ Notebook mode with multiple language fontification.
 >>>>>>> fix compile errors
 =======
 >>>>>>> need to revert a commit
+=======
+>>>>>>> loaddefs
 ;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23497 9216
 ;;;;;;  46575 206000))
 =======
@@ -754,8 +848,18 @@ Notebook mode with multiple language fontification.
 ;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23498 10965
 ;;;;;;  922427 880000))
 >>>>>>> need to revert a commit
+<<<<<<< HEAD
 >>>>>>> need to revert a commit
+<<<<<<< HEAD
 >>>>>>> need to revert a commit
+=======
+=======
+=======
+;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23499 15724
+;;;;;;  780262 19000))
+>>>>>>> loaddefs
+>>>>>>> loaddefs
+>>>>>>> loaddefs
 ;;; Generated autoloads from ein-notebook.el
 
 (defalias 'ein:notebook-name 'ein:$notebook-notebook-name)
@@ -789,6 +893,7 @@ notebook buffer.  Let's warn for now to see who is doing this.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23499
 ;;;;;;  16469 728162 481000))
 =======
@@ -806,6 +911,8 @@ notebook buffer.  Let's warn for now to see who is doing this.
 >>>>>>> optional error-buffer for ein-divine
 =======
 >>>>>>> need to revert a commit
+=======
+>>>>>>> loaddefs
 ;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23495
 <<<<<<< HEAD
 ;;;;;;  50360 466489 162000))
@@ -914,6 +1021,12 @@ notebook buffer.  Let's warn for now to see who is doing this.
 =======
 =======
 ;;;;;;  18434 376476 945000))
+>>>>>>> loaddefs
+<<<<<<< HEAD
+=======
+=======
+;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23499
+;;;;;;  15724 776261 999000))
 >>>>>>> loaddefs
 >>>>>>> loaddefs
 >>>>>>> loaddefs
@@ -1128,6 +1241,7 @@ Show full traceback in traceback viewer.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23499 54796 72693 801000))
 =======
 =======
@@ -1162,6 +1276,8 @@ Show full traceback in traceback viewer.
 >>>>>>> get the sentinel right
 =======
 >>>>>>> need to revert a commit
+=======
+>>>>>>> loaddefs
 =======
 >>>>>>> loaddefs
 <<<<<<< HEAD
@@ -1291,6 +1407,11 @@ Show full traceback in traceback viewer.
 =======
 =======
 ;;;;;;  "ob-ein.el" "zeroein.el") (23498 18227 115434 69000))
+>>>>>>> loaddefs
+<<<<<<< HEAD
+=======
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23499 15724 768261 959000))
 >>>>>>> loaddefs
 >>>>>>> loaddefs
 >>>>>>> loaddefs
