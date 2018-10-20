@@ -211,8 +211,8 @@ and save it immediately.
 
 ;;;***
 
-;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23498 20366
-;;;;;;  920508 56000))
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23498 39427
+;;;;;;  612878 724000))
 ;;; Generated autoloads from ein-jupyter.el
 
 (autoload 'ein:jupyter-server-login-and-open "ein-jupyter" "\
@@ -298,7 +298,7 @@ Notebook mode with multiple language fontification.
 ;;;***
 
 ;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23498
-;;;;;;  25143 74907 629000))
+;;;;;;  41115 291323 237000))
 ;;; Generated autoloads from ein-notebooklist.el
 
 (autoload 'ein:notebooklist-enable-keepalive "ein-notebooklist" "\
@@ -499,7 +499,7 @@ Show full traceback in traceback viewer.
 ;;;;;;  "ein-python.el" "ein-pytools.el" "ein-query.el" "ein-scratchsheet.el"
 ;;;;;;  "ein-skewer.el" "ein-smartrep.el" "ein-subpackages.el" "ein-timestamp.el"
 ;;;;;;  "ein-utils.el" "ein-websocket.el" "ein-worksheet.el" "ein.el"
-;;;;;;  "ob-ein.el" "zeroein.el") (23498 25143 74907 629000))
+;;;;;;  "ob-ein.el" "zeroein.el") (23498 41443 397057 449000))
 
 ;;;***
 

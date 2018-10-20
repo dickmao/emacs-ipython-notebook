@@ -199,9 +199,11 @@ To suppress popup, you can pass `ignore' as CALLBACK."
 (defun ein:notebooklist-token-or-password (url-or-port)
   "Return token or password (I believe jupyter requires one or the other but not both) for URL-OR-PORT.  Empty string token means all authentication disabled.  Nil means don't know."
   (multiple-value-bind (password-p token) (ein:crib-token url-or-port)
-    (cond ((eql password-p t) (read-passwd "Password: "))
-          ((and (stringp token) (eql password-p :json-false)) token)
-          (t nil))))
+    (multiple-value-bind (my-url-or-port my-token) (ein:jupyter-server-conn-info)
+        (cond ((eql password-p t) (read-passwd "Password: "))
+              ((and (stringp token) (eql password-p :json-false)) token)
+              ((equal url-or-port my-url-or-port) my-token)
+              (t nil)))))
 
 (defun ein:notebooklist-ask-url-or-port ()
   (let* ((url-or-port-list (mapcar (lambda (x) (format "%s" x))

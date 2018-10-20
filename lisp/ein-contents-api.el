@@ -67,8 +67,10 @@ global setting.  For global setting and more information, see
                            path
                            params))))
 
-(defun ein:content-query-contents (url-or-port path callback)
+(defun ein:content-query-contents (url-or-port path callback &optional iteration)
   "Register CALLBACK of arity 1 for the contents at PATH from the Jupyter URL-OR-PORT."
+  (unless iteration
+    (setq iteration 0))
   (ein:query-singleton-ajax
    (list 'content-query-contents url-or-port path)
    (ein:content-url* url-or-port path)
@@ -78,7 +80,7 @@ global setting.  For global setting and more information, see
    :sync ein:force-sync
    :complete (apply-partially #'ein:content-query-contents--complete url-or-port path)
    :success (apply-partially #'ein:content-query-contents--success url-or-port path callback)
-   :error (apply-partially #'ein:content-query-contents--error url-or-port path)
+   :error (apply-partially #'ein:content-query-contents--error url-or-port path callback iteration)
    ))
 
 (defun* ein:content-query-contents--complete (url-or-port path
@@ -87,8 +89,12 @@ global setting.  For global setting and more information, see
                                                           &aux (resp-string (format "STATUS: %s DATA: %s" (request-response-status-code response) data)))
   (ein:log 'debug "ein:query-contents--complete %s" resp-string))
 
-(defun* ein:content-query-contents--error (url-or-port path &key symbol-status response error-thrown &allow-other-keys)
-  (ein:log 'error "ein:content-query-contents--error %s REQUEST-STATUS %s DATA %s" (concat (file-name-as-directory url-or-port) path) symbol-status (cdr error-thrown)))
+(defun* ein:content-query-contents--error (url-or-port path callback iteration &key symbol-status response error-thrown &allow-other-keys)
+  (if (and (eq (request-response-status-code response) 403) (< iteration 3))
+      (progn
+        (ein:log 'info "Retry content-query-contents #%s" iteration)
+        (ein:content-query-contents url-or-port path callback (1+ iteration)))
+    (ein:log 'error "ein:content-query-contents--error %s REQUEST-STATUS %s DATA %s" (concat (file-name-as-directory url-or-port) path) symbol-status (cdr error-thrown))))
 
 
 ;; TODO: This is one place to check for redirects - update the url slot if so.
