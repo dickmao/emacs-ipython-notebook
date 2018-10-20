@@ -1,15 +1,11 @@
 sudo: false
-language: emacs-lisp
+language: python
 
 addons:
   apt:
     packages:
     - gnutls-bin
     - sharutils
-
-os:
-  - linux
-  - osx
 
 cache:
   directories:

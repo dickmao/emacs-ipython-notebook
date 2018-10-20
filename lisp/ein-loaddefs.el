@@ -5,6 +5,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-company" "ein-company.el" (23498 20366
 ;;;;;;  916508 25000))
 =======
@@ -12,13 +13,22 @@
 ;;;;;;  327452 197000))
 >>>>>>> rename ipython-version to notebook-version, which is what it is
 =======
+=======
+>>>>>>> install-virtualenv.sh
 ;;;### (autoloads nil "ein-company" "ein-company.el" (23497 5224
 ;;;;;;  327452 197000))
 =======
 ;;;### (autoloads nil "ein-company" "ein-company.el" (23498 20366
 ;;;;;;  916508 25000))
 >>>>>>> add osx
+<<<<<<< HEAD
 >>>>>>> add osx
+=======
+=======
+;;;### (autoloads nil "ein-company" "ein-company.el" (23498 20366
+;;;;;;  916508 25000))
+>>>>>>> install-virtualenv.sh
+>>>>>>> install-virtualenv.sh
 ;;; Generated autoloads from ein-company.el
 
 (autoload 'ein:company-backend "ein-company" "\
@@ -30,6 +40,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-connect" "ein-connect.el" (23499 16469
 ;;;;;;  728162 481000))
 =======
@@ -37,13 +48,22 @@
 ;;;;;;  327452 197000))
 >>>>>>> rename ipython-version to notebook-version, which is what it is
 =======
+=======
+>>>>>>> install-virtualenv.sh
 ;;;### (autoloads nil "ein-connect" "ein-connect.el" (23497 5224
 ;;;;;;  327452 197000))
 =======
 ;;;### (autoloads nil "ein-connect" "ein-connect.el" (23498 20366
 ;;;;;;  916508 25000))
 >>>>>>> add osx
+<<<<<<< HEAD
 >>>>>>> add osx
+=======
+=======
+;;;### (autoloads nil "ein-connect" "ein-connect.el" (23498 20366
+;;;;;;  916508 25000))
+>>>>>>> install-virtualenv.sh
+>>>>>>> install-virtualenv.sh
 ;;; Generated autoloads from ein-connect.el
 
 (autoload 'ein:connect-to-notebook-command "ein-connect" "\
@@ -101,18 +121,28 @@ It should be possible to support python-mode.el.  Patches are welcome!
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-dev" "ein-dev.el" (23498 20366 920508
 ;;;;;;  56000))
 =======
 ;;;### (autoloads nil "ein-dev" "ein-dev.el" (23497 5224 327452 197000))
 >>>>>>> rename ipython-version to notebook-version, which is what it is
 =======
+=======
+>>>>>>> install-virtualenv.sh
 ;;;### (autoloads nil "ein-dev" "ein-dev.el" (23497 5224 327452 197000))
 =======
 ;;;### (autoloads nil "ein-dev" "ein-dev.el" (23498 20366 920508
 ;;;;;;  56000))
 >>>>>>> add osx
+<<<<<<< HEAD
 >>>>>>> add osx
+=======
+=======
+;;;### (autoloads nil "ein-dev" "ein-dev.el" (23498 20366 920508
+;;;;;;  56000))
+>>>>>>> install-virtualenv.sh
+>>>>>>> install-virtualenv.sh
 ;;; Generated autoloads from ein-dev.el
 
 (autoload 'ein:dev-insert-mode-map "ein-dev" "\
@@ -191,6 +221,7 @@ change in its input area.
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-ipynb-mode" "ein-ipynb-mode.el" (23499
 ;;;;;;  16469 728162 481000))
 =======
@@ -198,13 +229,22 @@ change in its input area.
 ;;;;;;  5224 327452 197000))
 >>>>>>> rename ipython-version to notebook-version, which is what it is
 =======
+=======
+>>>>>>> install-virtualenv.sh
 ;;;### (autoloads nil "ein-ipynb-mode" "ein-ipynb-mode.el" (23497
 ;;;;;;  5224 327452 197000))
 =======
 ;;;### (autoloads nil "ein-ipynb-mode" "ein-ipynb-mode.el" (23498
 ;;;;;;  20366 920508 56000))
 >>>>>>> add osx
+<<<<<<< HEAD
 >>>>>>> add osx
+=======
+=======
+;;;### (autoloads nil "ein-ipynb-mode" "ein-ipynb-mode.el" (23498
+;;;;;;  20366 920508 56000))
+>>>>>>> install-virtualenv.sh
+>>>>>>> install-virtualenv.sh
 ;;; Generated autoloads from ein-ipynb-mode.el
 
 (autoload 'ein:ipynb-mode "ein-ipynb-mode" "\
@@ -268,6 +308,7 @@ and save it immediately.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23499 50600
 ;;;;;;  8727 966000))
 =======
@@ -279,13 +320,22 @@ and save it immediately.
 ;;;;;;  487545 694000))
 >>>>>>> rename ipython-version to notebook-version, which is what it is
 =======
+=======
+>>>>>>> install-virtualenv.sh
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23497 5993
 ;;;;;;  487545 694000))
 =======
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23498 20366
 ;;;;;;  920508 56000))
 >>>>>>> add osx
+<<<<<<< HEAD
 >>>>>>> add osx
+=======
+=======
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23498 20366
+;;;;;;  920508 56000))
+>>>>>>> install-virtualenv.sh
+>>>>>>> install-virtualenv.sh
 ;;; Generated autoloads from ein-jupyter.el
 
 (autoload 'ein:jupyter-server-login-and-open "ein-jupyter" "\
@@ -332,6 +382,7 @@ there is no running server then no action will be taken.
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-jupyterhub" "ein-jupyterhub.el" (23498
 ;;;;;;  20366 920508 56000))
 =======
@@ -339,13 +390,22 @@ there is no running server then no action will be taken.
 ;;;;;;  5668 493807 700000))
 >>>>>>> rename ipython-version to notebook-version, which is what it is
 =======
+=======
+>>>>>>> install-virtualenv.sh
 ;;;### (autoloads nil "ein-jupyterhub" "ein-jupyterhub.el" (23497
 ;;;;;;  5668 493807 700000))
 =======
 ;;;### (autoloads nil "ein-jupyterhub" "ein-jupyterhub.el" (23498
 ;;;;;;  20366 920508 56000))
 >>>>>>> add osx
+<<<<<<< HEAD
 >>>>>>> add osx
+=======
+=======
+;;;### (autoloads nil "ein-jupyterhub" "ein-jupyterhub.el" (23498
+;;;;;;  20366 920508 56000))
+>>>>>>> install-virtualenv.sh
+>>>>>>> install-virtualenv.sh
 ;;; Generated autoloads from ein-jupyterhub.el
 
 (autoload 'ein:jupyterhub-connect "ein-jupyterhub" "\
@@ -357,6 +417,7 @@ Log on to a jupyterhub server using PAM authentication. Requires jupyterhub vers
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-kernel" "ein-kernel.el" (23498 20366 920508
 ;;;;;;  56000))
 =======
@@ -364,13 +425,22 @@ Log on to a jupyterhub server using PAM authentication. Requires jupyterhub vers
 ;;;;;;  197000))
 >>>>>>> rename ipython-version to notebook-version, which is what it is
 =======
+=======
+>>>>>>> install-virtualenv.sh
 ;;;### (autoloads nil "ein-kernel" "ein-kernel.el" (23497 5224 327452
 ;;;;;;  197000))
 =======
 ;;;### (autoloads nil "ein-kernel" "ein-kernel.el" (23498 20366 920508
 ;;;;;;  56000))
 >>>>>>> add osx
+<<<<<<< HEAD
 >>>>>>> add osx
+=======
+=======
+;;;### (autoloads nil "ein-kernel" "ein-kernel.el" (23498 20366 920508
+;;;;;;  56000))
+>>>>>>> install-virtualenv.sh
+>>>>>>> install-virtualenv.sh
 ;;; Generated autoloads from ein-kernel.el
 
 (defalias 'ein:kernel-url-or-port 'ein:$kernel-url-or-port)
@@ -392,6 +462,7 @@ Notebook mode with multiple language fontification.
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23499 16469
 ;;;;;;  728162 481000))
 =======
@@ -399,19 +470,29 @@ Notebook mode with multiple language fontification.
 ;;;;;;  46575 206000))
 >>>>>>> rename ipython-version to notebook-version, which is what it is
 =======
+=======
+>>>>>>> install-virtualenv.sh
 ;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23497 9216
 ;;;;;;  46575 206000))
 =======
 ;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23498 20366
 ;;;;;;  920508 56000))
 >>>>>>> add osx
+<<<<<<< HEAD
 >>>>>>> add osx
+=======
+=======
+;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23498 25143
+;;;;;;  74907 629000))
+>>>>>>> install-virtualenv.sh
+>>>>>>> install-virtualenv.sh
 ;;; Generated autoloads from ein-notebook.el
 
 (defalias 'ein:notebook-name 'ein:$notebook-notebook-name)
 
 ;;;***
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -425,6 +506,8 @@ Notebook mode with multiple language fontification.
 >>>>>>> rename ipython-version to notebook-version, which is what it is
 =======
 >>>>>>> add osx
+=======
+>>>>>>> install-virtualenv.sh
 ;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23495
 <<<<<<< HEAD
 ;;;;;;  50360 466489 162000))
@@ -466,7 +549,14 @@ Notebook mode with multiple language fontification.
 ;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23498
 ;;;;;;  20366 920508 56000))
 >>>>>>> add osx
+<<<<<<< HEAD
 >>>>>>> add osx
+=======
+=======
+;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23498
+;;;;;;  25143 74907 629000))
+>>>>>>> install-virtualenv.sh
+>>>>>>> install-virtualenv.sh
 ;;; Generated autoloads from ein-notebooklist.el
 
 (autoload 'ein:notebooklist-enable-keepalive "ein-notebooklist" "\
@@ -674,6 +764,7 @@ Show full traceback in traceback viewer.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23499 54796 72693 801000))
 =======
 =======
@@ -688,6 +779,8 @@ Show full traceback in traceback viewer.
 >>>>>>> finish the task of previous commit
 =======
 >>>>>>> add osx
+=======
+>>>>>>> install-virtualenv.sh
 <<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23495 44399 897023 299000))
 =======
@@ -729,7 +822,13 @@ Show full traceback in traceback viewer.
 =======
 ;;;;;;  "ob-ein.el" "zeroein.el") (23498 20366 920508 56000))
 >>>>>>> add osx
+<<<<<<< HEAD
 >>>>>>> add osx
+=======
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23498 25143 74907 629000))
+>>>>>>> install-virtualenv.sh
+>>>>>>> install-virtualenv.sh
 
 ;;;***
 
