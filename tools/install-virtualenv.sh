@@ -10,12 +10,14 @@ WORKDIR=${HOME}/local
 
 if [ "x$TRAVIS_OS_NAME" = "xosx" ]; then
 
-    # Install some custom requirements on OS X
-    # e.g. brew install pyenv-virtualenv
+    brew update
+    brew list python &>/dev/null || brew install python
+    brew list python3 &>/dev/null || brew install python3
+    brew install pyenv-virtualenv
 
     case "${TOXENV}" in
         py27)
-            virtualenv -p python2 $WORKDIR/py27
+            virtualenv -p python $WORKDIR/py27
             ;;
         py35)
             virtualenv -p python3 $WORKDIR/py35
