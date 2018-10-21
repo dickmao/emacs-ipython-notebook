@@ -110,6 +110,7 @@ install:
   - set PATH=%PATH%;%userprofile%\local\cask\bin;\msys64\usr\bin
   - copy C:\projects\myproject\tools\appveyor.init.el %userprofile%\.emacs.d\init.el
   - copy C:\projects\myproject\tools\appveyor.init.el %userprofile%\.emacs
+  - copy C:\projects\myproject\tools\appveyor.init.el C:\msys64\home\appveyor\.emacs
   - bash -lc "cd /c/projects/myproject ; bash tools/install-cask.sh"
   - choco install gnuwin32-make.portable
 

@@ -1,3 +1,11 @@
+(let ((default-directory  "c:/projects/myproject/lisp"))
+  (normal-top-level-add-to-load-path '("."))
+  (normal-top-level-add-subdirs-to-load-path))
+(let ((default-directory  "c:/projects/myproject/.cask"))
+  (normal-top-level-add-to-load-path '("."))
+  (normal-top-level-add-subdirs-to-load-path))
+(require 'ein-loaddefs)
+
 (setq utf-translate-cjk-mode nil) ; disable CJK coding/encoding (Chinese/Japanese/Korean characters)
 (set-language-environment 'utf-8)
 (set-keyboard-coding-system 'utf-8-mac) ; For old Carbon emacs on OS X only
