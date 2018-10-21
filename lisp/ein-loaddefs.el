@@ -65,6 +65,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-connect" "ein-connect.el" (23499 16469
 ;;;;;;  728162 481000))
 =======
@@ -80,6 +81,8 @@
 >>>>>>> optional error-buffer for ein-divine
 =======
 >>>>>>> need to revert a commit
+=======
+>>>>>>> loaddefs
 =======
 >>>>>>> loaddefs
 ;;;### (autoloads nil "ein-connect" "ein-connect.el" (23497 5224
@@ -122,6 +125,12 @@
 =======
 ;;;### (autoloads nil "ein-connect" "ein-connect.el" (23499 15704
 ;;;;;;  28156 789000))
+>>>>>>> loaddefs
+<<<<<<< HEAD
+=======
+=======
+;;;### (autoloads nil "ein-connect" "ein-connect.el" (23499 59497
+;;;;;;  362662 813000))
 >>>>>>> loaddefs
 >>>>>>> loaddefs
 ;;; Generated autoloads from ein-connect.el
@@ -358,7 +367,13 @@ change in its input area.
 =======
 =======
 ;;;### (autoloads nil "ein-ipynb-mode" "ein-ipynb-mode.el" (23499
+<<<<<<< HEAD
 ;;;;;;  15704 32156 809000))
+>>>>>>> loaddefs
+<<<<<<< HEAD
+=======
+=======
+;;;;;;  59481 582589 917000))
 >>>>>>> loaddefs
 >>>>>>> loaddefs
 ;;; Generated autoloads from ein-ipynb-mode.el
@@ -433,6 +448,7 @@ and save it immediately.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23499 50600
 ;;;;;;  8727 966000))
 =======
@@ -460,6 +476,8 @@ and save it immediately.
 >>>>>>> i wasn't crazy when i wrote that
 =======
 >>>>>>> get the sentinel right
+=======
+>>>>>>> loaddefs
 =======
 >>>>>>> loaddefs
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23497 5993
@@ -530,6 +548,12 @@ and save it immediately.
 =======
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23499 15724
 ;;;;;;  784262 40000))
+>>>>>>> loaddefs
+<<<<<<< HEAD
+=======
+=======
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23499 59497
+;;;;;;  350662 757000))
 >>>>>>> loaddefs
 >>>>>>> loaddefs
 ;;; Generated autoloads from ein-jupyter.el
@@ -704,6 +728,7 @@ Notebook mode with multiple language fontification.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23499 16469
 ;;;;;;  728162 481000))
 =======
@@ -721,6 +746,8 @@ Notebook mode with multiple language fontification.
 >>>>>>> fix compile errors
 =======
 >>>>>>> need to revert a commit
+=======
+>>>>>>> loaddefs
 =======
 >>>>>>> loaddefs
 ;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23497 9216
@@ -770,6 +797,12 @@ Notebook mode with multiple language fontification.
 =======
 ;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23499 15724
 ;;;;;;  780262 19000))
+>>>>>>> loaddefs
+<<<<<<< HEAD
+=======
+=======
+;;;### (autoloads nil "ein-notebook" "ein-notebook.el" (23499 59497
+;;;;;;  362662 813000))
 >>>>>>> loaddefs
 >>>>>>> loaddefs
 ;;; Generated autoloads from ein-notebook.el
@@ -922,7 +955,13 @@ notebook buffer.  Let's warn for now to see who is doing this.
 =======
 =======
 ;;;### (autoloads nil "ein-notebooklist" "ein-notebooklist.el" (23499
+<<<<<<< HEAD
 ;;;;;;  15724 776261 999000))
+>>>>>>> loaddefs
+<<<<<<< HEAD
+=======
+=======
+;;;;;;  59497 370662 850000))
 >>>>>>> loaddefs
 >>>>>>> loaddefs
 ;;; Generated autoloads from ein-notebooklist.el
@@ -1134,6 +1173,7 @@ Show full traceback in traceback viewer.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23499 54796 72693 801000))
 =======
 =======
@@ -1168,6 +1208,8 @@ Show full traceback in traceback viewer.
 >>>>>>> get the sentinel right
 =======
 >>>>>>> need to revert a commit
+=======
+>>>>>>> loaddefs
 =======
 >>>>>>> loaddefs
 =======
@@ -1283,6 +1325,11 @@ Show full traceback in traceback viewer.
 =======
 =======
 ;;;;;;  "ob-ein.el" "zeroein.el") (23499 15724 768261 959000))
+>>>>>>> loaddefs
+<<<<<<< HEAD
+=======
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23499 59497 366662 832000))
 >>>>>>> loaddefs
 >>>>>>> loaddefs
 
