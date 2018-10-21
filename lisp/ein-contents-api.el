@@ -90,9 +90,9 @@ global setting.  For global setting and more information, see
   (ein:log 'debug "ein:query-contents--complete %s" resp-string))
 
 (defun* ein:content-query-contents--error (url-or-port path callback iteration &key symbol-status response error-thrown &allow-other-keys)
-  (if (and (eq (request-response-status-code response) 403) (< iteration 3))
+  (if (< iteration 3)
       (progn
-        (ein:log 'info "Retry content-query-contents #%s" iteration)
+        (ein:log 'info "Retry content-query-contents #%s in response to %s" iteration (request-response-status-code response))
         (ein:content-query-contents url-or-port path callback (1+ iteration)))
     (ein:log 'error "ein:content-query-contents--error %s REQUEST-STATUS %s DATA %s" (concat (file-name-as-directory url-or-port) path) symbol-status (cdr error-thrown))))
 
@@ -375,9 +375,9 @@ global setting.  For global setting and more information, see
 (defun* ein:content-query-sessions--error (url-or-port callback iteration
                                                        &key response error-thrown
                                                        &allow-other-keys)
-  (if (and (eq (request-response-status-code response) 403) (< iteration 3))
+  (if (< iteration 3)
       (progn
-        (ein:log 'info "Retry sessions #%s" iteration)
+        (ein:log 'info "Retry sessions #%s in response to %s" iteration (request-response-status-code response))
         (ein:content-query-sessions url-or-port callback (1+ iteration)))
     (ein:log 'error "ein:content-query-sessions--error %s: ERROR %s DATA %s" url-or-port (car error-thrown) (cdr error-thrown))))
 
