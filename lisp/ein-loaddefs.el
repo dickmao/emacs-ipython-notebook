@@ -331,6 +331,7 @@ and save it immediately.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23499 50600
 ;;;;;;  8727 966000))
 =======
@@ -348,6 +349,8 @@ and save it immediately.
 >>>>>>> attempt to deal with windows-nt
 =======
 >>>>>>> appveyor for msys2
+=======
+>>>>>>> protect against 403 forbidden sessions
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23497 5993
 ;;;;;;  487545 694000))
 =======
@@ -375,7 +378,14 @@ and save it immediately.
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23499 50001
 ;;;;;;  272715 906000))
 >>>>>>> appveyor for msys2
+<<<<<<< HEAD
 >>>>>>> appveyor for msys2
+=======
+=======
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23499 50600
+;;;;;;  8727 966000))
+>>>>>>> protect against 403 forbidden sessions
+>>>>>>> protect against 403 forbidden sessions
 ;;; Generated autoloads from ein-jupyter.el
 
 (autoload 'ein:jupyter-server-login-and-open "ein-jupyter" "\
@@ -834,6 +844,7 @@ Show full traceback in traceback viewer.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23499 54796 72693 801000))
 =======
 =======
@@ -854,6 +865,8 @@ Show full traceback in traceback viewer.
 >>>>>>> attempt to deal with windows-nt
 =======
 >>>>>>> appveyor for msys2
+=======
+>>>>>>> protect against 403 forbidden sessions
 <<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23495 44399 897023 299000))
 =======
@@ -913,7 +926,13 @@ Show full traceback in traceback viewer.
 =======
 ;;;;;;  "ob-ein.el" "zeroein.el") (23499 16469 728162 481000))
 >>>>>>> appveyor for msys2
+<<<<<<< HEAD
 >>>>>>> appveyor for msys2
+=======
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23499 54131 347717 504000))
+>>>>>>> protect against 403 forbidden sessions
+>>>>>>> protect against 403 forbidden sessions
 
 ;;;***
 
