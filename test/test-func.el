@@ -196,6 +196,7 @@ See the definition of `create-image' for how it works."
         (should (search-forward-regexp "^Hello$" nil t))))))
 
 (ert-deftest 14-notebook-execute-current-cell-question ()
+  :expected-result (if (eq system-type 'darwin) t :passed)
   (let ((notebook (ein:testing-get-untitled0-or-create *ein:testing-port*)))
     (ein:testing-wait-until
      (lambda () (ein:aand (ein:$notebook-kernel notebook)

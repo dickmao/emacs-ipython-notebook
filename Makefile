@@ -6,7 +6,7 @@ ELCFILES = $(SRC:.el=.elc)
 
 .PHONY: autoloads
 autoloads:
-	rm -f lisp/ein-loaddefs.el
+	-rm -f lisp/ein-loaddefs.el
 	$(EMACS) -Q --batch \
 		--eval "(let ((generated-autoload-file (expand-file-name \"lisp/ein-loaddefs.el\"))) (update-directory-autoloads (expand-file-name \"lisp\")))"
 
