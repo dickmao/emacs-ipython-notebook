@@ -211,8 +211,72 @@ and save it immediately.
 
 ;;;***
 
+<<<<<<< HEAD
 ;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23499 50600
 ;;;;;;  8727 966000))
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23499 50600
+;;;;;;  8727 966000))
+=======
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23496 59791
+;;;;;;  332973 588000))
+>>>>>>> retry kernelspecs 403
+=======
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23497 5993
+;;;;;;  487545 694000))
+>>>>>>> rename ipython-version to notebook-version, which is what it is
+=======
+=======
+>>>>>>> install-virtualenv.sh
+=======
+>>>>>>> attempt to deal with windows-nt
+=======
+>>>>>>> appveyor for msys2
+=======
+>>>>>>> protect against 403 forbidden sessions
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23497 5993
+;;;;;;  487545 694000))
+=======
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23498 20366
+;;;;;;  920508 56000))
+>>>>>>> add osx
+<<<<<<< HEAD
+>>>>>>> add osx
+=======
+=======
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23498 20366
+;;;;;;  920508 56000))
+>>>>>>> install-virtualenv.sh
+<<<<<<< HEAD
+>>>>>>> install-virtualenv.sh
+=======
+=======
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23498 39427
+;;;;;;  612878 724000))
+>>>>>>> attempt to deal with windows-nt
+<<<<<<< HEAD
+>>>>>>> attempt to deal with windows-nt
+=======
+=======
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23499 50001
+;;;;;;  272715 906000))
+>>>>>>> appveyor for msys2
+<<<<<<< HEAD
+>>>>>>> appveyor for msys2
+=======
+=======
+;;;### (autoloads nil "ein-jupyter" "ein-jupyter.el" (23499 50600
+;;;;;;  8727 966000))
+>>>>>>> protect against 403 forbidden sessions
+>>>>>>> protect against 403 forbidden sessions
+>>>>>>> protect against 403 forbidden sessions
 ;;; Generated autoloads from ein-jupyter.el
 
 (autoload 'ein:jupyter-server-login-and-open "ein-jupyter" "\
@@ -499,7 +563,109 @@ Show full traceback in traceback viewer.
 ;;;;;;  "ein-python.el" "ein-pytools.el" "ein-query.el" "ein-scratchsheet.el"
 ;;;;;;  "ein-skewer.el" "ein-smartrep.el" "ein-subpackages.el" "ein-timestamp.el"
 ;;;;;;  "ein-utils.el" "ein-websocket.el" "ein-worksheet.el" "ein.el"
+<<<<<<< HEAD
 ;;;;;;  "ob-ein.el" "zeroein.el") (23499 54796 72693 801000))
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+;;;;;;  "ob-ein.el" "zeroein.el") (23499 54796 72693 801000))
+=======
+=======
+>>>>>>> Got to the bottom of the 405
+=======
+>>>>>>> retry kernelspecs 403
+=======
+>>>>>>> loaddefs
+=======
+>>>>>>> rename ipython-version to notebook-version, which is what it is
+=======
+>>>>>>> finish the task of previous commit
+=======
+>>>>>>> add osx
+=======
+>>>>>>> install-virtualenv.sh
+=======
+>>>>>>> attempt to deal with windows-nt
+=======
+>>>>>>> appveyor for msys2
+=======
+>>>>>>> protect against 403 forbidden sessions
+<<<<<<< HEAD
+;;;;;;  "ob-ein.el" "zeroein.el") (23495 44399 897023 299000))
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23495 51024 546003 652000))
+>>>>>>> finish merge
+<<<<<<< HEAD
+>>>>>>> finish merge
+=======
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23496 52336 462090 584000))
+>>>>>>> Got to the bottom of the 405
+<<<<<<< HEAD
+>>>>>>> Got to the bottom of the 405
+=======
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23497 3801 932754 929000))
+>>>>>>> retry kernelspecs 403
+<<<<<<< HEAD
+>>>>>>> retry kernelspecs 403
+=======
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23497 4102 225915 892000))
+>>>>>>> loaddefs
+<<<<<<< HEAD
+>>>>>>> loaddefs
+=======
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23497 9201 198489 45000))
+>>>>>>> rename ipython-version to notebook-version, which is what it is
+<<<<<<< HEAD
+>>>>>>> rename ipython-version to notebook-version, which is what it is
+=======
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23497 10876 427906 877000))
+>>>>>>> finish the task of previous commit
+<<<<<<< HEAD
+>>>>>>> finish the task of previous commit
+=======
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23498 20366 920508 56000))
+>>>>>>> add osx
+<<<<<<< HEAD
+>>>>>>> add osx
+=======
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23498 25143 74907 629000))
+>>>>>>> install-virtualenv.sh
+<<<<<<< HEAD
+>>>>>>> install-virtualenv.sh
+=======
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23498 41443 397057 449000))
+>>>>>>> attempt to deal with windows-nt
+<<<<<<< HEAD
+>>>>>>> attempt to deal with windows-nt
+=======
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23499 16469 728162 481000))
+>>>>>>> appveyor for msys2
+<<<<<<< HEAD
+>>>>>>> appveyor for msys2
+=======
+=======
+;;;;;;  "ob-ein.el" "zeroein.el") (23499 54131 347717 504000))
+>>>>>>> protect against 403 forbidden sessions
+>>>>>>> protect against 403 forbidden sessions
+>>>>>>> protect against 403 forbidden sessions
 
 ;;;***
 
