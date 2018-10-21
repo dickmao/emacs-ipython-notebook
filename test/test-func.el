@@ -205,7 +205,8 @@ See the definition of `create-image' for how it works."
       (insert "range?")
       (let ((cell (call-interactively #'ein:worksheet-execute-cell)))
         (ein:testing-wait-until (lambda () (and (not (oref cell :running))
-                                                (ein:$notebook-pager notebook)))))
+                                                (ein:$notebook-pager notebook)
+                                                (get-buffer (ein:$notebook-pager notebook))))))
       (with-current-buffer (get-buffer (ein:$notebook-pager notebook))
         (should (search-forward "Docstring:"))))))
 
