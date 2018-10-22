@@ -78,6 +78,7 @@ the notebook directory, you can set it here for future calls to
     (set-process-query-on-exit-flag proc nil)
     proc))
 
+;;;###autoload
 (defun ein:jupyter-server-conn-info (&optional buffer)
   "Return the url-or-port and password for BUFFER or the global session."
   (unless buffer

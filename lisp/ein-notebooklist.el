@@ -38,6 +38,7 @@
 (require 'ein-subpackages)
 (require 'deferred)
 (require 'dash)
+(require 'ido)
 
 (defcustom ein:notebooklist-render-order
   '(render-header
@@ -57,7 +58,7 @@ is opened at first time.::
 
   (add-hook
    'ein:notebooklist-first-open-hook
-   (lambda () (ein:notebooklist-open-notebook \"main.ipynb\")))
+   (lambda () (ein:notebook-open (ein:$notebooklist-url-or-port ein:%notebooklist%) \"main.ipynb\")))
 
 "
   :type 'hook
@@ -330,13 +331,6 @@ This function is called via `ein:notebook-after-rename-hook'."
                           (ein:$notebook-notebook-path ein:%notebook%)))
 
 (add-hook 'ein:notebook-after-rename-hook 'ein:notebooklist-refresh-related)
-
-(defun ein:notebooklist-open-notebook (path &optional nblist callback)
-  (unless nblist (setq nblist ein:%notebooklist%))
-  (ein:notebook-open (ein:$notebooklist-url-or-port nblist) path nil callback))
-
-(defun ein:notebooklist-open-file (url-or-port path)
-  (ein:file-open url-or-port path))
 
 ;;;###autoload
 (defun ein:notebooklist-upload-file (upload-path)
@@ -669,7 +663,7 @@ You may find the new one in the notebook list." error)
                      :notify (lexical-let ((url-or-port url-or-port)
                                            (path path))
                                (lambda (&rest ignore)
-                                 (ein:notebooklist-open-file url-or-port path)))
+                                 (ein:file-open url-or-port path)))
                      "Open")
                     (widget-insert " ------ ")
                     (widget-create
@@ -683,11 +677,11 @@ You may find the new one in the notebook list." error)
           if (string= type "notebook")
           do (progn (widget-create
                      'link
-                     :notify (lexical-let ((name name)
+                     :notify (lexical-let ((url-or-port url-or-port)
                                            (path path))
                                (lambda (&rest ignore)
                                  (run-at-time 3 nil #'ein:notebooklist-reload) ;; TODO using deferred better?
-                                 (ein:notebooklist-open-notebook path)))
+                                 (ein:notebook-open url-or-port path)))
                      "Open")
                     (widget-insert " ")
                     (if (gethash path sessions)
@@ -738,19 +732,26 @@ Notebook list data is passed via the buffer local variable
 
 ;;;###autoload
 
-(defun ein:notebooklist-nbpaths ()
-  "Return list of .ipynb files for all sessions"
+(defun ein:notebooklist-list-paths (&optional content-type)
+  "Return all files of CONTENT-TYPE for all sessions"
   (apply #'append
          (loop for nblist in (ein:notebooklist-list)
                for url-or-port = (ein:$notebooklist-url-or-port nblist)
                collect
                (loop for content in (ein:content-need-hierarchy url-or-port)
-                     when (string= (ein:$content-type content) "notebook")
+                     when (or (null content-type) (string= (ein:$content-type content) content-type))
                      collect (ein:url url-or-port (ein:$content-path content))))))
 
-(defsubst ein:notebooklist-ask-nbpath ()
-  (completing-read
-   "Open notebook: " (ein:notebooklist-nbpaths)))
+(defsubst ein:notebooklist-parse-nbpath (nbpath)
+  "Return `(,url-or-port ,path) from URL-OR-PORT/PATH"
+  (let* ((parsed (url-generic-parse-url nbpath))
+         (path (url-filename parsed)))
+    (list (substring nbpath 0 (- (length nbpath) (length path)))
+          (substring path 1))))
+
+(defsubst ein:notebooklist-ask-path (&optional content-type)
+  (ido-completing-read (format  "[ein] Open %s: " content-type)
+                       (ein:notebooklist-list-paths content-type)))
 
 ;;;###autoload
 
@@ -948,6 +949,8 @@ on all the notebooks opened from the current notebooklist."
     (set-keymap-parent map (make-composed-keymap widget-keymap
                                                  special-mode-map))
     (define-key map "\C-c\C-r" 'ein:notebooklist-reload)
+    (define-key map "\C-c\C-f" 'ein:file-open)
+    (define-key map "\C-c\C-o" 'ein:notebook-open)
     (define-key map "p" 'ein:notebooklist-prev-item)
     (define-key map "n" 'ein:notebooklist-next-item)
     map)
