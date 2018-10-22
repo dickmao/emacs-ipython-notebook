@@ -1,5 +1,5 @@
 ========================================================================
- EIN -- Emacs IPython Notebook |build-status| |melpa-dev| |melpa-stable|
+Emacs IPython Notebook |build-status|
 ========================================================================
 
 .. |build-status|
