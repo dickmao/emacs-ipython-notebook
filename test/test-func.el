@@ -57,17 +57,6 @@
   "Advice to add `ein:notebooklist-after-open-hook'."
   (run-hooks 'ein:notebooklist-after-open-hook))
 
-(defun ein:testing-delete-notebook (url-or-port notebook &optional path)
-  (ein:log 'debug "TESTING-DELETE-NOTEBOOK start")
-  (ein:notebooklist-open* url-or-port (ein:$notebook-notebook-path notebook))
-  (ein:testing-wait-until (lambda ()
-                            (bufferp (get-buffer (format ein:notebooklist-buffer-name-template url-or-port)))))
-  (with-current-buffer (ein:notebooklist-get-buffer url-or-port)
-    (ein:testing-wait-until (lambda () (eql major-mode 'ein:notebooklist-mode)))
-    (ein:log 'debug "TESTING-DELETE-NOTEBOOK deleting notebook")
-    (ein:notebooklist-delete-notebook (ein:$notebook-notebook-path notebook)))
-  (ein:log 'debug "TESTING-DELETE-NOTEBOOK end"))
-
 ;; (ert-deftest 00-jupyter-start-server ()
 ;;   (ein:log 'verbose "ERT TESTING-JUPYTER-START-SERVER start")
 ;;   (condition-case err
@@ -117,13 +106,12 @@
                  (ein:$notebook-kernel it)
                  (ein:kernel-live-p it))))
     (ein:log 'verbose "ERT TESTING-DELETE-UNTITLED0 deleting notebook")
-    (ein:testing-delete-notebook *ein:testing-port* notebook)
     (with-current-buffer (ein:notebooklist-get-buffer *ein:testing-port*)
+      (ein:notebooklist-delete-notebook (ein:$notebook-notebook-path notebook))
       (deferred:sync! (ein:notebooklist-reload nil t)))
+    (ein:log 'verbose
+      "ERT TESTING-DELETE-UNTITLED0 check that the notebook is deleted")
     (should-not (member (ein:url *ein:testing-port* (ein:$notebook-notebook-path notebook)) (ein:notebooklist-list-paths "notebook"))))
-  (ein:log 'verbose
-    "ERT TESTING-DELETE-UNTITLED0 check that the notebook is deleted")
-
   (ein:log 'verbose "ERT TESTING-DELETE-UNTITLED0 end"))
 
 (ert-deftest 11-notebook-execute-current-cell-simple ()

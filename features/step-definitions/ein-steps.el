@@ -129,9 +129,8 @@
         (let ((url-or-port (car (ein:jupyter-server-conn-info))))
           (with-current-buffer (ein:notebooklist-get-buffer url-or-port)
             (lexical-let (notebook)
-              (ein:notebooklist-open-notebook path nil
-                                              (lambda (nb created &rest -ignore-)
-                                                (setq notebook nb)))
+              (ein:notebook-open url-or-port path nil
+                                 (lambda (nb created) (setq notebook nb)))
               (ein:testing-wait-until (lambda () (and (not (null notebook))
                                                  (ein:aand (ein:$notebook-kernel notebook)
                                                            (ein:kernel-live-p it)))))
