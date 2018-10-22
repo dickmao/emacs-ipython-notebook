@@ -37,8 +37,6 @@
 
 (autoload 'company-mode "company")
 
-(declare-function ein:notebooklist-open-notebook-global "ein-notebooklist")
-
 
 ;;; Utils
 
@@ -174,14 +172,13 @@ notebooks."
 ;;;###autoload
 (defun ein:connect-to-notebook (nbpath &optional buffer no-reconnection)
   "Connect any buffer to notebook and its kernel."
-  (interactive
-   (list
-    (ein:notebooklist-ask-nbpath)))
-  (ein:notebooklist-open-notebook-global
-   nbpath
-   (lambda (notebook created buffer no-reconnection)
-     (ein:connect-buffer-to-notebook notebook buffer no-reconnection))
-   (list (or buffer (current-buffer)) no-reconnection)))
+  (interactive (list (ein:notebooklist-ask-path "notebook")))
+  (multiple-value-bind (url-or-port path) (ein:notebooklist-parse-nbpath nbpath)
+    (ein:notebook-open url-or-port path nil
+                       (apply-partially 
+                        (lambda (buffer* no-reconnection* notebook created)
+                          (ein:connect-buffer-to-notebook notebook buffer* no-reconnection*))
+                        (or buffer (current-buffer)) no-reconnection))))
 
 ;;;###autoload
 (defun ein:connect-to-notebook-buffer (buffer-or-name)

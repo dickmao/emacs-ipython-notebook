@@ -281,7 +281,7 @@ jupyter kernels.
 
 (defun ein:org-babel-parse-session (session)
   (if (numberp session)
-      (values (format "http://localhost:%s" session) nil)
+      (values (ein:url (format "http://localhost:%s" session)) nil)
     (let ((session-uri (url-generic-parse-url session)))
       (cond ((url-fullness session-uri)
              (values (ein:url (format "%s://%s:%s" (url-type session-uri) (url-host session-uri) (url-port session-uri)))
