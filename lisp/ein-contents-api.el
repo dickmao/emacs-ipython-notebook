@@ -93,6 +93,7 @@ global setting.  For global setting and more information, see
   (if (< iteration 3)
       (progn
         (ein:log 'info "Retry content-query-contents #%s in response to %s" iteration (request-response-status-code response))
+        (sleep-for 0 (* (1+ iteration) 200))
         (ein:content-query-contents url-or-port path callback (1+ iteration)))
     (ein:log 'error "ein:content-query-contents--error %s REQUEST-STATUS %s DATA %s" (concat (file-name-as-directory url-or-port) path) symbol-status (cdr error-thrown))))
 

@@ -1,6 +1,4 @@
 EMACS ?= $(shell which emacs)
-IPYTHON = env/ipy.$(IPY_VERSION)/bin/ipython
-IPY_VERSION = 5.8.0
 SRC=$(shell cask files)
 ELCFILES = $(SRC:.el=.elc)
 
@@ -14,9 +12,6 @@ autoloads:
 clean:
 	cask clean-elc
 
-env-ipy.%:
-	tools/makeenv.sh env/ipy.$* tools/requirement-ipy.$*.txt
-
 .PHONY: test-compile
 test-compile: clean autoloads
 	! ( cask build 2>&1 | awk '{if (/^ /) { gsub(/^ +/, " ", $$0); printf "%s", $$0 } else { printf "\n%s", $$0 }}' | egrep "not known|Error|free variable|error for|Use of gv-ref" )
@@ -24,9 +19,6 @@ test-compile: clean autoloads
 
 .PHONY: quick
 quick: test-compile test-unit
-
-.PHONY: test-no-build
-test-no-build: test-unit test-int autoloads
 
 .PHONY: test
 test: quick test-int
@@ -39,9 +31,3 @@ test-int:
 .PHONY: test-unit
 test-unit:
 	cask exec ert-runner -L ./lisp -L ./test -l test/testein.el test/test-ein*.el
-
-travis-ci-zeroein:
-	$(EMACS) --version
-	EMACS=$(EMACS) lisp/zeroein.el -batch
-	rm -rf lib/*
-	EMACS=$(EMACS) lisp/zeroein.el -batch

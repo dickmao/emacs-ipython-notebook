@@ -176,7 +176,6 @@ KEY, then call `request' with URL and SETTINGS.  KEY is compared by
                    (ein:log 'debug "Stuck waiting for %s processes to complete."
                             (hash-table-count ein:query-running-process-table))
                    (sleep-for 3)))))
-    (ein:log 'debug "Currently at %s simultaneous request calls." (hash-table-count ein:query-running-process-table))
     (ein:aif (gethash key ein:query-running-process-table)
         (unless (request-response-done-p it)
           ;; This seems to result in clobbered cookie jars

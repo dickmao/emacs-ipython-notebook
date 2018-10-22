@@ -110,7 +110,7 @@
   (ein:log 'verbose "ERT TESTING-DELETE-UNTITLED0 start")
   (ein:log 'verbose "ERT TESTING-DELETE-UNTITLED0 creating notebook")
   (let ((notebook (ein:testing-get-untitled0-or-create *ein:testing-port*)))
-    (should (member (ein:url *ein:testing-port* (ein:$notebook-notebook-path notebook)) (ein:notebooklist-nbpaths)))
+    (should (member (ein:url *ein:testing-port* (ein:$notebook-notebook-path notebook)) (ein:notebooklist-list-paths "notebook")))
     (ein:testing-wait-until
      (lambda ()
        (ein:aand notebook
@@ -120,7 +120,7 @@
     (ein:testing-delete-notebook *ein:testing-port* notebook)
     (with-current-buffer (ein:notebooklist-get-buffer *ein:testing-port*)
       (deferred:sync! (ein:notebooklist-reload nil t)))
-    (should-not (member (ein:url *ein:testing-port* (ein:$notebook-notebook-path notebook)) (ein:notebooklist-nbpaths))))
+    (should-not (member (ein:url *ein:testing-port* (ein:$notebook-notebook-path notebook)) (ein:notebooklist-list-paths "notebook"))))
   (ein:log 'verbose
     "ERT TESTING-DELETE-UNTITLED0 check that the notebook is deleted")
 
