@@ -1,7 +1,6 @@
 (eval-when-compile (require 'cl))
 (require 'ert)
 
-(require 'ein-loaddefs)
 (require 'ein-notebooklist)
 (require 'ein-jupyter)
 (require 'wid-edit)

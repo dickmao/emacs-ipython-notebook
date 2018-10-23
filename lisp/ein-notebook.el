@@ -1323,6 +1323,7 @@ This hook is run regardless the actual major mode used."
   (when (require 'mumamo nil t)
     (require 'ein-mumamo))
   ;; Return first matched mode
+  (autoload 'ein:notebook-multilang-mode "ein-multilang")
   (loop for mode in ein:notebook-modes
         if (functionp mode)
         return mode))
