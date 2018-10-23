@@ -10,9 +10,15 @@ Emacs IPython Notebook |build-status|
 Usage
 =====
 
-1. ``make install``
+1. Install Cask_::
+   
+     curl -fsSL https://raw.githubusercontent.com/cask/cask/master/go | python
+   
+2. ``make install``
+   
+3. ``M-x ein:login``
 
-2. ``M-x ein:login`` to access jupyter server.
+.. _Cask: https://cask.readthedocs.io/en/latest/guide/installation.html
 
 Keybindings - Notebook
 ----------------------
