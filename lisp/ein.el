@@ -3,7 +3,7 @@
 ;; Copyright (C) 2012-2015 Takafumi Arakaki, John Miller
 
 ;; Author:  John Miller <millejoh at millejoh.com>, Takafumi Arakaki <aka.tkf at gmail.com>
-;; URL: http://millejoh.github.io/emacs-ipython-notebook/
+;; URL: https://github.com/dickmao/emacs-ipython-notebook
 ;; Keywords: applications, tools
 ;; Version: 0.15.0
 

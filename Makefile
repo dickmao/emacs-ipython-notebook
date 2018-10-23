@@ -2,18 +2,17 @@ EMACS ?= $(shell which emacs)
 SRC=$(shell cask files)
 ELCFILES = $(SRC:.el=.elc)
 
-.PHONY: autoloads
-autoloads:
-	-rm -f lisp/ein-loaddefs.el
-	$(EMACS) -Q --batch \
-		--eval "(let ((generated-autoload-file (expand-file-name \"lisp/ein-loaddefs.el\"))) (update-directory-autoloads (expand-file-name \"lisp\")))"
+.PHONY: install
+install:
+	cask package
+	cask eval "(package-install-file (car (file-expand-wildcards \"dist/ein*.tar\")))"
 
 .PHONY: clean
 clean:
 	cask clean-elc
 
 .PHONY: test-compile
-test-compile: clean autoloads
+test-compile: clean
 	! ( cask build 2>&1 | awk '{if (/^ /) { gsub(/^ +/, " ", $$0); printf "%s", $$0 } else { printf "\n%s", $$0 }}' | egrep "not known|Error|free variable|error for|Use of gv-ref" )
 	cask clean-elc
 
