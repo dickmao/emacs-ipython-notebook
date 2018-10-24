@@ -12,7 +12,7 @@
 
 (When "^I am in notebooklist buffer$"
       (lambda ()
-        (switch-to-buffer (ein:notebooklist-get-buffer (car (ein:jupyter-server-conn-info))))))))
+        (switch-to-buffer (ein:notebooklist-get-buffer (car (ein:jupyter-server-conn-info))))))
 
 (When "^I wait \\([.0-9]+\\) seconds?$"
       (lambda (seconds)
@@ -21,24 +21,6 @@
 (When "^I am in log buffer$"
       (lambda ()
         (switch-to-buffer ein:log-all-buffer-name)))
-
-(defun ein:testing-new-notebook (url-or-port ks)
-  (lexical-let (notebook)
-    (condition-case err
-        (progn
-          (ein:notebooklist-new-notebook url-or-port ks nil
-                                         (lambda (nb created &rest ignore)
-                                           (setq notebook nb)))
-          (ein:testing-wait-until (lambda () 
-                                    (and notebook
-                                         (ein:aand (ein:$notebook-kernel notebook)
-                                                   (ein:kernel-live-p it))))
-                                  nil 10000 2000)
-          notebook)
-      (error (message "ein:testing-new-notebook: %s" (error-message-string err))
-             (when notebook
-               (ein:notebook-close notebook))
-             nil))))
 
 (When "^new \\(.+\\) notebook$"
       (lambda (kernel)
@@ -73,7 +55,7 @@
         (if login
             (ein:testing-wait-until (lambda () (ein:notebooklist-list)) nil 20000 1000))))
 
-(When "^I login to \\([.0-9]+\\)$"
+(When "^I login erroneously to \\(.*\\)$"
       (lambda (port)
         (cl-letf (((symbol-function 'ein:notebooklist-ask-url-or-port)
                    (lambda (&rest args) (ein:url port)))

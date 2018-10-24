@@ -63,6 +63,24 @@
                             (zerop (hash-table-count ein:query-running-process-table)))
                           nil ms interval t))
 
+(defun ein:testing-new-notebook (url-or-port ks)
+  (lexical-let (notebook)
+    (condition-case err
+        (progn
+          (ein:notebooklist-new-notebook url-or-port ks nil
+                                         (lambda (nb created &rest ignore)
+                                           (setq notebook nb)))
+          (ein:testing-wait-until (lambda () 
+                                    (and notebook
+                                         (ein:aand (ein:$notebook-kernel notebook)
+                                                   (ein:kernel-live-p it))))
+                                  nil 10000 2000)
+          notebook)
+      (error (message "ein:testing-new-notebook: %s" (error-message-string err))
+             (when notebook
+               (ein:notebook-close notebook))
+             nil))))
+
 (defun ein:testing-wait-until (predicate &optional predargs ms interval continue)
   "Wait until PREDICATE function returns non-`nil'.
   PREDARGS is argument list for the PREDICATE function.

@@ -46,7 +46,7 @@
         (prog1
             (ein:testing-get-notebook url-or-port path *ein:testing-notebook-name*)
           (with-current-buffer (ein:notebooklist-get-buffer url-or-port)
-            (deferred:sync! (ein:notebooklist-reload nil t)))
+            (deferred:sync! (ein:notebooklist-reload ein:%notebooklist% t)))
           (ein:log 'debug "TESTING-GET-UNTITLED0-OR-CREATE end"))))))
 
 (defvar ein:notebooklist-after-open-hook nil)
@@ -96,21 +96,14 @@
 (ert-deftest 20-delete-untitled0 ()
   (ein:log 'verbose "----------------------------------")
   (ein:log 'verbose "ERT TESTING-DELETE-UNTITLED0 start")
-  (ein:log 'verbose "ERT TESTING-DELETE-UNTITLED0 creating notebook")
-  (let ((notebook (ein:testing-get-untitled0-or-create *ein:testing-port*)))
-    (should (member (ein:url *ein:testing-port* (ein:$notebook-notebook-path notebook)) (ein:notebooklist-list-paths "notebook")))
-    (ein:testing-wait-until
-     (lambda ()
-       (ein:aand notebook
-                 (ein:$notebook-kernel it)
-                 (ein:kernel-live-p it))))
-    (ein:log 'verbose "ERT TESTING-DELETE-UNTITLED0 deleting notebook")
-    (with-current-buffer (ein:notebooklist-get-buffer *ein:testing-port*)
+  (with-current-buffer (ein:notebooklist-get-buffer *ein:testing-port*)
+    (let ((notebook (ein:testing-get-untitled0-or-create *ein:testing-port*)))
+      (should (member (ein:url *ein:testing-port* (ein:$notebook-notebook-path notebook)) 
+                      (ein:notebooklist-list-notebooks)))
+      (ein:log 'verbose "ERT TESTING-DELETE-UNTITLED0 deleting notebook")
       (ein:notebooklist-delete-notebook (ein:$notebook-notebook-path notebook))
-      (deferred:sync! (ein:notebooklist-reload nil t)))
-    (ein:log 'verbose
-      "ERT TESTING-DELETE-UNTITLED0 check that the notebook is deleted")
-    (should-not (member (ein:url *ein:testing-port* (ein:$notebook-notebook-path notebook)) (ein:notebooklist-list-paths "notebook"))))
+      (deferred:sync! (ein:notebooklist-reload ein:%notebooklist% t))
+      (should-not (member (ein:url *ein:testing-port* (ein:$notebook-notebook-path notebook)) (ein:notebooklist-list-notebooks)))))
   (ein:log 'verbose "ERT TESTING-DELETE-UNTITLED0 end"))
 
 (ert-deftest 11-notebook-execute-current-cell-simple ()
