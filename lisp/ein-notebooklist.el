@@ -39,6 +39,12 @@
 (require 'deferred)
 (require 'dash)
 
+(defcustom ein:notebooklist-login-timeout (truncate (* 6.3 1000))
+  "Timeout in milliseconds for logging into server"
+  :group 'ein
+  :type 'integer
+)
+
 (defcustom ein:notebooklist-render-order
   '(render-header
     render-opened-notebooks
@@ -187,49 +193,57 @@ To suppress popup, you can pass `ignore' as CALLBACK."
 exist) for allow local jupyter instances, keyed by they url and
 port the instance is running on."
   (let ((lines (process-lines ein:jupyter-default-server-command "notebook" "list" "--json"))
-        (token-pairs (make-hash-table :test #'equal)))
+        (url-tokens (make-hash-table :test #'equal)))
     (loop for line in lines
           do (destructuring-bind
                  (&key password url token &allow-other-keys)
                  (ein:json-read-from-string line)
-               (let* ((url (ein:url url))
-                      (tp (gethash url token-pairs nil)))
-                 (if tp
-                     (setf (gethash url token-pairs) (append tp (list password token)))
-                   (setf (gethash url token-pairs) (list password token))))))
-    token-pairs))
+               (push (list password token) (gethash (ein:url url) url-tokens))))
+    url-tokens))
 
 (defun ein:crib-token (url-or-port)
-  (ein:aif (gethash url-or-port (ein:crib-token--all-local-tokens))
-      (if (> (length it) 2)
-          (let ((token (read-passwd "I see multiple jupyter servers registered on the same url! Please enter the token for one that is actually running: ")))
-            (list :json-false token))
-        it)
-    (list nil nil)))
+  (let ((pw-pairs (gethash url-or-port (ein:crib-token--all-local-tokens))))
+    ;; pw-pairs is of the form ((PASSWORD-P TOKEN) (PASSWORD-P TOKEN))
+    (cond ((= (length pw-pairs) 1) (car pw-pairs))
+          ((> (length pw-pairs) 1) 
+           ;; orig code: (list :json-false token) meant "no password, yes token"
+           ;; It's not clear how two entries for the same url could happen but if it did,
+           ;; 1. what if both entries don't have any auth enabled?
+           ;; 2. what if an entry required a password and not a token?
+           ;; It's best to return "nil nil" in this unlikely (impossible?) event, and let
+           ;; the downstream logic handle it.
+           (warn "I see multiple jupyter servers registered on the same url! Please enter the token for one that is actually running.")
+           (list nil nil))
+          (t (list nil nil)))))
 
 (defun ein:notebooklist-token-or-password (url-or-port)
-  "Return token or password (I believe jupyter requires one or the other but not both) for URL-OR-PORT.  Empty string token means all authentication disabled.  Nil means don't know."
+  "Return token or password (jupyter requires one or the other but not both) for URL-OR-PORT.  Empty string token means all authentication disabled.  Nil means don't know."
   (multiple-value-bind (password-p token) (ein:crib-token url-or-port)
     (autoload 'ein:jupyter-server-conn-info "ein-jupyter")
     (multiple-value-bind (my-url-or-port my-token) (ein:jupyter-server-conn-info)
-        (cond ((eq password-p t) (read-passwd "Password: "))
-              ((and (stringp token) (eql password-p :json-false)) token)
-              ((equal url-or-port my-url-or-port) my-token)
-              (t nil)))))
+      (cond ((eq password-p t) (read-passwd (format "Password for %s: " url-or-port)))
+            ((and (stringp token) (eql password-p :json-false)) token)
+            ((equal url-or-port my-url-or-port) my-token)
+            (t nil)))))
 
 (defun ein:notebooklist-ask-url-or-port ()
-  (let* ((url-or-port-list (mapcar (lambda (x) (format "%s" x))
-                                   ein:url-or-port))
-         (default (format "%s" (ein:aif (ein:get-notebook)
-                                   (ein:$notebook-url-or-port it)
-                                 (ein:aif ein:%notebooklist%
-                                     (ein:$notebooklist-url-or-port it)
-                                   (ein:default-url-or-port)))))
-         (url-or-port
-          (completing-read (format "URL or port number (default %s): " default)
-                           url-or-port-list
-                           nil nil nil nil
-                           default)))
+  (let* ((default (ein:url (ein:aif (ein:get-notebook)
+                               (ein:$notebook-url-or-port it)
+                             (ein:aif ein:%notebooklist%
+                                 (ein:$notebooklist-url-or-port it)
+                               (ein:default-url-or-port)))))
+         (url-or-port-list
+          (-distinct (mapcar #'ein:url
+                             (append (list default) 
+                                     ein:url-or-port
+                                     (hash-table-keys 
+                                      (ein:crib-token--all-local-tokens))))))
+         (url-or-port (let ((ido-report-no-match nil)
+                            (ido-use-faces nil))
+                        (ido-completing-read (format "URL or port [%s]: " default)
+                                             url-or-port-list
+                                             nil nil nil nil
+                                             default))))
     (ein:url url-or-port)))
 
 (defcustom ein:populate-hierarchy-on-notebooklist-open nil
@@ -802,8 +816,7 @@ is a string of the format \"URL-OR-PORT/PATH\"."
                collect
                (loop for content in (ein:content-need-hierarchy url-or-port)
                      when (string= (ein:$content-type content) "notebook")
-                     collect (format "%s/%s" url-or-port
-                                     (ein:$content-path content)))
+                     collect (ein:url url-or-port (ein:$content-path content)))
                ;; (if (= api-version 3)
                ;;     (loop for note in (ein:content-need-hierarchy url-or-port)
                ;;           collect (format "%s/%s" url-or-port
@@ -864,21 +877,26 @@ See also:
   "Called from `ein:notebooklist-login'."
   (ein:log 'debug "Login attempt #%d in response to %s from %s."
            iteration response-status url-or-port)
-  (ein:query-singleton-ajax
-   (list 'notebooklist-login--iteration url-or-port)
-   (ein:url url-or-port "login")
-;; This was the culprit that necessitated the 405 workaround
-;; :type "POST"
-;; From the curl manpage:
-;; The method string you set with -X will be used for all requests,
-;;               which if you for example use -L, --location may cause unintended
-;;               side-effects  when  curl doesn't change request method according
-;;               to the HTTP 30x response codes - and similar.
-   :data (if token (concat "password=" (url-hexify-string token)))
-   :parser #'ein:notebooklist-login--parser
-   :complete (apply-partially #'ein:notebooklist-login--complete url-or-port)
-   :error (apply-partially #'ein:notebooklist-login--error url-or-port token callback errback iteration)
-   :success (apply-partially #'ein:notebooklist-login--success url-or-port callback errback token iteration)))
+  (unless callback
+    (setq callback #'ignore))
+  (unless errback
+    (setq errback #'ignore))
+  (lexical-let (done-p)
+    (add-function :after callback (lambda (&rest ignore) (setq done-p t)))
+    (add-function :after errback (lambda (&rest ignore) (setq done-p t)))
+    (ein:query-singleton-ajax
+     (list 'notebooklist-login--iteration url-or-port)
+     (ein:url url-or-port "login")
+     ;; do not use :type "POST" here (see git history)
+     :timeout ein:notebooklist-login-timeout
+     :data (if token (concat "password=" (url-hexify-string token)))
+     :parser #'ein:notebooklist-login--parser
+     :complete (apply-partially #'ein:notebooklist-login--complete url-or-port)
+     :error (apply-partially #'ein:notebooklist-login--error url-or-port token callback errback iteration)
+     :success (apply-partially #'ein:notebooklist-login--success url-or-port callback errback token iteration))
+    (with-local-quit
+      (loop until done-p
+            do (sleep-for 0 450)))))
 
 ;;;###autoload
 (defun ein:notebooklist-open (url-or-port callback)
@@ -940,7 +958,7 @@ CALLBACK takes one argument, the buffer created by ein:notebooklist-open--succes
   (if (plist-get data :bad-page)
       (if (>= iteration 0)
           (ein:notebooklist-login--error-1 url-or-port errback)
-        (setq token (read-passwd "Password: "))
+        (setq token (read-passwd (format "Password for %s: " url-or-port)))
         (ein:notebooklist-login--iteration url-or-port callback errback token (1+ iteration) response-status))
     (ein:notebooklist-login--success-1 url-or-port callback)))
 
@@ -952,8 +970,8 @@ CALLBACK takes one argument, the buffer created by ein:notebooklist-open--succes
                  &allow-other-keys
                  &aux
                  (response-status (request-response-status-code response)))
-  (cond ((< iteration 0)
-         (setq token (read-passwd "Password: "))
+  (cond ((and response-status (< iteration 0))
+         (setq token (read-passwd (format "Password for %s: " url-or-port)))
          (ein:notebooklist-login--iteration url-or-port callback errback token (1+ iteration) response-status))
         ((and (eq response-status 403) (< iteration 1))
          (ein:notebooklist-login--iteration url-or-port callback errback token (1+ iteration) response-status))

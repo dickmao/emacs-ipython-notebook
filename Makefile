@@ -20,7 +20,7 @@ env-ipy.%:
 
 .PHONY: test-compile
 test-compile: clean autoloads
-+	! ( cask build 2>&1 | awk '{if (/^ /) { gsub(/^ +/, " ", $$0); printf "%s", $$0 } else { printf "\n%s", $$0 }}' | egrep "not known|Error|free variable|error for|Use of gv-ref" )
+	! ( cask build 2>&1 | awk '{if (/^ /) { gsub(/^ +/, " ", $$0); printf "%s", $$0 } else { printf "\n%s", $$0 }}' | egrep "not known|Error|free variable|error for|Use of gv-ref" )
 	cask clean-elc
 
 .PHONY: quick

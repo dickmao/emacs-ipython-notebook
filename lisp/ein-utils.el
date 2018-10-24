@@ -204,8 +204,11 @@ at point, i.e. any word before then \"(\", if it is present."
             (and (stringp url-or-port) (string-match "^[0-9]+$" url-or-port)))
         (setq url-or-port (format "http://localhost:%s" url-or-port)))
     (let ((parsed-url (url-generic-parse-url url-or-port)))
-      (if (or (null (url-host parsed-url)) (string= (url-host parsed-url) "localhost"))
-          (setf (url-host parsed-url) ein:url-localhost))
+      (when (null (url-host parsed-url))
+        (setq url-or-port (concat "https://" url-or-port))
+        (setq parsed-url (url-generic-parse-url url-or-port)))
+      (when (string= (url-host parsed-url) "localhost")
+        (setf (url-host parsed-url) ein:url-localhost))
       (directory-file-name (concat (file-name-as-directory (url-recreate-url parsed-url))
                                    (apply #'ein:glom-paths paths))))))
 

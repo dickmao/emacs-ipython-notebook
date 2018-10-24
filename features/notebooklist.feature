@@ -75,5 +75,10 @@ Scenario: To the cloud with password
 
 @login
 Scenario: Logging into nowhere
-  Given I login to 0
+  Given I login erroneously to 0
   Then I should see message "ein: [error] Login to http://127.0.0.1:0 failed"
+
+@login
+Scenario: Logging into nowhere
+  Given I login erroneously to adfljdsf.org:8432
+  Then I should see message "ein: [error] Login to https://adfljdsf.org:8432 failed"
