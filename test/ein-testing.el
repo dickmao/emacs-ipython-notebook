@@ -55,8 +55,8 @@
   (ein:testing-save-buffer request-log-buffer-name ein:testing-dump-file-request))
 
 (defun ein:testing-flush-queries (&optional ms interval)
-  "Forget all the deferred:flush-queue! and deferred:sync! and all the semaphore
-callbacks.  This is what I need."
+  "I need the smoke to clear, but just waiting for zero running processes doesn't work
++if I call this between links in a deferred chain.  Adding a flush-queue."
   (deferred:flush-queue!)
   (ein:testing-wait-until (lambda ()
                             (ein:query-gc-running-process-table)

@@ -280,20 +280,6 @@ PATH is specifying directory from file navigation.  PATH is empty on login.  RES
               (ein:content-query-contents url-or-port path success))))
       (ein:content-query-contents url-or-port path success))))
 
-;; point of order (poo): ein:notebooklist-refresh-kernelspecs requeries the kernelspecs and calls ein:notebooklist-reload.  ein:notebooklist-reload already requeries the kernelspecs in one of its callbacks, so this function seems redundant.
-
-;; (defun ein:notebooklist-refresh-kernelspecs (&optional url-or-port)
-;;   (interactive (list (or (and ein:%notebooklist% (ein:$notebooklist-url-or-port ein:%notebooklist%))
-;;                          (ein:notebooklist-ask-url-or-port))))
-;;   (unless url-or-port
-;;     (if ein:%notebooklist%
-;;         (setq url-or-port (ein:$notebooklist-url-or-port ein:%notebooklist%))
-;;       (setq url-or-port (ein:default-url-or-port))))
-;;   (ein:query-kernelspecs url-or-port)
-;;   (when ein:%notebooklist%
-;;     (ein:notebooklist-reload ein:%notebooklist%))
-;; )
-
 (defcustom ein:notebooklist-keepalive-refresh-time 1
   "When the notebook keepalive is enabled, the frequency, IN
 HOURS, with which to make calls to the jupyter content API to
@@ -360,7 +346,7 @@ automatically be called during calls to `ein:notebooklist-open`."
         (ein:notebooklist-list-add ein:%notebooklist%)
         (ein:notebooklist-render ipy-version)
         (goto-char orig-point)
-        (ein:log 'verbose "Opened notebooklist at %s" (concat (file-name-as-directory url-or-port) path))
+        (ein:log 'verbose "Opened notebooklist at %s" (ein:url url-or-port path))
         (unless already-opened-p
           (run-hooks 'ein:notebooklist-first-open-hook))
         (when ein:enable-keepalive

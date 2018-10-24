@@ -26,7 +26,6 @@
 ;;; Code:
 
 (eval-when-compile (require 'cl))
-(require 'request)
 (require 'request-deferred)
 (require 'url)
 

@@ -69,7 +69,6 @@ Scenario: Test the conflagrative commands
   Then the cursor should be at point "22"
   And I undo again
   And I dump buffer
-  Then the cursor should be at point "83"
   And I press "C-c C-v"
   And I press "C-/"
   And I undo again
