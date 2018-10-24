@@ -12,14 +12,11 @@
 
 (When "^I am in notebooklist buffer$"
       (lambda ()
-        (multiple-value-bind (url-or-port token) (ein:jupyter-server-conn-info)
-          (switch-to-buffer (ein:notebooklist-get-buffer url-or-port))
-          (sit-for 0.8)
-          )))
+        (switch-to-buffer (ein:notebooklist-get-buffer (car (ein:jupyter-server-conn-info))))))))
 
 (When "^I wait \\([.0-9]+\\) seconds?$"
       (lambda (seconds)
-        (sit-for (string-to-number seconds))))
+        (sleep-for (string-to-number seconds))))
 
 (When "^I am in log buffer$"
       (lambda ()

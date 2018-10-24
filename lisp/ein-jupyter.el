@@ -187,7 +187,7 @@ the log of the running jupyter server."
               (setf done-p "error")
               (ein:log 'warn "Jupyter server failed to start, cancelling operation")
               (ein:jupyter-server-stop t)))
-      (unless no-login-p
+      (if (and (not no-login-p) (ein:jupyter-server-process))
         (ein:jupyter-server-login-and-open login-callback)))))
 
 ;;;###autoload
