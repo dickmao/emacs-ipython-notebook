@@ -6,6 +6,7 @@ ELCFILES = $(SRC:.el=.elc)
 
 .PHONY: install
 install:
+	rm -rf dist/
 	cask package
 	emacs -Q --batch --eval "(package-initialize)" --eval "(package-install-file (car (file-expand-wildcards \"dist/ein*.tar\")))"
 
