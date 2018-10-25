@@ -138,7 +138,7 @@
                                       (ein:$notebook-url-or-port notebook)
                                       (ein:$notebook-notebook-name notebook))))
                 (switch-to-buffer buf-name)
-                (Then "I should be in buffer \"%s\"" buf-name))))))
+                (Then "I should be in buffer \"%s\"" buf-name)))))))
 
 (When "^I dump buffer"
       (lambda () (message "%s" (buffer-string))))

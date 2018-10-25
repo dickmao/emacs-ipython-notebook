@@ -177,7 +177,7 @@ notebooks."
                        (apply-partially 
                         (lambda (buffer* no-reconnection* notebook created)
                           (ein:connect-buffer-to-notebook notebook buffer* no-reconnection*))
-                        (or buffer (current-buffer)) no-reconnection)))))
+                        (or buffer (current-buffer)) no-reconnection))))
 
 ;;;###autoload
 (defun ein:connect-to-notebook-buffer (buffer-or-name)

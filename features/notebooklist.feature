@@ -25,15 +25,6 @@ Scenario: Resync
   And I switch to log expr "ein:log-all-buffer-name"
   Then I should see "kernelspecs--complete"
 
-@foo
-Scenario: Global notebooks
-  Given I am in notebooklist buffer
-  When I clear log expr "ein:log-all-buffer-name"
-  And I call "ein:notebooklist-open-notebook-global"
-  And I wait 0.9 seconds
-  And I switch to log expr "ein:log-all-buffer-name"
-  Then I should see "Opened notebook"
-
 @login
 Scenario: No token server
   Given I start the server configured "c.NotebookApp.token = u''\n"
