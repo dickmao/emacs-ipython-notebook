@@ -39,8 +39,13 @@
 (provide 'ein-notebook) ; see manual "Named Features" regarding recursive requires
 (require 'ein-notebook)
 
-(defcustom ein:content-query-max-depth 4
+(defcustom ein:content-query-max-depth 2
   "Don't recurse the directory tree deeper than this."
+  :type 'integer
+  :group 'ein)
+
+(defcustom ein:content-query-max-branch 10
+  "Don't descend into more than this number of directories per depth.  The total number of parallel queries should therefore be O({max_branch}^{max_depth})"
   :type 'integer
   :group 'ein)
 
@@ -204,46 +209,51 @@ global setting.  For global setting and more information, see
 
 (defun ein:content-query-hierarchy* (url-or-port path callback sessions depth content)
   "Returns list (tree) of content objects"
-  (if (> depth ein:content-query-max-depth)
-      (funcall callback nil)
-    (lexical-let* ((url-or-port url-or-port)
-                   (path path)
-                   (callback callback)
-                   (items (ein:$content-raw-content content))
-                   (directories (loop for item in items
-                                      if (string= "directory" (plist-get item :type))
-                                      collect (ein:new-content url-or-port path item)
-                                      end))
-                   (others (loop for item in items
-                                 with c0
-                                 if (not (string= "directory" (plist-get item :type)))
-                                 do (setf c0 (ein:new-content url-or-port path item))
-                                    (setf (ein:$content-session-p c0)
-                                          (gethash (ein:$content-path c0) sessions))
-                                 and collect c0
-                                 end)))
-      (deferred:$
-        (apply #'deferred:parallel
-               (loop for c0 in directories
-                     collect
-                     (lexical-let ((c0 c0)
-                                   (d0 (deferred:new #'identity)))
-                       (ein:content-query-contents
-                        url-or-port
-                        (ein:$content-path c0)
-                        (apply-partially #'ein:content-query-hierarchy*
-                                         url-or-port
-                                         (ein:$content-path c0)
-                                         (lambda (tree)
-                                           (deferred:callback-post d0 (cons c0 tree)))
-                                         sessions (1+ depth)))
-                       d0)))
-        (deferred:nextc it
-          (lambda (tree)
-            (let ((result (append others tree)))
-              (if (string= path "")
-                  (setf (gethash url-or-port *ein:content-hierarchy*) (-flatten result)))
-              (funcall callback result))))))))
+  (lexical-let* ((url-or-port url-or-port)
+                 (path path)
+                 (callback callback)
+                 (items (ein:$content-raw-content content))
+                 (directories (if (< depth ein:content-query-max-depth)
+                                  (loop for item in items
+                                        with result
+                                        until (>= (length result) 
+                                                  ein:content-query-max-branch)
+                                        if (string= "directory" (plist-get item :type))
+                                          collect (ein:new-content url-or-port path item) 
+                                            into result
+                                        end
+                                        finally return result
+                                        )))
+                 (others (loop for item in items
+                               with c0
+                               if (not (string= "directory" (plist-get item :type)))
+                               do (setf c0 (ein:new-content url-or-port path item))
+                               (setf (ein:$content-session-p c0)
+                                     (gethash (ein:$content-path c0) sessions))
+                               and collect c0
+                               end)))
+    (deferred:$
+      (apply #'deferred:parallel
+             (loop for c0 in directories
+                   collect
+                   (lexical-let ((c0 c0)
+                                 (d0 (deferred:new #'identity)))
+                     (ein:content-query-contents
+                      url-or-port
+                      (ein:$content-path c0)
+                      (apply-partially #'ein:content-query-hierarchy*
+                                       url-or-port
+                                       (ein:$content-path c0)
+                                       (lambda (tree)
+                                         (deferred:callback-post d0 (cons c0 tree)))
+                                       sessions (1+ depth)))
+                     d0)))
+      (deferred:nextc it
+        (lambda (tree)
+          (let ((result (append others tree)))
+            (if (string= path "")
+                (setf (gethash url-or-port *ein:content-hierarchy*) (-flatten result)))
+            (funcall callback result)))))))
 
 (defun ein:content-query-hierarchy (url-or-port callback)
   "Send for content hierarchy of URL-OR-PORT with CALLBACK arity 1 for content hierarchy"

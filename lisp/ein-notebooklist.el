@@ -779,7 +779,8 @@ Notebook list data is passed via the buffer local variable
 
 (defsubst ein:notebooklist-ask-path (&optional content-type)
   (ido-completing-read (format  "Open %s: " content-type)
-                       (ein:notebooklist-list-paths content-type)))
+                       (ein:notebooklist-list-paths content-type)
+                       nil t))
 
 ;;;###autoload
 
