@@ -188,7 +188,7 @@ the source is in git repository."
                                                   &allow-other-keys)
   (if (< iteration 3)
       (progn
-        (ein:log 'info "Retry kernelspecs #%s in response to %s" iteration (request-response-status-code response))
+        (ein:log 'verbose "Retry kernelspecs #%s in response to %s" iteration (request-response-status-code response))
         (ein:query-kernelspecs url-or-port callback (1+ iteration)))
     (ein:log 'error
              "ein:query-kernelspecs-error %s: ERROR %s DATA %s" url-or-port (car error-thrown) (cdr error-thrown))))

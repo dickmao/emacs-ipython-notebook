@@ -36,6 +36,10 @@
           path))
 
 (defun ein:file-open (url-or-port path)
+  (interactive
+   (ein:notebooklist-parse-nbpath (if noninteractive
+                                      (car (ein:notebooklist-list-paths "file"))
+                                    (ein:notebooklist-ask-path "file"))))
   (ein:content-query-contents url-or-port path #'ein:file-open-finish))
 
 (defun ein:file-open-finish (content)
