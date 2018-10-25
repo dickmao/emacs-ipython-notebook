@@ -56,12 +56,25 @@
 
 (defun ein:testing-flush-queries (&optional ms interval)
   "I need the smoke to clear, but just waiting for zero running processes doesn't work
-+if I call this between links in a deferred chain.  Adding a flush-queue."
+if I call this between links in a deferred chain.  Adding a flush-queue."
   (deferred:flush-queue!)
   (ein:testing-wait-until (lambda ()
                             (ein:query-gc-running-process-table)
                             (zerop (hash-table-count ein:query-running-process-table)))
                           nil ms interval t))
+
+(defun ein:testing-wait-until (predicate &optional predargs ms interval continue)
+  "Wait until PREDICATE function returns non-`nil'.
+  PREDARGS is argument list for the PREDICATE function.
+  MS is milliseconds to wait.  INTERVAL is polling interval in milliseconds."
+  (let* ((int (ein:aif interval it (ein:aif ms (max 300 (/ ms 10)) 300)))
+         (count (max 1 (if ms (truncate (/ ms int)) 25))))
+    (unless (or (loop repeat count
+                       when (apply predicate predargs)
+                       return t
+                       do (sleep-for 0 int))
+                continue)
+      (error "Timeout: %s" predicate))))
 
 (defun ein:testing-new-notebook (url-or-port ks)
   (lexical-let (notebook)
@@ -80,19 +93,6 @@
              (when notebook
                (ein:notebook-close notebook))
              nil))))
-
-(defun ein:testing-wait-until (predicate &optional predargs ms interval continue)
-  "Wait until PREDICATE function returns non-`nil'.
-  PREDARGS is argument list for the PREDICATE function.
-  MS is milliseconds to wait.  INTERVAL is polling interval in milliseconds."
-  (let* ((int (ein:aif interval it (ein:aif ms (max 300 (/ ms 10)) 300)))
-         (count (max 1 (if ms (truncate (/ ms int)) 25))))
-    (unless (or (loop repeat count
-                       when (apply predicate predargs)
-                       return t
-                       do (sleep-for 0 int)) 
-                continue)
-      (error "Timeout: %s" predicate))))
 
 (defadvice ert-run-tests-batch (after ein:testing-dump-logs-hook activate)
   "Hook `ein:testing-dump-logs-hook' because `kill-emacs-hook'

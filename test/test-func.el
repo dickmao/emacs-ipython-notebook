@@ -46,7 +46,7 @@
         (prog1
             (ein:testing-get-notebook url-or-port path *ein:testing-notebook-name*)
           (with-current-buffer (ein:notebooklist-get-buffer url-or-port)
-            (deferred:sync! (ein:notebooklist-reload ein:%notebooklist% t)))
+            (deferred:sync! (ein:notebooklist-reload nil t)))
           (ein:log 'debug "TESTING-GET-UNTITLED0-OR-CREATE end"))))))
 
 (defvar ein:notebooklist-after-open-hook nil)

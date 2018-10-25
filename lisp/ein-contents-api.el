@@ -39,6 +39,11 @@
 (provide 'ein-notebook) ; see manual "Named Features" regarding recursive requires
 (require 'ein-notebook)
 
+(defcustom ein:content-query-max-depth 4
+  "Don't recurse the directory tree deeper than this."
+  :type 'integer
+  :group 'ein)
+
 (defcustom ein:content-query-timeout (* 60 1000) ;1 min
   "Query timeout for getting content from Jupyter/IPython notebook.
 If you cannot open large notebooks because of a timeout error try
@@ -68,7 +73,7 @@ global setting.  For global setting and more information, see
                            params))))
 
 (defun ein:content-query-contents (url-or-port path callback &optional iteration)
-  "Register CALLBACK of arity 1 for the contents at PATH from the Jupyter URL-OR-PORT."
+  "Register CALLBACK of arity 1 for the contents at PATH from the URL-OR-PORT."
   (unless iteration
     (setq iteration 0))
   (ein:query-singleton-ajax
@@ -92,7 +97,8 @@ global setting.  For global setting and more information, see
 (defun* ein:content-query-contents--error (url-or-port path callback iteration &key symbol-status response error-thrown &allow-other-keys)
   (if (< iteration 3)
       (progn
-        (ein:log 'info "Retry content-query-contents #%s in response to %s" iteration (request-response-status-code response))
+        (ein:log 'verbose "Retry content-query-contents #%s in response to %s" iteration (request-response-status-code response))
+        (sleep-for 0 (* (1+ iteration) 200))
         (ein:content-query-contents url-or-port path callback (1+ iteration)))
     (ein:log 'error "ein:content-query-contents--error %s REQUEST-STATUS %s DATA %s" (concat (file-name-as-directory url-or-port) path) symbol-status (cdr error-thrown))))
 
@@ -196,46 +202,48 @@ global setting.  For global setting and more information, see
           (ein:$content-raw-content content) (plist-get data :content))
     content))
 
-(defun ein:content-query-hierarchy* (url-or-port path callback sessions content)
+(defun ein:content-query-hierarchy* (url-or-port path callback sessions depth content)
   "Returns list (tree) of content objects"
-  (lexical-let* ((url-or-port url-or-port)
-                 (path path)
-                 (callback callback)
-                 (items (ein:$content-raw-content content))
-                 (directories (loop for item in items
-                                    if (string= "directory" (plist-get item :type))
+  (if (> depth ein:content-query-max-depth)
+      (funcall callback nil)
+    (lexical-let* ((url-or-port url-or-port)
+                   (path path)
+                   (callback callback)
+                   (items (ein:$content-raw-content content))
+                   (directories (loop for item in items
+                                      if (string= "directory" (plist-get item :type))
                                       collect (ein:new-content url-or-port path item)
-                                    end))
-                 (others (loop for item in items
-                               with c0
-                               if (not (string= "directory" (plist-get item :type)))
+                                      end))
+                   (others (loop for item in items
+                                 with c0
+                                 if (not (string= "directory" (plist-get item :type)))
                                  do (setf c0 (ein:new-content url-or-port path item))
                                     (setf (ein:$content-session-p c0)
                                           (gethash (ein:$content-path c0) sessions))
                                  and collect c0
-                               end)))
-    (deferred:$
-      (apply #'deferred:parallel
-             (loop for c0 in directories
-                   collect
-                   (lexical-let ((c0 c0)
-                                 (d0 (deferred:new #'identity)))
-                     (ein:content-query-contents
-                      url-or-port
-                      (ein:$content-path c0)
-                      (apply-partially #'ein:content-query-hierarchy*
-                                       url-or-port
-                                       (ein:$content-path c0)
-                                       (lambda (tree)
-                                         (deferred:callback-post d0 (cons c0 tree)))
-                                       sessions))
-                     d0)))
-      (deferred:nextc it
-        (lambda (tree)
-          (let ((result (append others tree)))
-            (if (string= path "")
-                (setf (gethash url-or-port *ein:content-hierarchy*) (-flatten result)))
-            (funcall callback result)))))))
+                                 end)))
+      (deferred:$
+        (apply #'deferred:parallel
+               (loop for c0 in directories
+                     collect
+                     (lexical-let ((c0 c0)
+                                   (d0 (deferred:new #'identity)))
+                       (ein:content-query-contents
+                        url-or-port
+                        (ein:$content-path c0)
+                        (apply-partially #'ein:content-query-hierarchy*
+                                         url-or-port
+                                         (ein:$content-path c0)
+                                         (lambda (tree)
+                                           (deferred:callback-post d0 (cons c0 tree)))
+                                         sessions (1+ depth)))
+                       d0)))
+        (deferred:nextc it
+          (lambda (tree)
+            (let ((result (append others tree)))
+              (if (string= path "")
+                  (setf (gethash url-or-port *ein:content-hierarchy*) (-flatten result)))
+              (funcall callback result))))))))
 
 (defun ein:content-query-hierarchy (url-or-port callback)
   "Send for content hierarchy of URL-OR-PORT with CALLBACK arity 1 for content hierarchy"
@@ -249,7 +257,7 @@ global setting.  For global setting and more information, see
                                    (apply-partially #'ein:content-query-hierarchy*
                                                     url-or-port
                                                     ""
-                                                    callback sessions))))))
+                                                    callback sessions 0))))))
 
 
 ;;; Save Content
@@ -377,7 +385,7 @@ global setting.  For global setting and more information, see
                                                        &allow-other-keys)
   (if (< iteration 3)
       (progn
-        (ein:log 'info "Retry sessions #%s in response to %s" iteration (request-response-status-code response))
+        (ein:log 'verbose "Retry sessions #%s in response to %s" iteration (request-response-status-code response))
         (ein:content-query-sessions url-or-port callback (1+ iteration)))
     (ein:log 'error "ein:content-query-sessions--error %s: ERROR %s DATA %s" url-or-port (car error-thrown) (cdr error-thrown))))
 

@@ -204,11 +204,8 @@ at point, i.e. any word before then \"(\", if it is present."
             (and (stringp url-or-port) (string-match "^[0-9]+$" url-or-port)))
         (setq url-or-port (format "http://localhost:%s" url-or-port)))
     (let ((parsed-url (url-generic-parse-url url-or-port)))
-      (when (null (url-host parsed-url))
-        (setq url-or-port (concat "https://" url-or-port))
-        (setq parsed-url (url-generic-parse-url url-or-port)))
-      (when (string= (url-host parsed-url) "localhost")
-        (setf (url-host parsed-url) ein:url-localhost))
+      (if (or (null (url-host parsed-url)) (string= (url-host parsed-url) "localhost"))
+          (setf (url-host parsed-url) ein:url-localhost))
       (directory-file-name (concat (file-name-as-directory (url-recreate-url parsed-url))
                                    (apply #'ein:glom-paths paths))))))
 
@@ -609,21 +606,27 @@ otherwise it should be a function, which is called on `time'."
   "Display MESG with a modest animation until done-p returns t.  
 
 DONEBACK returns t or 'error when calling process is done, and nil if not done."
-  (lexical-let* (error-p
-                 (mesg mesg)
+  (lexical-let* ((mesg mesg)
                  (doneback doneback)
                  (count -1))
     (message "%s%s" mesg (make-string (1+ (% (incf count) 3)) ?.))    
+    ;; https://github.com/kiwanami/emacs-deferred/issues/28
+    ;; "complicated timings of macro expansion lexical-let, deferred:lambda"
+    ;; using deferred:loop instead
     (deferred:$
-      (deferred:timeout
-        10000 'error
-        (deferred:lambda ()
-          (ein:aif (or (funcall doneback) error-p) it
-            (message "%s%s" mesg (make-string (1+ (% (incf count) 3)) ?.))
-            (deferred:nextc (deferred:wait 425) self))))
+      (deferred:loop (loop for i from 1 below 30 by 1 collect i)
+        (lambda ()
+          (deferred:$
+            (deferred:next
+              (lambda ()
+                (ein:aif (funcall doneback) it
+                  (message "%s%s" mesg (make-string (1+ (% (incf count) 3)) ?.))
+                  (sleep-for 0 365)))))))
       (deferred:nextc it
         (lambda (status)
-          (message "%s... %s" mesg (if (eq status 'error) "failed" "done")))))))
+          (message "%s... %s" mesg 
+                   (if (or (null status) (eq status 'error)) "failed" "done")))))))
+
 
 (defun ein:display-warning (message &optional level)
   "Simple wrapper around `display-warning'.

@@ -299,30 +299,33 @@ will be updated with kernel's cwd."
         ((>= api-version 3)
          (ein:url url-or-port "api/contents" path))))
 
-;;; TODO - I think notebook-path is unnecessary (JMM).
+;;;###autoload
 
-(defun ein:notebook-open (url-or-port path &optional kernelspec callback cbargs)
+(defun ein:notebook-open (url-or-port path &optional kernelspec callback)
   "Returns notebook at URL-OR-PORT/PATH.
 Note that notebook sends for its contents and won't have them right away.
 
 After the notebook is opened, CALLBACK is called as::
 
-  \(apply CALLBACK notebook CREATED CBARGS)
+  \(funcall CALLBACK notebook created)
 
-where the second argument CREATED indicates whether the notebook
-is newly created or not.
+where `created' indicates a new notebook or an existing one.
 
 TODO - This function should not be used to switch to an existing 
 notebook buffer.  Let's warn for now to see who is doing this.
 "
+  (interactive
+    (ein:notebooklist-parse-nbpath (if noninteractive
+                                       (car (ein:notebooklist-list-paths "notebook"))
+                                     (ein:notebooklist-ask-path "notebook"))))
   (let* ((existing (ein:notebook-get-opened-notebook url-or-port path))
          (notebook (ein:aif existing it
-                    (ein:notebook-new url-or-port path kernelspec)))
-         (callback0 (apply-partially (lambda (notebook* created callback* cbargs*)
-                                      (pop-to-buffer (ein:notebook-buffer notebook*))
-                                      (when callback*
-                                        (apply callback* notebook* created cbargs*)))
-                                     notebook (if existing nil t) callback cbargs)))
+                     (ein:notebook-new url-or-port path kernelspec)))
+         (callback0 (apply-partially (lambda (notebook* created callback*)
+                                       (pop-to-buffer (ein:notebook-buffer notebook*))
+                                       (when callback*
+                                         (funcall callback* notebook* created)))
+                                     notebook (not existing) callback)))
     (if existing
         (progn
           (ein:log 'warn "Notebook %s is already opened"
@@ -1359,7 +1362,7 @@ This hook is run regardless the actual major mode used."
   (define-key map (kbd "C-c <down>") 'ein:worksheet-move-cell-down)
   (define-key map (kbd "M-<up>") 'ein:worksheet-move-cell-up)
   (define-key map (kbd "M-<down>") 'ein:worksheet-move-cell-down)
-  (define-key map "\C-c\C-f" 'ein:pytools-request-tooltip-or-help)
+  (define-key map "\C-c\C-h" 'ein:pytools-request-tooltip-or-help)
   (define-key map "\C-c\C-i" 'ein:completer-complete)
   (define-key map "\C-c\C-x" 'ein:tb-show)
   (define-key map "\C-c\C-r" 'ein:notebook-restart-kernel-command)
@@ -1367,7 +1370,8 @@ This hook is run regardless the actual major mode used."
   (define-key map "\C-c\C-q" 'ein:notebook-kill-kernel-then-close-command)
   (define-key map (kbd "C-c C-#") 'ein:notebook-close)
   (define-key map (kbd "C-:") 'ein:shared-output-eval-string)
-  (define-key map "\C-c\C-o" 'ein:console-open)
+  (define-key map "\C-c\C-f" 'ein:file-open)
+  (define-key map "\C-c\C-o" 'ein:notebook-open)
   (define-key map "\C-x\C-s" 'ein:notebook-save-notebook-command)
   (define-key map "\C-x\C-w" 'ein:notebook-rename-command)
   (define-key map "\M-."          'ein:pytools-jump-to-source-command)

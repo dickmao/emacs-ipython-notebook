@@ -15,7 +15,6 @@
 (defvar *ein:testing-jupyter-server-directory*  (or (getenv "JUPYTER_TESTING_DIR") (concat default-directory "test"))
   "Location where to start the jupyter notebook server.")
 
-(setq ein:populate-hierarchy-on-notebooklist-open t)
 (setq ein:testing-dump-file-log (concat default-directory "log/testfunc.log"))
 (setq ein:testing-dump-file-messages (concat default-directory "log/testfunc.messages"))
 (setq ein:testing-dump-file-server  (concat default-directory  "log/testfunc.server"))
