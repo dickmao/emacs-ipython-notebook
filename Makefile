@@ -2,6 +2,8 @@ EMACS ?= $(shell which emacs)
 SRC=$(shell cask files)
 ELCFILES = $(SRC:.el=.elc)
 
+.DEFAULT_GOAL := test-compile
+
 .PHONY: install
 install:
 	cask package
