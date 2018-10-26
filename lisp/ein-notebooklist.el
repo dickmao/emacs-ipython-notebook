@@ -827,9 +827,10 @@ See also:
      :complete (apply-partially #'ein:notebooklist-login--complete url-or-port)
      :error (apply-partially #'ein:notebooklist-login--error url-or-port token callback errback iteration)
      :success (apply-partially #'ein:notebooklist-login--success url-or-port callback errback token iteration))
-    (with-local-quit
-      (loop until done-p
-            do (sleep-for 0 450)))))
+    (unless noninteractive
+      (with-local-quit
+        (loop until done-p
+              do (sleep-for 0 450))))))
 
 ;;;###autoload
 (defun ein:notebooklist-open (url-or-port callback)

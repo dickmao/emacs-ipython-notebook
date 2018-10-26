@@ -36,8 +36,8 @@
                 (switch-to-buffer buf-name)
                 (Then "I should be in buffer \"%s\"" buf-name)))))))
 
-(When "^I start \\(and login to \\)?the server configured \"\\(.*\\)\"$"
-      (lambda (login config)
+(When "^I stop the server$"
+      (lambda ()
         (cl-letf (((symbol-function 'y-or-n-p) #'ignore))
           (ein:jupyter-server-stop t))
         (loop repeat 10
@@ -45,9 +45,13 @@
               until (null (get-buffer-process buffer))
               do (sleep-for 1) 
               finally do (ein:aif (get-buffer-process buffer) (delete-process it)))
+        ))
+
+(When "^I start \\(and login to \\)?the server configured \"\\(.*\\)\"$"
+      (lambda (login config)
+        (When "I stop the server")
         (When "I clear log expr \"ein:log-all-buffer-name\"")
         (When "I clear log expr \"ein:jupyter-server-buffer-name\"")
-        (clrhash ein:notebooklist-map)
         (with-temp-file ".ecukes-temp-config.py" (insert (s-replace "\\n" "\n" config)))
         (setq ein:jupyter-server-args '("--no-browser" "--debug" "--config=.ecukes-temp-config.py"))
         (ein:jupyter-server-start (executable-find "jupyter") 
@@ -160,3 +164,28 @@
       (lambda ()
         (with-demoted-errors "demoted: %s"
           (undo))))
+
+(When "^I create a directory \"\\(.+\\)\" with depth \\([0-9]+\\) and width \\([0-9]+\\)$"
+      (lambda (dir depth width)
+        (when (f-exists? dir)
+          (f-delete dir t))
+        (f-mkdir dir)
+        (ein:testing-make-directory-level dir 1 (string-to-number width) (string-to-number depth))))
+
+(When "^I custom set \"\\(.+\\)\" to \\(.+\\)$"
+      (lambda (custom-variable value)
+        (custom-set-variables `(,(intern custom-variable) ,value))
+        ))
+
+(When "^I start server from \"\\(.+\\)\"$"
+      (lambda (file-name)
+        (When "I stop the server")
+        (find-file file-name)
+        (ein:ipynb-mode)
+        ;;  ;; this causes loops to fail in query-hierarchy*
+        (cl-letf (((symbol-function 'read-directory-name)
+                   (lambda (&rest args) (ein:process-suitable-notebook-dir file-name))))
+          (When "I press \"C-c C-o\""))
+        (Then "I should be in buffer \"%s\"" (format ein:notebook-buffer-name-template
+                                                     (car (ein:jupyter-server-conn-info))
+                                                     (file-name-nondirectory "/var/tmp/fg7cv8/bar.ipynb")))))

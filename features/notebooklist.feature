@@ -73,3 +73,10 @@ Scenario: Logging into nowhere
 Scenario: Logging into nowhere
   Given I login erroneously to adfljdsf.org:8432
   Then I should see message "ein: [error] Login to https://adfljdsf.org:8432 failed"
+
+@content
+Scenario: Read a massive directory
+  Given I create a directory "/var/tmp/fg7Cv8" with depth 5 and width 10
+  And I custom set "ein:content-query-max-depth" to 4
+  And I custom set "ein:content-query-max-branch" to 3
+  And I start server from "/var/tmp/fg7Cv8/8/4/3/bar.ipynb"

@@ -120,13 +120,8 @@ global setting.  For global setting and more information, see
       (setq content (ein:new-content url-or-port path data)))
     (ein:aif response
         (setf (ein:$content-url-or-port content) (ein:get-response-redirect it)))
-    ;; (if (length (request-response-history response))
-    ;;     (let ((url (url-generic-parse-url (format "%s" (request-response-url response)))))
-    ;;       (setf (ein:$content-url-or-port content) (format "%s://%s:%s"
-    ;;                                                        (url-type url)
-    ;;                                                        (url-host url)
-    ;;                                                        (url-port url)))))
-    (when callback (funcall callback content))))
+    (when callback 
+      (funcall callback content))))
 
 (defun ein:fix-legacy-content-data (data)
   (if (listp (car data))
@@ -216,14 +211,12 @@ global setting.  For global setting and more information, see
                  (directories (if (< depth ein:content-query-max-depth)
                                   (loop for item in items
                                         with result
-                                        until (>= (length result) 
-                                                  ein:content-query-max-branch)
+                                        until (>= (length result) ein:content-query-max-branch)
                                         if (string= "directory" (plist-get item :type))
                                           collect (ein:new-content url-or-port path item) 
                                             into result
                                         end
-                                        finally return result
-                                        )))
+                                        finally return result)))
                  (others (loop for item in items
                                with c0
                                if (not (string= "directory" (plist-get item :type)))

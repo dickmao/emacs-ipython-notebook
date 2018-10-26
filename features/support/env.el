@@ -12,6 +12,7 @@
 (require 'ein-jupyter)
 (require 'ein-dev)
 (require 'ein-testing)
+(require 'ein-ipynb-mode)
 
 (defvar ein:testing-jupyter-server-root (f-parent (f-dirname load-file-name)))
 
@@ -33,7 +34,7 @@
  (setq ein:testing-dump-file-messages (concat default-directory "log/ecukes.messages"))
  (setq ein:testing-dump-file-server  (concat default-directory  "log/ecukes.server"))
  (setq ein:testing-dump-file-request  (concat default-directory "log/ecukes.request"))
- (Given "I start and login to the server configured \"\\n\"")
+; (Given "I start and login to the server configured \"\\n\"")
 )
 
 (After

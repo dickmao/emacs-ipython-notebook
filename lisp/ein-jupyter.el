@@ -38,7 +38,7 @@
   :group 'ein
   :type 'integer)
 
-(defcustom ein:jupyter-server-args nil
+(defcustom ein:jupyter-server-args '("--no-browser" "--debug")
   "Add any additional command line options you wish to include
 with the call to the jupyter notebook."
   :group 'ein
@@ -216,7 +216,7 @@ there is no running server then no action will be taken.
               when (y-or-n-p (format "Save notebook %s before stopping the server?" (ein:$notebook-notebook-name nb)))
               do (progn
                    (setf (gethash (ein:$notebook-notebook-name nb) check-for-saved) t)
-                   (ein:notebook-save-notebook nb 0
+                   (ein:notebook-save-notebook nb
                                                #'(lambda (name check-hash)
                                                    (remhash name check-hash))
                                                (list (ein:$notebook-notebook-name nb) check-for-saved)))))
