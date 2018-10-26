@@ -82,5 +82,3 @@ Scenario: Read a massive directory
   And I open file "foo.txt"
   And notebooklist-list-paths does not contain "5/5/5/foo.txt"
   And notebooklist-list-paths contains "foo.txt"
-
-
