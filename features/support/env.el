@@ -13,18 +13,20 @@
 (require 'ein-dev)
 (require 'ein-testing)
 (require 'ein-ipynb-mode)
+(require 'ein-contents-api)
 
 (defvar ein:testing-jupyter-server-root (f-parent (f-dirname load-file-name)))
 
 (defun ein:testing-after-scenario ()
   (ein:testing-flush-queries)
   (with-current-buffer (ein:notebooklist-get-buffer (car (ein:jupyter-server-conn-info)))
-    (let ((urlport (ein:$notebooklist-url-or-port ein:%notebooklist%)))
-      (loop for notebook in (ein:notebook-opened-notebooks)
-            for path = (ein:$notebook-notebook-path notebook)
-            do (ein:notebook-kill-kernel-then-close-command notebook t)
-               (if (search "Untitled" path )
-                   (ein:notebooklist-delete-notebook path)))))
+    (if ein:%notebooklist%
+        (let ((urlport (ein:$notebooklist-url-or-port ein:%notebooklist%)))
+          (loop for notebook in (ein:notebook-opened-notebooks)
+                for path = (ein:$notebook-notebook-path notebook)
+                do (ein:notebook-kill-kernel-then-close-command notebook t)
+                (if (search "Untitled" path )
+                    (ein:notebooklist-delete-notebook path))))))
   (ein:testing-flush-queries))
 
 (Setup
@@ -34,7 +36,7 @@
  (setq ein:testing-dump-file-messages (concat default-directory "log/ecukes.messages"))
  (setq ein:testing-dump-file-server  (concat default-directory  "log/ecukes.server"))
  (setq ein:testing-dump-file-request  (concat default-directory "log/ecukes.request"))
-; (Given "I start and login to the server configured \"\\n\"")
+ (Given "I start and login to the server configured \"\\n\"")
 )
 
 (After

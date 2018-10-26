@@ -45,17 +45,16 @@
               until (null (get-buffer-process buffer))
               do (sleep-for 1) 
               finally do (ein:aif (get-buffer-process buffer) (delete-process it)))
-        ))
+        (When "I clear log expr \"ein:log-all-buffer-name\"")
+        (When "I clear log expr \"ein:jupyter-server-buffer-name\"")))
 
 (When "^I start \\(and login to \\)?the server configured \"\\(.*\\)\"$"
       (lambda (login config)
         (When "I stop the server")
-        (When "I clear log expr \"ein:log-all-buffer-name\"")
-        (When "I clear log expr \"ein:jupyter-server-buffer-name\"")
         (with-temp-file ".ecukes-temp-config.py" (insert (s-replace "\\n" "\n" config)))
-        (setq ein:jupyter-server-args '("--no-browser" "--debug" "--config=.ecukes-temp-config.py"))
-        (ein:jupyter-server-start (executable-find "jupyter") 
-                                  ein:testing-jupyter-server-root (not login))
+        (let ((ein:jupyter-server-args '("--no-browser" "--debug" "--config=.ecukes-temp-config.py")))
+          (ein:jupyter-server-start (executable-find ein:jupyter-default-server-command) 
+                                    ein:testing-jupyter-server-root (not login)))
         (if login
             (ein:testing-wait-until (lambda () (ein:notebooklist-list)) nil 20000 1000))))
 
@@ -172,20 +171,49 @@
         (f-mkdir dir)
         (ein:testing-make-directory-level dir 1 (string-to-number width) (string-to-number depth))))
 
+(When "^I set \"\\(.+\\)\" to \\(.+\\)$"
+      (lambda (variable value)
+        (set (intern variable) value)))
+
 (When "^I custom set \"\\(.+\\)\" to \\(.+\\)$"
       (lambda (custom-variable value)
-        (custom-set-variables `(,(intern custom-variable) ,value))
+        (customize-set-value (intern custom-variable) value)))
+
+(When "^I get into notebook mode \"\\(.+\\)\" \"\\(.+\\)\"$"
+      (lambda (notebook-dir file-path)
+        (When "I stop the server")
+        (When (format "I find file \"%s\"" (concat (file-name-as-directory notebook-dir) file-path)))
+        (When "I press \"C-c C-z\"")
+        (ein:testing-wait-until (lambda () (ein:notebooklist-list)) nil 20000 1000)
         ))
 
-(When "^I start server from \"\\(.+\\)\"$"
+(When "^I find file \"\\(.+\\)\"$"
       (lambda (file-name)
-        (When "I stop the server")
         (find-file file-name)
-        (ein:ipynb-mode)
-        ;;  ;; this causes loops to fail in query-hierarchy*
-        (cl-letf (((symbol-function 'read-directory-name)
-                   (lambda (&rest args) (ein:process-suitable-notebook-dir file-name))))
-          (When "I press \"C-c C-o\""))
-        (Then "I should be in buffer \"%s\"" (format ein:notebook-buffer-name-template
-                                                     (car (ein:jupyter-server-conn-info))
-                                                     (file-name-nondirectory "/var/tmp/fg7cv8/bar.ipynb")))))
+        (when (string= (file-name-extension file-name) "ipynb")
+          (ein:ipynb-mode))
+))
+
+(When "notebooklist-list-paths does not contain \"\\(.+\\)\"$"
+      (lambda (file-name)
+        (Given "I am in notebooklist buffer")
+        (let ((nbpath (ein:url (car (ein:jupyter-server-conn-info)) file-name)))
+          (assert (not (member nbpath (ein:notebooklist-list-paths)))))))
+
+(When "notebooklist-list-paths contains \"\\(.+\\)\"$"
+      (lambda (file-name)
+        (Given "I am in notebooklist buffer")
+        (let ((nbpath (ein:url (car (ein:jupyter-server-conn-info)) file-name)))
+          (assert (member nbpath (ein:notebooklist-list-paths))))))
+
+(When "I open \\(notebook\\|file\\) \"\\(.+\\)\"$"
+      (lambda (content-type file-name)
+        (Given "I am in notebooklist buffer")
+        (And "I clear log expr \"ein:log-all-buffer-name\"")
+        (let ((nbpath (ein:url (car (ein:jupyter-server-conn-info)) file-name)))
+          (cl-letf (((symbol-function 'ein:notebooklist-ask-path)
+                     (lambda (&rest args) nbpath)))
+            (When (format "I press \"C-c C-%s\"" (if (string= content-type "file") "f" "o")))
+            (ein:testing-flush-queries)
+            (Given "I switch to log expr \"ein:log-all-buffer-name\"")
+            (Then (format "I should see \"Opened %s %s\"" content-type file-name))))))

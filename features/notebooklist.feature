@@ -77,6 +77,10 @@ Scenario: Logging into nowhere
 @content
 Scenario: Read a massive directory
   Given I create a directory "/var/tmp/fg7Cv8" with depth 5 and width 10
-  And I custom set "ein:content-query-max-depth" to 4
-  And I custom set "ein:content-query-max-branch" to 3
-  And I start server from "/var/tmp/fg7Cv8/8/4/3/bar.ipynb"
+  And I get into notebook mode "/var/tmp/fg7Cv8" "8/4/3/bar.ipynb"
+  And I open notebook "bar.ipynb"
+  And I open file "foo.txt"
+  And notebooklist-list-paths does not contain "5/5/5/foo.txt"
+  And notebooklist-list-paths contains "foo.txt"
+
+

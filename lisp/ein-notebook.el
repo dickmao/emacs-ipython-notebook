@@ -326,9 +326,7 @@ TODO - This function should not be used to switch to an existing
 notebook buffer.  Let's warn for now to see who is doing this.
 "
   (interactive
-    (ein:notebooklist-parse-nbpath (if noninteractive
-                                       (car (ein:notebooklist-list-paths "notebook"))
-                                     (ein:notebooklist-ask-path "notebook"))))
+   (ein:notebooklist-parse-nbpath (ein:notebooklist-ask-path "notebook")))
   (let* ((existing (ein:notebook-get-opened-notebook url-or-port path))
          (notebook (ein:aif existing it
                      (ein:notebook-new url-or-port path kernelspec)))
