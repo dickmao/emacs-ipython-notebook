@@ -152,16 +152,20 @@
 (defun ein:process-refresh-processes ()
   "Use `jupyter notebook list --json` to populate ein:%processes%"
   (clrhash ein:%processes%)
-  (loop for line in (process-lines ein:jupyter-default-server-command
-                                   "notebook" "list" "--json")
-        do (destructuring-bind 
-               (&key pid url notebook_dir &allow-other-keys)
-               (ein:json-read-from-string line)
-             (puthash (directory-file-name notebook_dir) 
-                      (make-ein:$process :pid pid 
-                                         :url (ein:url url) 
-                                         :dir (directory-file-name notebook_dir))
-                      ein:%processes%))))
+  (condition-case err
+      (loop for line in (process-lines ein:jupyter-default-server-command
+                                       "notebook" "list" "--json")
+            do (destructuring-bind 
+                   (&key pid url notebook_dir &allow-other-keys)
+                   (ein:json-read-from-string line)
+                 (puthash (directory-file-name notebook_dir) 
+                          (make-ein:$process :pid pid 
+                                             :url (ein:url url) 
+                                             :dir (directory-file-name notebook_dir))
+                          ein:%processes%)))
+    (error (ein:log 'verbose "ein:process-refresh-processes: '%s': %s" 
+                    ein:jupyter-default-server-command err)
+           '())))
 
 (defun ein:process-ps-refresh-processes ()
   "Can delete this.  It pokes around unix ps when it's far better to use `jupyter notebook list'"
@@ -179,15 +183,18 @@
                         ein:%processes%))
         end))
 
+(defun ein:process-url-match (url-or-port)
+  "Return ein:process whose url matches URL-OR-PORT."
+  (loop for dir in (ein:hash-keys ein:%processes%)
+        for proc = (gethash dir ein:%processes%)
+        when (string= (ein:url url-or-port) (ein:url (ein:$process-url proc)))
+        return (gethash dir ein:%processes%)))
+
 (defun ein:process-dir-match (filename)
   "Return ein:process whose directory is prefix of FILENAME."
   (loop for dir in (ein:hash-keys ein:%processes%)
         when (search dir filename)
         return (gethash dir ein:%processes%)))
-
-(defsubst ein:process-url-or-port (proc)
-  "Naively construct url-or-port from ein:process PROC's port and ip fields"
-  (ein:$process-url proc))
 
 (defsubst ein:process-path (proc filename)
   "Construct path by eliding PROC's dir from filename"
@@ -198,7 +205,7 @@
   (ein:process-refresh-processes)
   (let* ((proc (ein:process-dir-match filename)))
     (if proc
-        (let* ((url-or-port (ein:process-url-or-port proc))
+        (let* ((url-or-port (ein:$process-url proc))
                (path (ein:process-path proc filename))
                (callback1 (apply-partially (lambda (url-or-port* path* callback* buffer)
                                              (ein:notebook-open

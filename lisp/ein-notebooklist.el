@@ -177,8 +177,9 @@ port the instance is running on."
              ;; there may be NO local jupyter installation
              (process-lines ein:jupyter-default-server-command
                             "notebook" "list" "--json")
-           (error (message "Error getting local tokens: %s" err)
-                  ())))         ; empty list
+           (error (ein:log 'verbose "ein:crib-token--all-local-tokens: '%s': %s" 
+                           ein:jupyter-default-server-command err)
+                  '())))         ; empty list
         (url-tokens (make-hash-table :test #'equal)))
     (loop for line in lines
           do (destructuring-bind

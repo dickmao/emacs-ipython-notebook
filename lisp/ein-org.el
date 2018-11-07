@@ -28,6 +28,7 @@
 
 (require 'org)
 (require 'ein-notebooklist)
+(require 'ein-process)
 
 ;; FIXME: Separate org-unrelated cores from the following code and
 ;; expose them as API in ein-link.el.
@@ -55,14 +56,17 @@
 This function is to be used for FOLLOW function of
 `org-add-link-type'."
   (let ((link (read link-path)))
-    (destructuring-bind (&key url-or-port name &allow-other-keys)
+    (destructuring-bind (&key url-or-port name notebook-dir &allow-other-keys)
         link
-      (ein:notebooklist-login 
-       url-or-port 
-       (apply-partially (lambda (url-or-port* path* callback* buffer)
-                          (ein:notebook-open
-                           url-or-port* path* nil callback*))
-                        url-or-port name nil)))))
+      (if notebook-dir
+          (let ((local-file (concat (file-name-as-directory notebook-dir) name)))
+            (ein:process-open-notebook* (expand-file-name local-file) nil))
+        (ein:notebooklist-login 
+         url-or-port 
+         (apply-partially (lambda (url-or-port* path* callback* buffer)
+                            (ein:notebook-open
+                             url-or-port* path* nil callback*))
+                          url-or-port name nil))))))
 
 ;;;###autoload
 (defun ein:org-store-link ()
@@ -83,12 +87,15 @@ S-expression based (rather verbose) serialization, so that
 extending link spec without loosing backward compatibility is
 easier.  For the examples of link format in general, see Info
 node `(org) External links' and Info node `(org) Search options'"
+  (ein:process-refresh-processes)
   (ein:and-let* (((ein:worksheet-buffer-p))
                  (notebook (ein:get-notebook))
                  (name (ein:$notebook-notebook-path notebook))
                  (link (list :url-or-port (ein:get-url-or-port)
                              :name name))
                  (description name))
+    (ein:aif (ein:process-url-match (ein:get-url-or-port))
+        (plist-put link :notebook-dir (ein:$process-dir it)))
     (ein:aif (ein:notebook-worksheet-index notebook)
         (unless (= it 0)
           (plist-put link :worksheet-index it))
