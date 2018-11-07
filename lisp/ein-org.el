@@ -57,7 +57,12 @@ This function is to be used for FOLLOW function of
   (let ((link (read link-path)))
     (destructuring-bind (&key url-or-port name &allow-other-keys)
         link
-      (ein:notebook-open url-or-port name))))
+      (ein:notebooklist-login 
+       url-or-port 
+       (apply-partially (lambda (url-or-port* path* callback* buffer)
+                          (ein:notebook-open
+                           url-or-port* path* nil callback*))
+                        url-or-port name nil)))))
 
 ;;;###autoload
 (defun ein:org-store-link ()
