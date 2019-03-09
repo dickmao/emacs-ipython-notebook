@@ -22,14 +22,15 @@ EIN was originally written by tkf_.  More `complete documentation`_ is available
    :alt: MELPA stable version
 .. _Jupyter: http://jupyter.org
 .. _tkf: https://tkf.github.io/emacs-ipython-notebook
-.. _`complete documentation`: http://millejoh.github.io/emacs-ipython-notebook
 
 Install
 =======
-Install from MELPA_ (recommended) or ``make install`` from github source.  You will need to install Cask_ for the latter.  See the `online documentation`__ for more information.
+Install from MELPA_ (recommended) or ``make install`` from github source.  You will need to install Cask_ for the latter.
 
 Usage
 =====
+There are multiple (mutually exclusive) ways to launch EIN.
+
 Launch a local session
 ----------------------
 ``M-x ein:jupyter-server-start`` (aliased ``M-x ein:run``) launches a jupyter process from emacs.
@@ -42,35 +43,45 @@ Jupyter services relayed over HTTP such as ``mybinder.org`` and ``coursera.org``
 
 Open a notebook file
 --------------------
-Open an ``.ipynb`` file and press ``C-c C-z``.
+Open an ``.ipynb`` file normally in emacs and press ``C-c C-z``.
 
 .. _Cask: https://cask.readthedocs.io/en/latest/guide/installation.html
 .. _MELPA: http://melpa.org/#/
-__ `complete documentation`_
+
+It doesn't work
+===============
+
+As an emacs user, you are likely to self-diagnose most simple problems.  First issue ``M-x ein:dev-start-debug``.  Then reproduce the error.  Higher level diagnostics appear in ``M-x ein:log-pop-to-all-buffer``.  Lower level diagnostics (the actual ``curl`` requests) appear in ``M-x ein:log-pop-to-request-buffer``.
+
+If you cannot resolve the problem, file an issue using `M-x ein:dev-bug-report-template`.  Please ensure the resulting system output does not include information sensitive to your institution.
 
 Highlighted Features
 ====================
 
-* Copy/paste cells, even to/from different notebooks.
-* Console integration: You can easily connect to a kernel via the console
-  application.  This enables you to start debugging in the same kernel.  It is
-  even possible to connect to a console over ssh.
-* An IPython kernel can be "connected" to any buffer.  This enables you to
-  evaluate a buffer or buffer region using the same kernel as the notebook.
-  Notebook goodies such as tooltip help, help browser and code completion are
-  available in these buffers.
-* Jump to definition (go to the definition by hitting ``M-.`` over an object).
-* Projectile-like file navigation via ``C-c C-o``.
-* Limited JupyterHub support.
+* Easily copy cells between different notebooks.
+* Attach an emacs buffer to a running kernel.
+* Jump to definition via ``M-.``.
+* Automatic completion via auto-complete_ or company-mode_.
+* Limited _jupyterhub support.
+
+.. _auto-complete: https://github.com/auto-complete/auto-complete
+.. _company-mode: https://github.com/company-mode/company-mode
+.. _jupyterhub: https://github.com/jupyterhub/jupyterhub
 
 Org-mode Integration
 ====================
 
-EIN now integrates_ with org-mode! The code was heavily inspired by ob-ipython_
-which is another project very much worth checking out. Find it on MELPA_.
+EIN provides org-babel functionality similar to ob-ipython_ and scimax_.  *Language* is `ein`.  See :ref:`ob-ein`.
 
-.. _integrates: http://millejoh.github.io/emacs-ipython-notebook/#org-mode-integration
+.. code:: python
+
+   #+BEGIN_SRC ein :session localhost :results raw drawer
+   import math
+   4 * math.atan(1.0)
+   #+END_SRC
+
 .. _ob-ipython: https://github.com/gregsexton/ob-ipython/
+.. _scimax: https://github.com/jkitchin/scimax
 
 Screenshots
 ===========
@@ -104,17 +115,12 @@ commands are available.
 
 Links
 =====
+* `Complete documentation <http://millejoh.github.io/emacs-ipython-notebook/>`_
 
-* `Online Documentation
-  <http://millejoh.github.io/emacs-ipython-notebook/>`_
+* `Wiki <https://github.com/millejoh/emacs-ipython-notebook/wiki>`_
 
-* `Wiki
-  <https://github.com/millejoh/emacs-ipython-notebook/wiki>`_
-
-  + `Screenshots
-    <https://github.com/millejoh/emacs-ipython-notebook/wiki/Screenshots>`_
-  + `Tips
-    <https://github.com/millejoh/emacs-ipython-notebook/wiki/Tips>`_
+  + `Screenshots <https://github.com/millejoh/emacs-ipython-notebook/wiki/Screenshots>`_
+  + `Tips <https://github.com/millejoh/emacs-ipython-notebook/wiki/Tips>`_
 
 License
 =======

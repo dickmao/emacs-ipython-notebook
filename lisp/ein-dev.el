@@ -232,6 +232,7 @@ callback (`websocket-callback-debug-on-error') is enabled."
    :os (list
         :uname (ein:dev-stdout-program "uname" '("-a"))
         :lsb-release (ein:dev-stdout-program "lsb_release" '("-a")))
+   :ipython (list :version (ein:dev-stdout-program "ipython" '("--version")))
    :image-types (ein:eval-if-bound 'image-types)
    :image-types-available (seq-filter #'image-type-available-p
                                       (ein:eval-if-bound 'image-types))
@@ -264,52 +265,11 @@ callback (`websocket-callback-debug-on-error') is enabled."
   (let ((buffer (generate-new-buffer "*ein:bug-report*")))
     (with-current-buffer buffer
       (erase-buffer)
-      (insert "<!-- Use this template to help write bug report.
-You may skip some sections, but at the very least include the
-\"System info\" section, though do edit it to make sure no
-personal information is included!
+      (insert "<!-- Ensure no information sensitive to your institution is included!!! -->
 
-After finish writing it, please post it here:
-https://github.com/millejoh/emacs-ipython-notebook/issues/new
--->
-
-## Check list
-
-- [ ] Read the \"Avoiding Common Emacs Traps\" section in
-  https://github.com/millejoh/emacs-ipython-notebook/blob/master/CONTRIBUTING.md
-- [ ] Does IPython works from the web browser?
-- [ ] Confirm the problem was not due to badly compiled
-  files by removing all the `*.elc` files from source directory of EIN and
-  its dependencies.
-- [ ] Confirm that the libraries are loaded as expected and are at the required version.
-  (You can check the location in the \"System info\" section below)
-
-## Description of the problem you have
-
+## Problem description
 
 ## Steps to reproduce the problem
-
-1.
-2.
-3.
-
-## Expected output
-
-
-## Your EIN configuration (in .emacs.d/init.el or somewhere else)
-
-
-## Your IPython configuration
-
-1. What is your IPython version? (run `ipython --version`):
-
-2. How do you start IPython? (e.g., `ipython notebook --port 9999`):
-
-3. What is your IPython notebook port number or URL?:
-
-
-## Additional information (if any)
-
 
 ")
       (insert "## System info:\n\n```cl\n")
