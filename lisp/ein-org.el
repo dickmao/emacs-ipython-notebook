@@ -47,7 +47,6 @@
       (goto-char (point-min))
       (search-forward search nil t))))
 
-;;;###autoload
 (defun ein:org-open (link-path)
   "Open IPython notebook specified by LINK-PATH.
 This function is to be used for FOLLOW function of
@@ -57,7 +56,6 @@ This function is to be used for FOLLOW function of
         link
       (ein:notebook-open url-or-port name))))
 
-;;;###autoload
 (defun ein:org-store-link ()
   "Call `org-store-link-props' when in notebook buffer.
 This function is to be used for `org-store-link-functions'.
@@ -96,24 +94,6 @@ node `(org) External links' and Info node `(org) Search options'"
                  (print-level nil))
              (format "ipynb:%S" link))
      :description description)))
-
-;;;###autoload
-(eval-after-load "org"
-  '(if (fboundp 'org-link-set-parameters)
-       (org-link-set-parameters "ipynb"
-                                :follow 'ein:org-open
-                                :help-echo "Open ipython notebook."
-                                :store 'ein:org-store-link)
-     (org-add-link-type "ipynb" :follow 'ein:org-open)
-     (add-hook 'org-store-link-functions 'ein:org-store-link)))
-
-;; The above expression is evaluated via loaddef file.  At the moment,
-;; org.el nor ein-org.el need not be loaded.  When org-mode is used,
-;; the above `progn' is executed but still ein-org.el is not loaded.
-;; When `ein:org-open' or `ein:org-store-link' is called for opening
-;; or storing ipynb link, ein-org.el is loaded finally.  (When
-;; ein-org.el is loaded the above expression is evaluated again, but
-;; that's OK as the expression is idempotent.)
 
 (provide 'ein-org)
 

@@ -27,6 +27,7 @@
 ;;; Code:
 
 (require 'ein-process)
+(require 'ein-org)
 
 (defvar ein:ipynb-parent-mode 'js-mode
   "A mode (a symbol) to use for parent mode for `ein:ipynb-mode'.
@@ -48,6 +49,14 @@ Note that this variable must be set *before* compiling EIN.")
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '(".*\\.ipynb\\'" . ein:ipynb-mode))
+
+(if (fboundp 'org-link-set-parameters)
+    (org-link-set-parameters "ipynb"
+                             :follow 'ein:org-open
+                             :help-echo "Open ipython notebook."
+                             :store 'ein:org-store-link)
+  (org-add-link-type "ipynb" :follow 'ein:org-open)
+  (add-hook 'org-store-link-functions 'ein:org-store-link))
 
 (provide 'ein-ipynb-mode)
 

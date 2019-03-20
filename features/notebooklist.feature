@@ -45,6 +45,13 @@ Scenario: Read a massive directory
   And notebooklist-list-paths does not contain "4/4/4/foo.txt"
   And notebooklist-list-paths contains "foo.txt"
 
+@org
+Scenario: org store link
+  Given new default notebook
+  And I call "org-store-link"
+  When I open temp file "fg7Cv8.org"
+  And org-insert-link
+
 @login
 Scenario: No token server
   Given I start the server configured "c.NotebookApp.token = u''\n"

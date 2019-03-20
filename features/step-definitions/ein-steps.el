@@ -8,6 +8,14 @@
         (assert (not (ein:process-url-match (ein:url port))))
         (When (format "I type \"ein :session localhost:%s :result raw drawer\"" port))))
 
+(When "^org-insert-link$"
+      (lambda ()
+        (cl-letf (((symbol-function 'read-string)
+                   (lambda (&rest args) "foo"))
+                  ((symbol-function 'org-completing-read)
+                   (lambda (&rest args) "foo")))
+          (When "I call \"org-insert-link\""))))
+
 (When "^I ctrl-c-ctrl-c$"
       (lambda ()
         (cl-letf (((symbol-function 'read-directory-name)
