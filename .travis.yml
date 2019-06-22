@@ -42,7 +42,7 @@ install:
       eval "$(pyenv init -)" ;
       pyenv activate $TOXENV ;
     fi
-  - pip install jupyter ipython\<=$IPYTHON ipykernel\<=5.1.0
+  - pip install jupyter ipython\<=$IPYTHON jedi\<=0.13.3
   - pip install numpy
   - pip install matplotlib
   - jupyter kernelspec list
