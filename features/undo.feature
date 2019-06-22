@@ -17,12 +17,15 @@ Scenario: Kill yank doesn't break undo
   And I press "M-RET"
   And I type "math.log(math.exp(1.0))"
   And I wait for cell to execute
+  And I dump buffer
   And I press "C-<up>"
   And I press "C-<up>"
   And I press "C-c C-k"
   And I press "C-<down>"
   And I press "C-c C-y"
+  And I dump buffer
   And I press "C-/"
+  And I dump buffer
   Then the cursor should be at point "74"
 
 @undo
