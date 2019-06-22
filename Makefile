@@ -68,7 +68,7 @@ test-jupyterhub:
 	-cask exec ecukes --tags @jupyterhub --reporter magnars
 
 .PHONY: test
-test: quick test-int test-poly
+test: quick test-int
 
 .PHONY: test-poly
 test-poly:

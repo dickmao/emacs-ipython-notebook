@@ -29,7 +29,7 @@ matrix:
   include:
     - os: linux
       python: 3.6
-      env: EVM_EMACS=emacs-26.2-travis IPYTHON=6.5.0
+      env: EVM_EMACS=emacs-26.2-travis IPYTHON=7.5.0
 
   allow_failures:
     - env: EVM_EMACS=emacs-snapshot
@@ -63,9 +63,5 @@ before_script:
 
 script:
   - make test-install
-  - |
-    if [[ "x$TRAVIS_PYTHON_VERSION" == x3* ]]; then
-      make test-jupyterhub
-    fi
   - rm -rf $HOME/.matplotlib $HOME/.cache/fontconfig
   - make test || ( ( zip -q - log/{testein,testfunc,ecukes}.* 2>/dev/null | uuencode log.zip ) && ( printf "To diagnose, travis logs -i | dos2unix | sed '/^begin 644/,/^end/!d' | uudecode" ) && false)
