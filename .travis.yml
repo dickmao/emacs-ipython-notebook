@@ -42,7 +42,6 @@ install:
       eval "$(pyenv init -)" ;
       pyenv activate $TOXENV ;
     fi
-  - pip uninstall jupyter-console
   - pip install jupyter ipython\<=$IPYTHON jupyter-console\<=5.2.3
   - pip install numpy
   - pip install matplotlib
