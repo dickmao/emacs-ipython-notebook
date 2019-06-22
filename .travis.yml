@@ -28,8 +28,8 @@ env:
 matrix:
   include:
     - os: linux
-      python: 3.5
-      env: EVM_EMACS=emacs-26.1-travis IPYTHON=7.2.0
+      python: 3.6
+      env: EVM_EMACS=emacs-26.1-travis IPYTHON=7.5.0
 
   allow_failures:
     - env: EVM_EMACS=emacs-snapshot
@@ -42,7 +42,8 @@ install:
       eval "$(pyenv init -)" ;
       pyenv activate $TOXENV ;
     fi
-  - pip install jupyter ipython\<=$IPYTHON
+  - pip uninstall jupyter-console
+  - pip install jupyter ipython\<=$IPYTHON jupyter-console\<=5.2.3
   - pip install numpy
   - pip install matplotlib
   - jupyter kernelspec list
