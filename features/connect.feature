@@ -9,7 +9,13 @@ Scenario: Company completion in a python buffer
   And I connect to default notebook
   And I type "import itertools"
   And I press "RET"
+  And I clear log expr "ein:log-all-buffer-name"
   And I call "ein:connect-run-buffer"
+  And I switch to log expr "ein:log-all-buffer-name"
+  And I wait for buffer to say "Clearing callback shared output cell"
+  And I switch to buffer "*ein:shared-output*"
+  And I dump buffer
+  And I switch to buffer like "connect.py"
   And I type "itertools."
   And I call "company-complete"
   And I wait for completions "itertools.chain"

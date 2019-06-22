@@ -277,6 +277,15 @@
               do (sleep-for 0 500)
               finally do (should (gethash key (ein:$kernel-oinfo-cache (ein:get-kernel)))))))
 
+(When "^I wait for buffer to\\( not\\)? say \"\\(.+\\)\"$"
+      (lambda (negate bogey)
+        (test-wait-for
+         (lambda ()
+           (let* ((says (s-contains? (s-replace "\\n" "\n" bogey) (buffer-string))))
+             (revert-buffer :ignore-auto :noconfirm)
+             (if negate (not says) says)))
+         nil 40000 2000)))
+
 (When "^I wait for the smoke to clear"
       (lambda ()
         (ein:testing-flush-queries)

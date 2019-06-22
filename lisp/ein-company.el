@@ -52,7 +52,6 @@
     (deferred:nextc it
       (lambda (replies)
         (unless (stringp replies) ;; if not an error
-          (ein:log 'info "ein:company--complete: prefix=%s replies=%s" prefix replies)
           (ein:completions--prepare-matches prefix fetcher replies))))))
 
 (defun ein:completions--prepare-matches (prefix fetcher replies)
@@ -94,7 +93,6 @@
        (ein:aif cached it
          (unless (ein:company--punctuation-check (thing-at-point 'line)
                                                  (current-column))
-           (ein:log 'info "ein:company-backend: got here %s %s" arg ein:completion-backend)
            (cons :async
                  (lambda (cb)
                    (ein:company--complete arg cb)))))))))
