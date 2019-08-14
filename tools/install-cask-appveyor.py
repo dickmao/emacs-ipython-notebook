@@ -58,7 +58,7 @@ def fail(s):
 def bootstrap_cask(target_directory):
     cask = os.path.join(target_directory, 'bin', 'cask')
     try:
-        check_call([sys.executable, cask, 'eval', '(progn (setq package-check-signature nil) (cask-cli/upgrade-cask))'])
+        check_call([sys.executable, cask, 'eval', '(progn (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3") (cask-cli/upgrade-cask))'])
     except CalledProcessError:
         raise CaskGoError('Cask could not be bootstrapped. Try again later, '
                           'or report an issue at {0}'.format(ISSUE_TRACKER))
