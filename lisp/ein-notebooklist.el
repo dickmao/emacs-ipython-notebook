@@ -53,7 +53,7 @@
   "With which of ${XDG_DATA_HOME}/jupyter/kernels to create new notebooks."
   :group 'ein
   :type (append
-         '(choice (const :tag "First alphabetically" first-alphabetically))
+         '(choice (other :tag "First alphabetically" first-alphabetically))
          (condition-case nil
              (mapcar
               (lambda (x) `(const :tag ,(cdr x) ,(car x)))
@@ -67,7 +67,7 @@
                     (format "%s kernelspec list --json"
                             ein:jupyter-default-server-command)))))
                collect `(,k . ,(alist-get 'display_name (alist-get 'spec spec)))))
-           (error '(string :tag "Other")))))
+           (error '((string :tag "Ask"))))))
 
 (defcustom ein:notebooklist-render-order
   '(render-header
@@ -622,7 +622,9 @@ This function is called via `ein:notebook-after-rename-hook'."
           (unless (eq ein:notebooklist-default-kernel 'first-alphabetically)
             (widget-radio-value-set
              radio-widget
-             (symbol-name ein:notebooklist-default-kernel)))
+             (if (stringp ein:notebooklist-default-kernel)
+                 ein:notebooklist-default-kernel
+               (symbol-name ein:notebooklist-default-kernel))))
           (widget-insert "\n"))))))
 
 (defun render-opened-notebooks (url-or-port &rest args)
