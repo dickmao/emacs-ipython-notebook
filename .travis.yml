@@ -1,5 +1,5 @@
 sudo: false
-language: python
+language: nix
 
 addons:
   apt:
@@ -8,6 +8,9 @@ addons:
     - sharutils
     - nodejs
     - gfortran
+    - python-minimal
+    - python-pip
+    - python3.5-minimal
 
 cache:
   directories:
@@ -23,25 +26,22 @@ cache:
 
 env:
   global:
-    - PATH=$HOME/local/bin:$HOME/local/evm/bin:$HOME/local/cask/bin:$HOME/local/R/bin:$HOME/local/julia-1.1.0/bin:$PATH
+    - PATH=$HOME/local/bin:$HOME/local/cask/bin:$HOME/local/R/bin:$HOME/local/julia-1.1.0/bin:$PATH
 
 matrix:
   include:
     - os: linux
-      python: 2.7
-      env: EVM_EMACS=emacs-25.1-travis IPYTHON=5.8.0
-    - dist: trusty
-      python: 3.5
-      env: EVM_EMACS=emacs-26.1-travis IPYTHON=6.5.0
-    - dist: trusty
-      python: 3.6
-      env: EVM_EMACS=emacs-26.2-travis IPYTHON=7.5.0
+      env: EMACS_CI=emacs-25-1 IPYTHON=5.8.0
+    - os: linux
+      env: EMACS_CI=emacs-26-2 IPYTHON=6.5.0
+    - os: linux
+      env: EMACS_CI=emacs-26-3 IPYTHON=7.5.0
     - os: osx
       language: generic
-      env: EVM_EMACS=emacs-25.2 IPYTHON=5.8.0 TOXENV=py27
+      env: EMACS_CI=emacs-25-2 IPYTHON=5.8.0 TOXENV=py27
 
   allow_failures:
-    - env: EVM_EMACS=emacs-snapshot
+    - env: EMACS_CI=emacs-snapshot
 
 install:
   - cp -pr $HOME/.cask .
@@ -67,14 +67,7 @@ install:
   - ipython --version
 
 before_script:
-  - sh tools/install-evm.sh
-  - |
-    if [ "x$TRAVIS_OS_NAME" = "xosx" ]; then
-      evm config path $HOME/.evm
-    else
-      evm config path /tmp
-    fi
-  - evm install $EVM_EMACS --use --skip
+  - bash <(curl https://raw.githubusercontent.com/purcell/nix-emacs-ci/master/travis-install)
   - emacs --version
   - sh tools/install-cask.sh
 
