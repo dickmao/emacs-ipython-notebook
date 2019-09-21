@@ -9,7 +9,7 @@ Scenario: Breadcrumbs
 @kernel
 Scenario: Default kernel
   And I am in notebooklist buffer
-  Then I should see "(*) Python 3"
+  Then I should see "(*) Python"
 
 Scenario: New Notebook
   Given I am in notebooklist buffer
