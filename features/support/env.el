@@ -72,6 +72,7 @@
 
 (Setup
  (ein:dev-start-debug)
+ (setq ein:notebooklist-default-kernel 'python3)
  (setq ein:notebook-autosave-frequency 0)
  (setq ein:notebook-create-checkpoint-on-save nil)
  (setq ein:testing-dump-file-log (concat default-directory "log/ecukes.log"))
