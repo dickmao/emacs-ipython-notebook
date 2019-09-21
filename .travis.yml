@@ -51,14 +51,14 @@ install:
       eval "$(pyenv init -)" ;
       pyenv activate $TOXENV ;
     fi
-  - pip install jupyter ipython\<=$IPYTHON jedi\<=0.13.3
-  - pip install numpy
-  - pip install matplotlib
+  - pip install --user jupyter ipython\<=$IPYTHON jedi\<=0.13.3
+  - pip install --user numpy
+  - pip install --user matplotlib
   - |
     if [[ "x$TRAVIS_PYTHON_VERSION" == x3* ]]; then
-      pip install jupyterhub ;
-      npm install -g configurable-http-proxy ;
-      pip install jupyterhub-dummyauthenticator ;
+      pip install --user jupyterhub ;
+      sudo npm install -g configurable-http-proxy ;
+      pip install --user jupyterhub-dummyauthenticator ;
     fi
   - sh tools/install-R.sh
   - sh tools/install-julia.sh
