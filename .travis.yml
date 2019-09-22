@@ -31,14 +31,14 @@ env:
 matrix:
   include:
     - os: linux
-      env: EMACS_CI=emacs-25-1 IPYTHON=5.8.0
+      env: EMACS_CI=emacs-25-1 IPYTHON=5.8.0 PIP_INSTALL_USER=" --user"
     - os: linux
-      env: EMACS_CI=emacs-26-2 IPYTHON=6.5.0
+      env: EMACS_CI=emacs-26-2 IPYTHON=6.5.0 PIP_INSTALL_USER=" --user"
     - os: linux
-      env: EMACS_CI=emacs-26-3 IPYTHON=7.5.0
+      env: EMACS_CI=emacs-26-3 IPYTHON=7.5.0 PIP_INSTALL_USER=" --user"
     - os: osx
       language: generic
-      env: EMACS_CI=emacs-25-2 IPYTHON=5.8.0 TOXENV=py27 PIP_INSTALL_USER=" --user"
+      env: EMACS_CI=emacs-25-2 IPYTHON=5.8.0 TOXENV=py27
 
   allow_failures:
     - env: EMACS_CI=emacs-snapshot
