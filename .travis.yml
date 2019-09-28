@@ -8,6 +8,7 @@ addons:
     - sharutils
     - nodejs
     - gfortran
+    - gnupg
 
 cache:
   directories:
@@ -54,12 +55,6 @@ install:
   - pip install jupyter ipython\<=$IPYTHON jedi\<=0.13.3
   - pip install numpy
   - pip install matplotlib
-  - |
-    if [[ "x$TRAVIS_PYTHON_VERSION" == x3* ]]; then
-      pip install jupyterhub ;
-      npm install -g configurable-http-proxy ;
-      pip install jupyterhub-dummyauthenticator ;
-    fi
   - sh tools/install-R.sh
   - sh tools/install-julia.sh
   - jupyter kernelspec list
@@ -77,11 +72,15 @@ before_script:
   - evm install $EVM_EMACS --use --skip
   - emacs --version
   - sh tools/install-cask.sh
+  - gpg --homedir $HOME/.emacs.d/elpa/gnupg --receive-keys 066DAFCB81E42C40
 
 script:
   - make test-install
   - |
     if [[ "x$TRAVIS_PYTHON_VERSION" == x3* ]]; then
+      pip install jupyterhub ;
+      npm install -g configurable-http-proxy ;
+      pip install jupyterhub-dummyauthenticator ;
       make test-jupyterhub
     fi
   - rm -rf $HOME/.matplotlib $HOME/.cache/fontconfig
