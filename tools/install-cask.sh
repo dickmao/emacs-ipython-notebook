@@ -16,12 +16,12 @@ cask_upgrade_cask_or_reset() {
 }
 
 cask_install_or_reset() {
+    rsync -vazSHe ssh $HOME/.cask $(dirname $(dirname $(dirname $(cask package-directory))))
     cask install </dev/null
-    gpg --keyserver hkp://pool.sks-keyservers.net:80 --homedir $(cask package-directory)/gnupg --recv-keys 066DAFCB81E42C40
+    gpg2 --keyserver hkp://pool.sks-keyservers.net:80 --homedir $(cask package-directory)/gnupg --recv-keys 066DAFCB81E42C40
     cask install </dev/null
-    cask update </dev/null
     # travis cache
-    rsync -vazSHe ssh .cask $HOME/
+    rsync -vazSHe ssh $(dirname $(dirname $(cask package-directory))) $HOME/
 }
 
 # Bootstrap the cask tool and its dependencies

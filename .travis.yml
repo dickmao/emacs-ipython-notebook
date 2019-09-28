@@ -45,7 +45,6 @@ matrix:
     - env: EVM_EMACS=emacs-snapshot
 
 install:
-  - cp -pr $HOME/.cask .
   - sh tools/install-virtualenv.sh
   - |
     if [ "x$TRAVIS_OS_NAME" = "xosx" ]; then
