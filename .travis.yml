@@ -62,6 +62,7 @@ install:
   - ipython --version
 
 before_script:
+  - gpg --homedir $HOME/.emacs.d/elpa/gnupg --recv-keys 066DAFCB81E42C40
   - sh tools/install-evm.sh
   - |
     if [ "x$TRAVIS_OS_NAME" = "xosx" ]; then
@@ -72,7 +73,6 @@ before_script:
   - evm install $EVM_EMACS --use --skip
   - emacs --version
   - sh tools/install-cask.sh
-  - gpg --homedir $HOME/.emacs.d/elpa/gnupg --receive-keys 066DAFCB81E42C40
 
 script:
   - make test-install
