@@ -17,7 +17,7 @@ cask_upgrade_cask_or_reset() {
 
 cask_install_or_reset() {
     cask install </dev/null
-    for file in $CASKDIR/*/elpa ; do gpg --keyserver hkp://pool.sks-keyservers.net:80 --homedir $file/gnupg --recv-keys 066DAFCB81E42C40 ; done ;
+    gpg --keyserver hkp://pool.sks-keyservers.net:80 --homedir $(cask package-directory)/gnupg --recv-keys 066DAFCB81E42C40
     cask install </dev/null
     cask update </dev/null
     # travis cache

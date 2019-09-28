@@ -55,8 +55,6 @@ install:
   - pip install jupyter ipython\<=$IPYTHON jedi\<=0.13.3
   - pip install numpy
   - pip install matplotlib
-  - sh tools/install-R.sh
-  - sh tools/install-julia.sh
   - jupyter kernelspec list
   - curl --version
   - ipython --version
