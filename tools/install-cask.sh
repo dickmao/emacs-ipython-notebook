@@ -17,6 +17,8 @@ cask_upgrade_cask_or_reset() {
 
 cask_install_or_reset() {
     cask install </dev/null
+    for file in $CASKDIR/*/elpa ; do gpg --keyserver hkp://pool.sks-keyservers.net:80 --homedir $file/gnupg --recv-keys 066DAFCB81E42C40 ; done ;
+    cask install </dev/null
     cask update </dev/null
     # travis cache
     rsync -vazSHe ssh .cask $HOME/
@@ -31,5 +33,4 @@ fi
 # Effect is identical to "make elpa", but here we can retry
 # in the event of network failures.
 travis_retry cask_upgrade_cask_or_reset
-for file in $CASKDIR/*/elpa ; do gpg --keyserver hkp://pool.sks-keyservers.net:80 --homedir $file/gnupg --recv-keys 066DAFCB81E42C40 ; done ;
 travis_retry cask_install_or_reset && touch elpa-emacs
