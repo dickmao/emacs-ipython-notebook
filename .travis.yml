@@ -8,7 +8,7 @@ addons:
     - sharutils
     - nodejs
     - gfortran
-    - gnupg
+    - gnupg2
 
 cache:
   directories:
