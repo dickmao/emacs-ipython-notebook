@@ -18,8 +18,8 @@ cask_upgrade_cask_or_reset() {
 cask_install_or_reset() {
     rsync -azSHe ssh $HOME/.cask $(dirname $(dirname $(dirname $(cask package-directory))))
     chmod 700 $HOME/.emacs.d/elpa
-    gpg --keyserver hkp://pool.sks-keyservers.net:80 --homedir $HOME/.emacs.d/elpa --recv-keys 066DAFCB81E42C40
     gpg2 --keyserver hkp://pool.sks-keyservers.net:80 --homedir $HOME/.emacs.d/elpa --recv-keys 066DAFCB81E42C40
+    gpg2 --version
     cp -R $HOME/.emacs.d/elpa/gnupg $(cask package-directory)
     cask install </dev/null
     find $(cask package-directory)/archives -print | xargs ls -l
