@@ -9,7 +9,6 @@ addons:
     - nodejs
     - gfortran
     - gnupg2
-    - gnupg
     - dirmngr
 
 cache:
