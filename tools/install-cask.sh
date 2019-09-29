@@ -22,7 +22,8 @@ cask_install_or_reset() {
     gpg2 --keyserver hkp://pool.sks-keyservers.net:80 --homedir $HOME/.emacs.d/elpa --recv-keys 066DAFCB81E42C40
     cp -R $HOME/.emacs.d/elpa/gnupg $(cask package-directory)
     cask install </dev/null
-    find . -name gnupg -print
+    find $(cask package-directory)/archives -print | xargs ls -l
+    find $(cask package-directory)/gnupg -print | xargs ls -l
     # travis cache
     rsync -azSHe ssh $(dirname $(dirname $(cask package-directory))) $HOME/
 }
