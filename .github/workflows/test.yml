@@ -59,10 +59,12 @@ jobs:
         path: ~/.cask
         key: cask
 
+
+
     - name: dependencies
-      env:
-        PATH: ~/local/bin:~/local/cask/bin:~/local/R/bin:~/local/julia-1.1.0/bin:$PATH
       run: |
+        echo "::add-path::~/local/R/bin"
+        echo "::add-path::~/local/bin"
         mkdir -p ~/local/bin
         python -m pip install --upgrade pip
         pip install setuptools wheel jupyter ipykernel ipython
