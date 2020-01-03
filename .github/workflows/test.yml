@@ -61,10 +61,7 @@ jobs:
 
     - name: path
       run: |
-        echo '::add-path::$HOME/local/bin'
-        echo '::add-path::$HOME/local/cask/bin'
-        echo '::add-path::$HOME/local/R/bin'
-        echo '::add-path::$HOME/local/julia-1.1.0/bin'
+        echo "::set-env name=PATH::~/local/bin:~/local/cask/bin:~/local/R/bin:~/local/julia-1.1.0/bin:$PATH"
 
     - name: dependencies
       run: |
