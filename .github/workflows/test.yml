@@ -61,7 +61,7 @@ jobs:
 
     - name: dependencies
       env:
-        PATH: ~/local/bin:~/local/cask/bin:~/local/R/bin:~/local/julia-1.1.0/bin:${{ env.path }}
+        PATH: ~/local/bin:~/local/cask/bin:~/local/R/bin:~/local/julia-1.1.0/bin:$PATH
       run: |
         mkdir -p ~/local/bin
         python -m pip install --upgrade pip
