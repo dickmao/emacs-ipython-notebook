@@ -23,7 +23,7 @@ jobs:
             lint_ignore: 1
     env:
       EMACS_LINT_IGNORE: ${{ matrix.lint_ignore }}
-      LOCPATH=~/local/bin:~/local/cask/bin:~/local/R/bin:~/local/julia-1.1.0/bin
+      LOCPATH: ~/local/bin:~/local/cask/bin:~/local/R/bin:~/local/julia-1.1.0/bin
 
     steps:
     - uses: actions/checkout@v1
