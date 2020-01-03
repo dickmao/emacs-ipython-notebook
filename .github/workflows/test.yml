@@ -59,7 +59,12 @@ jobs:
         path: ~/.cask
         key: cask
 
-
+    - name: path
+      run: |
+        echo "::add-path::~/local/bin"
+        echo "::add-path::~/local/cask/bin"
+        echo "::add-path::~/local/R/bin"
+        echo "::add-path::~/local/julia-1.1.0/bin"
 
     - name: dependencies
       run: |
