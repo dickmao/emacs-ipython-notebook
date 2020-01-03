@@ -59,17 +59,13 @@ jobs:
         path: ~/.cask
         key: cask
 
-    - name: path
-      run: |
-        echo "::add-path::~/local/bin"
-        echo "::add-path::~/local/cask/bin"
-        echo "::add-path::~/local/R/bin"
-        echo "::add-path::~/local/julia-1.1.0/bin"
+    - name: paths
+      uses: dickmao/setup-paths@master
+      with:
+        paths: ~/local/bin:~/local/cask/bin:~/local/R/bin:~/local/julia-1.1.0/bin
 
     - name: dependencies
       run: |
-        echo "::add-path::~/local/R/bin"
-        echo "::add-path::~/local/bin"
         sudo apt-get -yq update
         DEBIAN_FRONTEND=noninteractive sudo apt-get -yq install gnutls-bin sharutils nodejs gfortran gnupg2 dirmngr libreadline-dev libcurl4-openssl-dev texlive-latex-base
         mkdir -p ~/local/bin

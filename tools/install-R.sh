@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# install R for Travis CI
+# install R for Actions CI
 
 set -x
 
@@ -17,7 +17,7 @@ if [ "x$UNAME" = "xLinux" ] ; then
     fi
     R -e "install.packages('IRkernel', repos='http://cran.mirrors.hoobly.com')"
     R -e "IRkernel::installspec()"
-elif [ "x$UNAME" = "xosx" ]; then
+elif [ "x$UNAME" = "xDarwin" ]; then
     brew list r &>/dev/null || HOMEBREW_NO_AUTO_UPDATE=1 brew install r
     R -e "install.packages('IRkernel', repos='http://cran.mirrors.hoobly.com')"
     R -e "IRkernel::installspec()"
