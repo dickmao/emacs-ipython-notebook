@@ -70,6 +70,8 @@ jobs:
       run: |
         echo "::add-path::~/local/R/bin"
         echo "::add-path::~/local/bin"
+        sudo apt-get -yq update
+        DEBIAN_FRONTEND=noninteractive sudo apt-get -yq install gnutls-bin sharutils nodejs gfortran gnupg2 dirmngr
         mkdir -p ~/local/bin
         python -m pip install --upgrade pip
         pip install setuptools wheel jupyter ipykernel ipython
