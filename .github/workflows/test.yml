@@ -23,7 +23,6 @@ jobs:
             lint_ignore: 1
     env:
       EMACS_LINT_IGNORE: ${{ matrix.lint_ignore }}
-      LOCPATH: ~/local/bin:~/local/cask/bin:~/local/R/bin:~/local/julia-1.1.0/bin
 
     steps:
     - uses: actions/checkout@v1
@@ -60,9 +59,15 @@ jobs:
         path: ~/.cask
         key: cask
 
+    - name: path
+      run: |
+        echo "::add-path::~/local/bin"
+        echo "::add-path::~/local/cask/bin"
+        echo "::add-path::~/local/R/bin"
+        echo "::add-path::~/local/julia-1.1.0/bin"
+
     - name: dependencies
       run: |
-        export PATH=$LOCPATH:$PATH
         mkdir -p ~/local/bin
         python -m pip install --upgrade pip
         pip install setuptools wheel jupyter ipykernel ipython
