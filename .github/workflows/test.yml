@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  pull_request:
   push:
     paths-ignore:
     - '**.md'
@@ -22,7 +23,6 @@ jobs:
             lint_ignore: 1
     env:
       EMACS_LINT_IGNORE: ${{ matrix.lint_ignore }}
-      PATH: ~/local/bin:~/local/cask/bin:~/local/R/bin:~/local/julia-1.1.0/bin:${PATH}
 
     steps:
     - uses: actions/checkout@v1
@@ -86,5 +86,6 @@ jobs:
 
     - name: test
       run: |
+        export PATH=~/local/bin:~/local/cask/bin:~/local/R/bin:~/local/julia-1.1.0/bin:$PATH
         rm -rf ~/.matplotlib ~/.cache/fontconfig
         make test
