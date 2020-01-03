@@ -61,10 +61,10 @@ jobs:
 
     - name: path
       run: |
-        echo "::add-path::${{ runner.workspace }}/local/bin"
-        echo "::add-path::${{ runner.workspace }}/local/cask/bin"
-        echo "::add-path::${{ runner.workspace }}/local/R/bin"
-        echo "::add-path::${{ runner.workspace }}/local/julia-1.1.0/bin"
+        echo '::add-path::$HOME/local/bin'
+        echo '::add-path::$HOME/local/cask/bin'
+        echo '::add-path::$HOME/local/R/bin'
+        echo '::add-path::$HOME/local/julia-1.1.0/bin'
 
     - name: dependencies
       run: |
