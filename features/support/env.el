@@ -29,14 +29,8 @@
 (when (file-exists-p (concat default-directory "features/support/test-poly.el"))
   (load-file (concat default-directory "features/support/test-poly.el")))
 
-(when ein:polymode
-  (!cons "evil" ecukes-exclude-tags))
-
-(cond ((not ein:polymode)
-       (!cons "julia" ecukes-exclude-tags)
-       (!cons "memory" ecukes-exclude-tags))
-      ((string= (getenv "TRAVIS_OS_NAME") "linux")
-       (!cons "memory" ecukes-exclude-tags)))
+(!cons "evil" ecukes-exclude-tags)
+(!cons "memory" ecukes-exclude-tags)
 
 (defvar ein:testing-jupyter-server-root (f-parent (f-dirname load-file-name)))
 

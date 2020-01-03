@@ -1,19 +1,21 @@
 name: CI
 
 on:
-  pull-request:
+  pull_request:
+  push:
     paths-ignore:
     - '**.md'
-    - 'tools/*'
+    branches-ignore:
+    - 'master'
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest]
         emacs_version: [25.1, 26.3]
-        python-version: [3.7]
+        python-version: [3.5]
         include:
           - emacs_version: 24.1
             lint_ignore: 1
@@ -21,7 +23,6 @@ jobs:
             lint_ignore: 1
     env:
       EMACS_LINT_IGNORE: ${{ matrix.lint_ignore }}
-      PATH: ~/local/bin:~/local/cask/bin:~/local/R/bin:~/local/julia-1.1.0/bin:${PATH}
 
     steps:
     - uses: actions/checkout@v1
@@ -40,17 +41,13 @@ jobs:
       if: startsWith(runner.os, 'Linux')
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
+        key: ${{ runner.os }}-pip
 
     - uses: actions/cache@v1
       if: startsWith(runner.os, 'macOS')
       with:
         path: ~/Library/Caches/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
+        key: ${{ runner.os }}-pip
 
     - uses: actions/cache@v1
       with:
@@ -62,10 +59,18 @@ jobs:
         path: ~/.cask
         key: cask
 
+    - name: paths
+      uses: dickmao/setup-paths@master
+      with:
+        paths: /home/runner/local/bin:/home/runner/local/cask/bin:/home/runner/local/R/bin:/home/runner/local/julia-1.1.0/bin
+
     - name: dependencies
       run: |
+        sudo apt-get -yq update
+        DEBIAN_FRONTEND=noninteractive sudo apt-get -yq install gnutls-bin sharutils nodejs gfortran gnupg2 dirmngr libreadline-dev libcurl4-openssl-dev texlive-latex-base
+        mkdir -p ~/local/bin
         python -m pip install --upgrade pip
-        pip install setuptools wheel jupyter ipykernel ipython
+        pip install setuptools wheel jupyter ipykernel ipython\<=7.8.0 numpy\<=1.16.4 matplotlib\<=3.0.3
         python -m ipykernel install --user
         sh tools/install-R.sh
         sh tools/install-julia.sh
@@ -77,6 +82,7 @@ jobs:
 
     - name: cask
       run: |
+        export PATH=$LOCPATH:$PATH
         sh tools/install-cask.sh
         curl -sLk -O https://github.com/dickmao/kubernetes-el/archive/master.zip && unzip master.zip
         ( cd ./kubernetes-el-master ; cask pkg-file )
@@ -85,5 +91,6 @@ jobs:
 
     - name: test
       run: |
+        export PATH=$LOCPATH:$PATH
         rm -rf ~/.matplotlib ~/.cache/fontconfig
         make test
