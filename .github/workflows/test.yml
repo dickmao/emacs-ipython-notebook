@@ -60,7 +60,7 @@ jobs:
         key: cask
 
     - name: paths
-      uses: dickmao/setup-paths@master
+      uses: dickmao/setup-paths@releases/v1
       with:
         paths: ~/local/bin:~/local/cask/bin:~/local/R/bin:~/local/julia-1.1.0/bin
 
