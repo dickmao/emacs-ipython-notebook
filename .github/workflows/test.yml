@@ -62,7 +62,7 @@ jobs:
     - name: paths
       uses: dickmao/setup-paths@master
       with:
-        paths: ~/local/bin:~/local/cask/bin:~/local/R/bin:~/local/julia-1.1.0/bin
+        paths: ${{ runner.home }}/local/bin:${{ runner.home }}/local/cask/bin:${{ runner.home }}/local/R/bin:${{ runner.home }}/local/julia-1.1.0/bin
 
     - name: dependencies
       run: |
