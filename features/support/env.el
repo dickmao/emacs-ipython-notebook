@@ -31,7 +31,6 @@
 
 (!cons "evil" ecukes-exclude-tags)
 (!cons "memory" ecukes-exclude-tags)
-(!cons "julia" ecukes-exclude-tags)
 
 (defvar ein:testing-jupyter-server-root (f-parent (f-dirname load-file-name)))
 
