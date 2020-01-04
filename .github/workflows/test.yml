@@ -70,7 +70,7 @@ jobs:
         DEBIAN_FRONTEND=noninteractive sudo apt-get -yq install gnutls-bin sharutils nodejs gfortran gnupg2 dirmngr libreadline-dev libcurl4-openssl-dev texlive-latex-base
         mkdir -p ~/local/bin
         python -m pip install --upgrade pip
-        pip install setuptools wheel jupyter ipykernel ipython
+        pip install setuptools wheel jupyter ipykernel ipython numpy matplotlib
         python -m ipykernel install --user
         sh tools/install-R.sh
         sh tools/install-julia.sh
