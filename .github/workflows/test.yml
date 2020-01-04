@@ -67,7 +67,7 @@ jobs:
     - name: dependencies
       run: |
         sudo apt-get -yq update
-        DEBIAN_FRONTEND=noninteractive sudo apt-get -yq install gnutls-bin sharutils nodejs gfortran gnupg2 dirmngr libreadline-dev libcurl4-openssl-dev texlive-latex-base libpng-dev
+        DEBIAN_FRONTEND=noninteractive sudo apt-get -yq install gnutls-bin sharutils nodejs gfortran gnupg2 dirmngr libreadline-dev libcurl4-openssl-dev texlive-latex-base
         mkdir -p ~/local/bin
         python -m pip install --upgrade pip
         pip install setuptools wheel jupyter ipykernel ipython\<=7.8.0 numpy\<=1.16.4 matplotlib\<=3.0.3
