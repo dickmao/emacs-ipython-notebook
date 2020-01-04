@@ -14,8 +14,7 @@ if [ "x$UNAME" = "xLinux" ] ; then
         cd R-3.4.1
         ./configure --prefix=${WORKDIR}/R
         make && make install
-        ls ${WORKDIR}/R/bin/*
-        find ${WORKDIR/R} -name R -print
+        find ${WORKDIR}/R -name R -print
     fi
     R -e "install.packages('IRkernel', repos='http://cran.mirrors.hoobly.com')"
     R -e "IRkernel::installspec()"
