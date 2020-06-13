@@ -1052,25 +1052,45 @@ cell bellow."
   "Execute all cells in the current worksheet buffer.
 If :above or :below specified, execute above/below the current cell."
   (interactive (list (ein:worksheet--get-ws-or-error)))
-  (let ((all (ein:worksheet-get-cells ws)))
-    (mapc (apply-partially #'ein:worksheet-execute-cell ws)
-          (seq-filter
-           #'ein:codecell-p
-           (aif (or above below)
-               (-when-let* ((current-id (slot-value it 'cell-id))
-                            (not-matching (apply-partially
-                                           (lambda (my other)
-                                             (not (string= (slot-value other 'cell-id) my)))
-                                           current-id)))
-                 (append (when above
-                           (aif (seq-take-while not-matching all)
-                               it
-                             (prog1 nil
-                               (ein:log 'info
-                                 "ein:worksheet-execute-all-cells: no cells above current"))))
-                         (when below
-                           (seq-drop-while not-matching all))))
-             all)))))
+  (let* ((all (ein:worksheet-get-cells ws))
+	 (cells (seq-filter
+		 #'ein:codecell-p
+		 (aif (or above below)
+		     (-when-let* ((current-id (slot-value it 'cell-id))
+				  (not-matching (apply-partially
+						 (lambda (my other)
+						   (not (string= (slot-value other 'cell-id) my)))
+						 current-id)))
+		       (append (when above
+				 (aif (seq-take-while not-matching all)
+				     it
+				   (prog1 nil
+				     (ein:log 'info
+				       "ein:worksheet-execute-all-cells: no cells above current"))))
+			       (when below
+				 (seq-drop-while not-matching all))))
+		   all))))
+    (make-thread
+     (apply-partially
+      (lambda (ws* cells*)
+	(with-current-buffer (ein:worksheet-buffer ws*)
+	  (let (inhibit-debugger)
+	    (condition-case-unless-debug err
+		(cl-block return
+		  (dolist (cell cells*)
+		    (let ((orig (ein:oref-safe cell 'input-prompt-number)))
+		      (ein:worksheet-execute-cell ws* cell)
+		      (when (cl-loop for prompt = (ein:oref-safe cell 'input-prompt-number)
+				     if (or (not (numberp prompt)) (equal orig prompt))
+				     do (thread-yield)
+				     else
+				     return (ein:cell-get-tb-data cell)
+				     end)
+			(cl-return-from return)))))
+	      (error
+	       (ein:log 'error "ein:worksheet-execute-all-cells: '%s'"
+			(error-message-string err)))))))
+      ws cells))))
 
 (defun ein:worksheet-execute-all-cells-above (ws)
   "Execute all cells above the current cell (exclusively) in the
