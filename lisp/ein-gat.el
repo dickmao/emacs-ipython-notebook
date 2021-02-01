@@ -50,6 +50,20 @@
 (defsubst ein:gat-shell-command (command)
   (string-trim (shell-command-to-string (concat "2>/dev/null " command))))
 
+(defcustom ein:gat-version
+  (ein:gat-shell-command "gat --project - --region - --zone - version")
+  "Currently, aws or gce."
+  :type 'string
+  :group 'ein)
+
+(defconst ein:gat-required-version "0.0.3")
+
+(defcustom ein:gat-vendor
+  (ein:gat-shell-command "gat --project - --region - --zone - vendor")
+  "Currently, aws or gce."
+  :type 'string
+  :group 'ein)
+
 (defcustom ein:gat-gce-zone (ein:gat-shell-command "gcloud config get-value compute/zone")
   "gcloud project zone."
   :type 'string
@@ -80,7 +94,7 @@
   :type '(repeat string)
   :group 'ein)
 
-(defcustom ein:gat-gpu-types (split-string "nvidia-tesla-t4")
+(defcustom ein:gat-gpu-types (split-string "nvidia-tesla-t4 nvidia-tesla-v100")
   "https://accounts.google.com/o/oauth2/auth?client_id=[client-id]&redirect_uri=urn:ietf:wg:oauth:2.0:oob&scope=https://www.googleapis.com/auth/compute&response_type=code
 curl -d code=[page-code] -d client_id=[client-id] -d client_secret=[client-secret] -d redirect_uri=urn:ietf:wg:oauth:2.0:oob -d grant_type=authorization_code https://accounts.google.com/o/oauth2/token
 curl -sLk -H \"Authorization: Bearer [access-token]\" https://compute.googleapis.com/compute/v1/projects/[project-id]/zones/[zone-id]/acceleratorTypes | jq -r -c '.items[].selfLink'"
@@ -271,12 +285,50 @@ With WORKTREE-DIR of /home/dick/gat/test-repo2
                     (cl-subseq archepath (+ it (length (match-string 1 archepath)))))
                   (file-name-nondirectory archepath))))))
 
+(defun ein:gat-region ()
+  (interactive)
+  (cl-case (intern ein:gat-vendor)
+    (aws ein:gat-aws-region)
+    (gce ein:gat-gce-region)
+    (otherwise (or ein:gat-aws-region ein:gat-gce-region))))
+
+(defun ein:gat-machine-types ()
+  (interactive)
+  (cl-case (intern ein:gat-vendor)
+    (aws ein:gat-aws-machine-types)
+    (gce ein:gat-gce-machine-types)
+    (otherwise (or ein:gat-aws-machine-types ein:gat-gce-machine-types))))
+
+(defmacro ein:gat-install-gat (&rest body)
+  `(if (and (executable-find "gat")
+            (string= ein:gat-required-version ein:gat-version))
+       (progn ,@body)
+     (if (zerop (length (ein:gat-region)))
+         (ein:log 'error "ein:gat-install-gat: no cloud utilities detected")
+       (ein:log 'info "ein:gat-install-gat: %s gat..."
+                (if (executable-find "gat") "Upgrading" "Installing"))
+       (let* ((orig-buf (current-buffer))
+              (bufname "*gat-install*")
+              (dir (make-temp-file "gat-install" t))
+              (commands `(,(format "cd %s" dir)
+                          "git clone --depth=1 --single-branch --branch=dev https://github.com/dickmao/gat.git"
+                          "make -C gat install"))
+              (compile (format "bash -ex -c '%s'" (mapconcat #'identity commands "; ")))
+              (callback (lambda (_buf msg)
+                          (when (cl-search "finished" msg)
+                            (with-current-buffer orig-buf
+                              ,@body)))))
+         (let ((compilation-scroll-output t))
+           (compilation-start compile nil (lambda (&rest _args) bufname)))
+         (with-current-buffer bufname
+           (add-hook 'compilation-finish-functions callback nil t))))))
+
 (defun ein:gat-edit (&optional _refresh)
   (interactive "P")
   (ein:gat-install-gat
    (if-let ((default-directory (ein:gat-where-am-i))
             (gat-chain-args `("gat" nil "--project" "-"
-                              "--region" ,ein:gat-aws-region "--zone" "-")))
+                              "--region" ,(ein:gat-region) "--zone" "-")))
        (if (special-variable-p 'magit-process-popup-time)
            (let ((magit-process-popup-time -1)
                  (notebook (ein:get-notebook)))
@@ -305,7 +357,7 @@ With WORKTREE-DIR of /home/dick/gat/test-repo2
    (if-let ((default-directory (ein:gat-where-am-i))
             (notebook (ein:get-notebook))
             (gat-chain-args `("gat" nil "--project" "-"
-                              "--region" ,ein:gat-aws-region "--zone" " -")))
+                              "--region" ,(ein:gat-region) "--zone" " -")))
        (if (special-variable-p 'magit-process-popup-time)
            (let ((magit-process-popup-time 0))
              (ein:gat-chain
@@ -324,29 +376,6 @@ With WORKTREE-DIR of /home/dick/gat/test-repo2
                                (setq ein:gat-current-worktree it))))))
          (error "ein:gat-create: magit not installed"))
      (message "ein:gat-create: not a notebook buffer"))))
-
-(defmacro ein:gat-install-gat (&rest body)
-  `(if (executable-find "gat")
-       (progn ,@body)
-     (if (or (not (executable-find "aws"))
-             (zerop (length ein:gat-aws-region)))
-         (ein:log 'error "ein:gat-install-gat: `aws configure region` must be valid")
-       (ein:log 'info "ein:gat-install-gat: Installing gat...")
-       (let* ((orig-buf (current-buffer))
-              (bufname "*gat-install*")
-              (dir (make-temp-file "gat-install" t))
-              (commands `(,(format "cd %s" dir)
-                          "git clone --depth=1 --single-branch --branch=dev https://github.com/dickmao/gat.git"
-                          "make -C gat install"))
-              (compile (format "bash -ex -c '%s'" (mapconcat #'identity commands "; ")))
-              (callback (lambda (_buf msg)
-                          (when (cl-search "finished" msg)
-                            (with-current-buffer orig-buf
-                              ,@body)))))
-         (let ((compilation-scroll-output t))
-           (compilation-start compile nil (lambda (&rest _args) bufname)))
-         (with-current-buffer bufname
-           (add-hook 'compilation-finish-functions callback nil t))))))
 
 ;;;###autoload
 (defun ein:gat-run-local-batch (&optional refresh)
@@ -449,10 +478,12 @@ EOF
                                                  "Could not hash" new-password)))))))))
               (gat-chain-args `("gat" nil
                                 "--project" "-"
-                                "--region" ,ein:gat-aws-region
+                                "--region" (ein:gat-region)
                                 "--zone" "-"))
-              (common-options (append `("--user" "root")
-                                      `("--env" "GRANT_SUDO=1")
+              (common-options (append `("--vendor" ,ein:gat-vendor)
+                                      '("--bespoke")
+                                      '("--user" "root")
+                                      '("--env" "GRANT_SUDO=1")
                                       (awhen (ein:gat-kaggle-env "KAGGLE_USERNAME" 'username)
                                         (split-string it))
                                       (awhen (ein:gat-kaggle-env "KAGGLE_KEY" 'key)
@@ -488,7 +519,7 @@ EOF
                       (concat (file-name-as-directory default-directory) ".gat"))
                      (member ".gat" (split-string default-directory "/")))
            (let* ((command (format "gat --project - --region %s --zone - create"
-                                   ein:gat-aws-region))
+                                   (ein:gat-region)))
                   (retcode (shell-command command)))
              (unless (zerop retcode)
                (error "ein:gat-where-am-i: \"%s\" exited with %d" command retcode))))
@@ -548,9 +579,9 @@ EOF
    "Machine Type: "
    (append (seq-uniq ein:gat-machine-history)
            (seq-remove (lambda (x) (member x ein:gat-machine-history))
-                       (cl-copy-list ein:gat-aws-machine-types)))
+                       (cl-copy-list (ein:gat-machine-types))))
    nil t nil 'ein:gat-machine-history
-   (car (or ein:gat-machine-history ein:gat-aws-machine-types))))
+   (car (or ein:gat-machine-history (ein:gat-machine-types)))))
 
 (defun ein:gat-elicit-gpus (&rest _args)
   (interactive)
@@ -566,7 +597,7 @@ EOF
   (let ((already (split-string
                   (ein:gat-shell-command
                    (format "gat --project - --region %s --zone - list"
-                           ein:gat-aws-region)))))
+                           (ein:gat-region))))))
     (if extant
         (ein:completing-read
          "Experiment: " already nil t nil nil
