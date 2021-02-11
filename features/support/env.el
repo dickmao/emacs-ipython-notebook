@@ -137,9 +137,7 @@
  (ein:testing-after-scenario))
 
 (Teardown
- (Given "I finally stop the server")
- (let ((default-directory ein:testing-project-path))
-   (And "remove git repo \"test-repo\"")))
+ (Given "I finally stop the server"))
 
 (Fail
  (if noninteractive
