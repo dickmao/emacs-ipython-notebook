@@ -21,7 +21,7 @@
 
 ;;; Commentary:
 
-;;; Code:
+;;; Code: goose gha
 
 (require 'ein-core)
 (require 'ein-notebooklist)
